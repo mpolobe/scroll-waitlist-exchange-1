@@ -16,11 +16,11 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel
 
+      - name: Set Vercel Token env
+        run: echo "VERCEL_TOKEN=${{ secrets.VERCEL_TOKEN }}" >> $GITHUB_ENV
+
       - name: Pull Deployment from Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          vercel pull --yes
+        run: vercel pull --yes
 
       - name: Commit Changes
         run: |
@@ -36,4 +36,4 @@ jobs:
           branch: vercel-auto-update
           title: "Auto-sync deployment files from Vercel"
           body: "This PR was created automatically by syncing Vercel deployment files."
-          commit-message: "Sync deployment files from Vercel"
+          commit-message: "Sync deployment files from Vercel".
