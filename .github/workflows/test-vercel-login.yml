@@ -1,0 +1,21 @@
+name: Automatic Pull Requests from Vercel
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create_pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Test Login to Vercel
+        env:
+          VERCEL_TOKEN: ZKW8P8jeGg1nc5j9q1NU9RFX
+        run: |
+          vercel login --token $VERCEL_TOKEN
