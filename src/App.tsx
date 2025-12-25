@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AlchemyAccountProvider } from "@account-kit/react";
 import { alchemyConfig } from "@/lib/alchemyConfig";
 import { SmartWalletProvider } from "@/contexts/SmartWalletContext";
+import { GeminiChatbot } from "@/components/ai/GeminiChatbot";
 import Index from "./pages/Index";
 import MerchantPortal from "./pages/MerchantPortal";
 import Blog from "./pages/Blog";
@@ -57,6 +58,7 @@ const App = () => (
                 <Route path="/wallet-auth" element={<WalletAuth />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <GeminiChatbot />
             </BrowserRouter>
           </TooltipProvider>
         </SmartWalletProvider>
