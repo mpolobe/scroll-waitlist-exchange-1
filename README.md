@@ -9,17 +9,20 @@ A modern cryptocurrency wallet application with AI-powered assistance, built wit
 - **2FA Wallet Security**: Biometric authentication (Face ID, Touch ID, passkey)
 - **AI Assistant**: Gemini-powered chatbot for 24/7 customer support
 - **Token Management**: Send/receive ETH, AFC, USDC with gas-sponsored transactions
-- **Railway Integration**: Book train tickets and pay with crypto
+- **Africa Railways Integration**: Real railway booking with Sui blockchain backend
+- **Cross-Chain Payments**: Bridge AFC (Ethereum) to AFRC (Sui) for bookings
+- **Real-Time Tracking**: Live train telemetry and sentinel network integration
 - **Merchant Portal**: API integration for payment processing
 - **Multi-Layer Security**: Separate account and wallet authentication
 
 ## Prerequisites
 
 - Node.js (v18 or higher)
-- Alchemy API key
-- Supabase project (for authentication)
-- Gemini API key (optional, for AI features)
+- Alchemy API key (Ethereum wallet infrastructure)
+- Supabase project (authentication & database)
+- Gemini API key (optional, for AI chatbot)
 - Twilio account (optional, for SMS/phone auth)
+- Africa Railways API key (optional, for real railway bookings)
 
 ## Setup
 
@@ -41,6 +44,11 @@ A modern cryptocurrency wallet application with AI-powered assistance, built wit
    
    # Gemini AI (Optional)
    VITE_GEMINI_API_KEY=your-gemini-api-key
+   
+   # Africa Railways Integration (Optional)
+   VITE_AFRICA_RAILWAYS_API_URL=https://api.africa-railways.com
+   AFRICA_RAILWAYS_API_KEY=your-africa-railways-api-key
+   VITE_SUI_NETWORK=testnet
    ```
    
    **For Phone Authentication:**
@@ -48,6 +56,11 @@ A modern cryptocurrency wallet application with AI-powered assistance, built wit
    - Go to Authentication > Providers > Phone
    - Add your Twilio credentials
    - Enable phone authentication
+   
+   **For Africa Railways Integration:**
+   - Contact Africa Railways for API access
+   - Configure bridge service for cross-chain payments
+   - See `AFRICA_RAILWAYS_INTEGRATION.md` for details
 
 3. **Run the development server:**
    ```bash
@@ -87,6 +100,29 @@ The Gemini AI chatbot provides:
 - 24/7 support
 
 To enable AI features, add your Gemini API key to `.env.local`.
+
+## Africa Railways Integration
+
+### Overview
+Africoin Wallet integrates with Africa Railways' Sui blockchain infrastructure for real railway bookings across 54 African nations.
+
+### Features
+- **Real Railway Data**: Live train schedules and seat availability
+- **Cross-Chain Payments**: AFC (Ethereum) → AFRC (Sui) bridge
+- **Real-Time Tracking**: WebSocket-based train telemetry
+- **Sentinel Network**: Safety reports and track worker alerts
+- **Blockchain Tickets**: Sui Move-based digital tickets
+
+### Demo
+Visit `/africa-railways-demo` to see the integration in action.
+
+### Documentation
+See `AFRICA_RAILWAYS_INTEGRATION.md` for:
+- Complete architecture specifications
+- 4-phase implementation plan (16 weeks)
+- API endpoint documentation
+- Security considerations
+- Cost analysis
 
 ## Tech Stack
 
