@@ -26,6 +26,7 @@ import TrainTracking from "./pages/TrainTracking";
 import ContactUs from "./pages/ContactUs";
 import WalletDashboard from "./pages/WalletDashboard";
 import WalletAuth from "./pages/WalletAuth";
+import AfricaRailwaysDemo from "./pages/AfricaRailwaysDemo";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
                 <Route path="/contact" element={<ContactUs />} />
                 <Route path="/wallet" element={<WalletDashboard />} />
                 <Route path="/wallet-auth" element={<WalletAuth />} />
+                <Route path="/africa-railways-demo" element={<AfricaRailwaysDemo />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <GeminiChatbot />
