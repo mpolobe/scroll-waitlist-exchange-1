@@ -78,7 +78,11 @@ export default function WalletDashboard() {
                 <h2 className="text-2xl font-bold mb-2">Connect Your Wallet</h2>
                 <p className="text-gray-600 mb-6">Choose your authentication method to connect</p>
                 <Button onClick={() => setShowAuthModal(true)} className="bg-gradient-to-r from-orange-500 to-amber-500"><Wallet className="w-4 h-4 mr-2" />Connect Wallet</Button>
-                <AuthMethodSelector open={showAuthModal} onOpenChange={setShowAuthModal} onAuthenticate={handleConnectWallet} isAuthenticating={isAuthenticating} error={walletError} />
+                <AuthMethodSelector open={showAuthModal} onOpenChange={setShowAuthModal} onSelectMethod={(method) => {
+                  if (['faceid', 'touchid', 'passcode'].includes(method)) {
+                    handleConnectWallet();
+                  }
+                }} isAuthenticating={isAuthenticating} error={walletError} showPasskeyOnly />
               </Card>
             ) : (
               <>
