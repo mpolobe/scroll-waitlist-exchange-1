@@ -11,9 +11,12 @@ interface AuthContextType {
   adminRole: string | null;
   walletAddress: string | null;
   signUp: (email: string, password: string, fullName: string, country: string) => Promise<any>;
+  signUpWithPhone: (phone: string, fullName: string, country: string) => Promise<any>;
   signIn: (email: string, password: string) => Promise<any>;
+  signInWithPhone: (phone: string) => Promise<any>;
   signInWithOTP: (email: string) => Promise<any>;
   verifyOTP: (email: string, token: string) => Promise<any>;
+  verifyPhoneOTP: (phone: string, token: string) => Promise<any>;
   signInWithMagicLink: (email: string) => Promise<any>;
   signInWithGoogle: () => Promise<any>;
   signInWithGitHub: () => Promise<any>;
@@ -155,6 +158,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return await supabase.auth.signInWithPassword({ email, password });
   };
 
+  const signUpWithPhone = async (phone: string, fullName: string, country: string) => {
+    const { data, error } = await supabase.auth.signInWithOtp({
+      phone,
+      options: { shouldCreateUser: true }
+    });
+    
+    if (!error && data) {
+      // Store user info for after verification
+      sessionStorage.setItem('pending_user_info', JSON.stringify({ phone, fullName, country }));
+    }
+    
+    return { data, error };
+  };
+
+  const signInWithPhone = async (phone: string) => {
+    const { data, error } = await supabase.auth.signInWithOtp({
+      phone,
+      options: { shouldCreateUser: false }
+    });
+    return { data, error };
+  };
+
+  const verifyPhoneOTP = async (phone: string, token: string) => {
+    const { data, error } = await supabase.auth.verifyOtp({
+      phone,
+      token,
+      type: 'sms'
+    });
+    
+    // If this is a new signup, create user record
+    if (!error && data.user) {
+      const pendingInfo = sessionStorage.getItem('pending_user_info');
+      if (pendingInfo) {
+        const { fullName, country } = JSON.parse(pendingInfo);
+        await supabase.from('users').insert({
+          id: data.user.id,
+          phone,
+          full_name: fullName,
+          country,
+          email_verified: false
+        });
+        sessionStorage.removeItem('pending_user_info');
+      }
+    }
+    
+    return { data, error };
+  };
+
   const signInWithOTP = async (email: string) => {
     const { data, error } = await supabase.auth.signInWithOtp({
       email,
@@ -260,10 +311,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAdmin,
       adminRole,
       walletAddress,
-      signUp, 
+      signUp,
+      signUpWithPhone,
       signIn,
+      signInWithPhone,
       signInWithOTP,
       verifyOTP,
+      verifyPhoneOTP,
       signInWithMagicLink,
       signInWithGoogle,
       signInWithGitHub,

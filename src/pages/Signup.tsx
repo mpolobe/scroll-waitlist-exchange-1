@@ -4,12 +4,14 @@ import MarketingNav from '@/components/MarketingNav';
 import MarketingFooter from '@/components/MarketingFooter';
 import SignupWithWallet from '@/components/auth/SignupWithWallet';
 import LoginForm from '@/components/auth/LoginForm';
-import { Shield, Zap, Wallet, UserPlus, LogIn } from 'lucide-react';
+import { PhoneLoginForm } from '@/components/auth/PhoneLoginForm';
+import { Shield, Zap, Wallet, UserPlus, LogIn, Smartphone } from 'lucide-react';
 
 const Signup = () => {
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get('tab') === 'login' ? 'login' : 'signup';
   const [activeTab, setActiveTab] = useState<'signup' | 'login'>(defaultTab);
+  const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -67,8 +69,36 @@ const Signup = () => {
                   <LogIn className="w-4 h-4" />Sign In
                 </button>
               </div>
+
+              <div className="flex gap-2 mb-6">
+                <button
+                  onClick={() => setAuthMethod('email')}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                    authMethod === 'email'
+                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Email
+                </button>
+                <button
+                  onClick={() => setAuthMethod('phone')}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                    authMethod === 'phone'
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  <Smartphone className="w-4 h-4" />
+                  Phone
+                </button>
+              </div>
               
-              {activeTab === 'signup' ? <SignupWithWallet /> : <LoginForm />}
+              {authMethod === 'phone' ? (
+                <PhoneLoginForm mode={activeTab} onBack={() => setAuthMethod('email')} />
+              ) : (
+                activeTab === 'signup' ? <SignupWithWallet /> : <LoginForm />
+              )}
               
               <p className="text-center text-sm text-gray-600 mt-6">
                 {activeTab === 'signup' ? (
