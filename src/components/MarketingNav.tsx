@@ -21,7 +21,7 @@ const MarketingNav = () => {
     }, 100);
   };
 
-  const handleSignIn = () => {
+  const handleSignUp = () => {
     navigate('/signup');
     setMobileMenuOpen(false);
   };
@@ -56,7 +56,7 @@ const MarketingNav = () => {
                 </Button>
               </>
             ) : (
-              <Button onClick={handleSignIn} size="sm" className="bg-gradient-to-r from-orange-500 to-purple-600">Sign Up</Button>
+              <Button onClick={handleSignUp} size="sm" className="bg-gradient-to-r from-orange-500 to-purple-600">Sign Up</Button>
             )}
           </div>
 
@@ -83,7 +83,7 @@ const MarketingNav = () => {
                 <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
               </>
             ) : (
-              <Button onClick={handleSignIn} className="mx-4 w-[calc(100%-2rem)] bg-gradient-to-r from-orange-500 to-purple-600">Sign Up</Button>
+              <Button onClick={handleSignUp} className="mx-4 w-[calc(100%-2rem)] bg-gradient-to-r from-orange-500 to-purple-600">Sign Up</Button>
             )}
           </div>
         )}
