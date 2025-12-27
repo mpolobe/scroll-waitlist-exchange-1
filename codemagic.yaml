@@ -65,6 +65,11 @@ workflows:
           success: true
           failure: true
  
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: true
+ 
   # iOS Build Workflow
   ios-workflow:
     name: Africoin Wallet iOS
