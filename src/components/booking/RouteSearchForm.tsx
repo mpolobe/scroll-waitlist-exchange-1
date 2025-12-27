@@ -87,8 +87,8 @@ export function RouteSearchForm({ onSearch }: RouteSearchFormProps) {
             value={adults} 
             onChange={(e) => {
               const val = parseInt(e.target.value);
-              if (!isNaN(val) && val >= 1) {
-                setAdults(val);
+              if (e.target.value === '' || (val >= 1 && val <= 9)) {
+                setAdults(val || 1);
               }
             }}
           />
@@ -103,8 +103,8 @@ export function RouteSearchForm({ onSearch }: RouteSearchFormProps) {
             value={children} 
             onChange={(e) => {
               const val = parseInt(e.target.value);
-              if (!isNaN(val) && val >= 0) {
-                setChildren(val);
+              if (e.target.value === '' || (val >= 0 && val <= 9)) {
+                setChildren(val || 0);
               }
             }}
           />

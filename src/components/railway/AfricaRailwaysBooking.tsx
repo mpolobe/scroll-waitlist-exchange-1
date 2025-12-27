@@ -157,7 +157,12 @@ export function AfricaRailwaysBooking() {
               min="1"
               max="10"
               value={searchParams.passengers}
-              onChange={(e) => setSearchParams({ ...searchParams, passengers: parseInt(e.target.value) })}
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                if (e.target.value === '' || (val >= 1 && val <= 10)) {
+                  setSearchParams({ ...searchParams, passengers: val || 1 });
+                }
+              }}
               className="mt-1"
             />
           </div>
