@@ -3,7 +3,7 @@ workflows:
   android-workflow:
     name: Africoin Wallet Android
     max_build_duration: 120
-    instance_type: mac_mini_m1
+    instance_type: mac_mini_m2
     environment:
       groups:
         - africoin_env_vars
@@ -69,7 +69,7 @@ workflows:
   ios-workflow:
     name: Africoin Wallet iOS
     max_build_duration: 120
-    instance_type: mac_mini_m1
+    instance_type: mac_mini_m2
     environment:
       ios_signing:
         distribution_type: app_store
