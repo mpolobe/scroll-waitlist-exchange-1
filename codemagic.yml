@@ -1,0 +1,187 @@
+workflows:
+  # Android Build Workflow
+  android-workflow:
+    name: Africoin Wallet Android
+    max_build_duration: 120
+    instance_type: mac_mini_m1
+    environment:
+      android_signing:
+        - africoin_keystore
+      groups:
+        - africoin_env_vars
+      vars:
+        PACKAGE_NAME: "com.africoin.wallet"
+        VITE_ALCHEMY_API_KEY: $VITE_ALCHEMY_API_KEY
+        VITE_ALCHEMY_GAS_POLICY_ID: $VITE_ALCHEMY_GAS_POLICY_ID
+        VITE_SUPABASE_URL: $VITE_SUPABASE_URL
+        VITE_SUPABASE_ANON_KEY: $VITE_SUPABASE_ANON_KEY
+        VITE_GEMINI_API_KEY: $VITE_GEMINI_API_KEY
+      node: 20.19.6
+    triggering:
+      events:
+        - push
+        - tag
+        - pull_request
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+          source: true
+        - pattern: 'develop'
+          include: true
+          source: true
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+ 
+      - name: Build web app
+        script: |
+          npm run build
+ 
+      - name: Install Capacitor (if not already installed)
+        script: |
+          if [ ! -f "capacitor.config.ts" ]; then
+            npm install @capacitor/core @capacitor/cli @capacitor/android
+            npx cap init "Africoin Wallet" "$PACKAGE_NAME" --web-dir=dist
+            npx cap add android
+          fi
+ 
+      - name: Sync Capacitor
+        script: |
+          npx cap sync android
+ 
+      - name: Set up keystore
+        script: |
+          echo $CM_KEYSTORE | base64 --decode > $CM_KEYSTORE_PATH
+ 
+      - name: Build Android APK
+        script: |
+          cd android
+          ./gradlew assembleRelease
+ 
+      - name: Build Android App Bundle (AAB)
+        script: |
+          cd android
+          ./gradlew bundleRelease
+ 
+    artifacts:
+      - android/app/build/outputs/**/*.apk
+      - android/app/build/outputs/**/*.aab
+ 
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: true
+ 
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: true
+ 
+  # iOS Build Workflow
+  ios-workflow:
+    name: Africoin Wallet iOS
+    max_build_duration: 120
+    instance_type: mac_mini_m1
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.africoin.wallet
+      groups:
+        - africoin_env_vars
+      vars:
+        PACKAGE_NAME: "com.africoin.wallet"
+        APP_NAME: "Africoin Wallet"
+        VITE_ALCHEMY_API_KEY: $VITE_ALCHEMY_API_KEY
+        VITE_ALCHEMY_GAS_POLICY_ID: $VITE_ALCHEMY_GAS_POLICY_ID
+        VITE_SUPABASE_URL: $VITE_SUPABASE_URL
+        VITE_SUPABASE_ANON_KEY: $VITE_SUPABASE_ANON_KEY
+        VITE_GEMINI_API_KEY: $VITE_GEMINI_API_KEY
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+      node: 20.19.6
+      xcode: 15.0
+      cocoapods: default
+    triggering:
+      events:
+        - push
+        - tag
+        - pull_request
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+          source: true
+        - pattern: 'develop'
+          include: true
+          source: true
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+ 
+      - name: Build web app
+        script: |
+          npm run build
+ 
+      - name: Install Capacitor (if not already installed)
+        script: |
+          if [ ! -f "capacitor.config.ts" ]; then
+            npm install @capacitor/core @capacitor/cli @capacitor/ios
+            npx cap init "$APP_NAME" "$PACKAGE_NAME" --web-dir=dist
+            npx cap add ios
+          fi
+ 
+      - name: Sync Capacitor
+        script: |
+          npx cap sync ios
+ 
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios/App
+          pod install
+ 
+      - name: Set up code signing
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$PACKAGE_NAME" \
+            --type IOS_APP_STORE \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
+ 
+      - name: Increment build number
+        script: |
+          cd ios/App
+          agvtool new-version -all $(($BUILD_NUMBER + 1))
+ 
+      - name: Build iOS app
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+ 
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+ 
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: true
+ 
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
+        beta_groups:
+          - Internal Testers
+        submit_to_app_store: false
