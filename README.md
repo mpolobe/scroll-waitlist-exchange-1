@@ -18,7 +18,8 @@ A modern cryptocurrency wallet application with AI-powered assistance, built wit
 ## Prerequisites
 
 - Node.js (v18 or higher)
-- Alchemy API key (Ethereum wallet infrastructure)
+- Alchemy Account Kit API key and Configuration (required for wallet features)
+- Alchemy Gas Manager Policy ID (optional, for sponsored transactions)
 - Supabase project (authentication & database)
 - Gemini API key (optional, for AI chatbot)
 - Twilio account (optional, for SMS/phone auth)
@@ -33,10 +34,11 @@ A modern cryptocurrency wallet application with AI-powered assistance, built wit
 
 2. **Configure environment variables:**
    
-   Create a `.env.local` file in the root directory:
+   Create a `.env.local` file in the root directory (see `.env.example` for template):
    ```env
-   # Alchemy (Blockchain)
+   # Alchemy Account Kit (Required for wallet features)
    VITE_ALCHEMY_API_KEY=your-alchemy-api-key
+   VITE_ALCHEMY_GAS_POLICY_ID=your-gas-policy-id  # Optional, for sponsored transactions
    
    # Supabase (Authentication & Database)
    VITE_SUPABASE_URL=your-supabase-url
@@ -50,6 +52,14 @@ A modern cryptocurrency wallet application with AI-powered assistance, built wit
    AFRICA_RAILWAYS_API_KEY=your-africa-railways-api-key
    VITE_SUI_NETWORK=testnet
    ```
+   
+   **Setting up Alchemy Account Kit:**
+   1. Go to [Alchemy Dashboard](https://dashboard.alchemy.com/)
+   2. Create a new app or select existing app
+   3. Copy your API key
+   4. Go to [Smart Wallets Configuration](https://dashboard.alchemy.com/services/smart-wallets/configuration)
+   5. Create a new configuration and enable desired login methods (email, social, passkeys)
+   6. (Optional) Create a [Gas Manager Policy](https://dashboard.alchemy.com/services/gas-manager/configuration) for sponsored transactions
    
    **For Phone Authentication:**
    Configure Twilio in Supabase Dashboard:
@@ -81,10 +91,12 @@ A modern cryptocurrency wallet application with AI-powered assistance, built wit
 - Rate-limited to prevent abuse
 
 ### Wallet Security (2FA)
-- Biometric authentication (Face ID, Touch ID)
-- Passkey support for all devices
-- Email OTP as fallback
+- Email authentication (primary method)
+- Social login (Google, Facebook)
+- Passkey support (Face ID, Touch ID, device passcode) - added after initial login
 - Self-custodial wallet with device-level security
+
+**Important:** Passkeys (Face ID, Touch ID, Passcode) are added AFTER you authenticate with email or social login. They cannot be used as the primary authentication method without first logging in.
 
 ### Two-Layer Security
 1. **Account Layer**: Phone/email authentication via Supabase

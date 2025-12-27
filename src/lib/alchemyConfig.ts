@@ -1,8 +1,8 @@
 import { createConfig } from "@account-kit/react";
 import { sepolia, alchemy } from "@account-kit/infra";
 
-// Create the Alchemy Account Kit config with multiple auth options
-// Passkey is primary but email is available as fallback for devices that don't support passkeys
+// Create the Alchemy Account Kit config with email authentication
+// Email is the primary authentication method, passkeys can be added later
 export const alchemyConfig = createConfig(
   {
     transport: alchemy({ 
@@ -18,19 +18,26 @@ export const alchemyConfig = createConfig(
     auth: {
       sections: [
         [
-          // Passkey as primary - seamless biometric/device authentication
-          { 
-            type: "passkey",
-          }
-        ],
-        [
-          // Email as fallback for devices without passkey support
+          // Email as primary authentication method
           {
             type: "email",
           }
         ],
+        [
+          // Social login options
+          {
+            type: "social",
+            authProviderId: "google",
+            mode: "popup"
+          },
+          {
+            type: "social", 
+            authProviderId: "facebook",
+            mode: "popup"
+          }
+        ],
       ],
-      addPasskeyOnSignup: false,
+      addPasskeyOnSignup: true,
       hideSignInText: false,
       header: "Connect Your Africoin Wallet",
     },
