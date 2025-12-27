@@ -5,8 +5,6 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m1
     environment:
-      android_signing:
-        - africoin_keystore
       groups:
         - africoin_env_vars
       vars:
@@ -50,19 +48,10 @@ workflows:
         script: |
           npx cap sync android
  
-      - name: Set up keystore
-        script: |
-          echo $CM_KEYSTORE | base64 --decode > $CM_KEYSTORE_PATH
- 
-      - name: Build Android APK
+      - name: Build Android APK (Debug)
         script: |
           cd android
-          ./gradlew assembleRelease
- 
-      - name: Build Android App Bundle (AAB)
-        script: |
-          cd android
-          ./gradlew bundleRelease
+          ./gradlew assembleDebug
  
     artifacts:
       - android/app/build/outputs/**/*.apk
