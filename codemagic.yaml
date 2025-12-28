@@ -15,6 +15,7 @@ workflows:
         VITE_SUPABASE_ANON_KEY: $VITE_SUPABASE_ANON_KEY
         VITE_GEMINI_API_KEY: $VITE_GEMINI_API_KEY
       node: 20.19.6
+      java: 21
     triggering:
       events:
         - push
