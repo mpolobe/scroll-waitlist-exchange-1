@@ -36,3 +36,13 @@ yarn-error.log*
 
 # Vite
 .vite
+
+# Android Keystore (NEVER COMMIT!)
+*.keystore
+*.jks
+key.properties
+
+# Capacitor
+android/
+ios/
+capacitor.config.ts
