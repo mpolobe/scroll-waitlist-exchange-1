@@ -120,6 +120,12 @@ git push origin v1.0.0
 - **Email:** ben.mpolokoso@gmail.com
 - **Console:** [https://play.google.com/console/developers/8975457855584245860](https://play.google.com/console/developers/8975457855584245860)
 
+### Google Cloud Project
+- **Project Name:** Africoin
+- **Project ID:** `gen-lang-client-0453426956`
+- **Project Number:** `834148498046`
+- **Console:** [https://console.cloud.google.com/home/dashboard?project=gen-lang-client-0453426956](https://console.cloud.google.com/home/dashboard?project=gen-lang-client-0453426956)
+
 ### App Details
 - **Package Name:** `com.africoin.wallet`
 - **App Name:** Africoin Wallet
