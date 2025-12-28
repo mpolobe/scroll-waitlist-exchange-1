@@ -5,6 +5,8 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
+      android_signing:
+        - africoin_wallet_keystore
       groups:
         - africoin_env_vars
       vars:
@@ -53,6 +55,14 @@ workflows:
         script: |
           cd android
           ./gradlew assembleDebug
+      
+      - name: Build Android Release (Signed)
+        script: |
+          cd android
+          # Build signed APK
+          ./gradlew assembleRelease
+          # Build signed AAB (for Google Play)
+          ./gradlew bundleRelease
  
     artifacts:
       - android/app/build/outputs/**/*.apk
@@ -61,10 +71,15 @@ workflows:
     publishing:
       email:
         recipients:
-          - your-email@example.com
+          - mpolobe@example.com
         notify:
           success: true
           failure: true
+      # Uncomment when ready to publish to Google Play
+      # google_play:
+      #   credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+      #   track: internal  # or alpha, beta, production
+      #   submit_as_draft: true
  
   # iOS Build Workflow
   ios-workflow:
