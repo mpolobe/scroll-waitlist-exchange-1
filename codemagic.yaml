@@ -1,16 +1,16 @@
 workflows:
-  # Android Build Workflow
-  android-workflow:
-    name: Africoin Wallet Android
+  # Android Debug Build Workflow
+  android-debug:
+    name: Africoin Wallet Android (Debug)
     max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
-      android_signing:
-        - africoin_wallet_keystore
       groups:
         - africoin_env_vars
+        - browserstack_credentials
       vars:
         PACKAGE_NAME: "com.africoin.wallet"
+        APP_NAME: "Africoin Wallet"
         VITE_ALCHEMY_API_KEY: $VITE_ALCHEMY_API_KEY
         VITE_ALCHEMY_GAS_POLICY_ID: $VITE_ALCHEMY_GAS_POLICY_ID
         VITE_SUPABASE_URL: $VITE_SUPABASE_URL
@@ -21,7 +21,6 @@ workflows:
     triggering:
       events:
         - push
-        - tag
         - pull_request
       branch_patterns:
         - pattern: 'main'
@@ -39,11 +38,11 @@ workflows:
         script: |
           npm run build
  
-      - name: Install Capacitor (if not already installed)
+      - name: Install Capacitor
         script: |
           if [ ! -f "capacitor.config.ts" ]; then
             npm install @capacitor/core @capacitor/cli @capacitor/android
-            npx cap init "Africoin Wallet" "$PACKAGE_NAME" --web-dir=dist
+            npx cap init "$APP_NAME" "$PACKAGE_NAME" --web-dir=dist
             npx cap add android
           fi
  
@@ -55,14 +54,127 @@ workflows:
         script: |
           cd android
           ./gradlew assembleDebug
-      
-      - name: Build Android Release (Signed)
+ 
+      - name: Upload to BrowserStack
+        script: |
+          APK_PATH="android/app/build/outputs/apk/debug/app-debug.apk"
+          
+          if [ -f "$APK_PATH" ]; then
+            echo "Uploading APK to BrowserStack..."
+            RESPONSE=$(curl -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
+              -X POST "https://api-cloud.browserstack.com/app-automate/upload" \
+              -F "file=@$APK_PATH")
+            
+            echo "BrowserStack Response:"
+            echo "$RESPONSE" | jq '.'
+            
+            APP_URL=$(echo "$RESPONSE" | jq -r '.app_url')
+            echo ""
+            echo "✅ APK uploaded successfully!"
+            echo "App URL: $APP_URL"
+            echo "Test at: https://app-live.browserstack.com/"
+          else
+            echo "⚠️  APK not found at $APK_PATH"
+          fi
+ 
+    artifacts:
+      - android/app/build/outputs/**/*.apk
+ 
+    publishing:
+      email:
+        recipients:
+          - ben.mpolokoso@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  # Android Release Build Workflow
+  android-release:
+    name: Africoin Wallet Android (Release)
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    environment:
+      android_signing:
+        - africoin_release
+      groups:
+        - africoin_env_vars
+        - android_signing
+        - browserstack_credentials
+      vars:
+        PACKAGE_NAME: "com.africoin.wallet"
+        APP_NAME: "Africoin Wallet"
+        VITE_ALCHEMY_API_KEY: $VITE_ALCHEMY_API_KEY
+        VITE_ALCHEMY_GAS_POLICY_ID: $VITE_ALCHEMY_GAS_POLICY_ID
+        VITE_SUPABASE_URL: $VITE_SUPABASE_URL
+        VITE_SUPABASE_ANON_KEY: $VITE_SUPABASE_ANON_KEY
+        VITE_GEMINI_API_KEY: $VITE_GEMINI_API_KEY
+      node: 20.19.6
+      java: 21
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'v*.*.*'
+          include: true
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+ 
+      - name: Build web app
+        script: |
+          npm run build
+ 
+      - name: Install Capacitor
+        script: |
+          if [ ! -f "capacitor.config.ts" ]; then
+            npm install @capacitor/core @capacitor/cli @capacitor/android
+            npx cap init "$APP_NAME" "$PACKAGE_NAME" --web-dir=dist
+            npx cap add android
+          fi
+ 
+      - name: Sync Capacitor
+        script: |
+          npx cap sync android
+ 
+      - name: Set up code signing
+        script: |
+          echo "$CM_KEYSTORE" | base64 --decode > $CM_KEYSTORE_PATH
+          cat >> android/key.properties <<EOF
+          storePassword=$CM_KEYSTORE_PASSWORD
+          keyPassword=$CM_KEY_PASSWORD
+          keyAlias=$CM_KEY_ALIAS
+          storeFile=$CM_KEYSTORE_PATH
+          EOF
+ 
+      - name: Build release APK
         script: |
           cd android
-          # Build signed APK
           ./gradlew assembleRelease
-          # Build signed AAB (for Google Play)
+ 
+      - name: Build release AAB
+        script: |
+          cd android
           ./gradlew bundleRelease
+ 
+      - name: Upload to BrowserStack
+        script: |
+          APK_PATH="android/app/build/outputs/apk/release/app-release.apk"
+          
+          if [ -f "$APK_PATH" ]; then
+            echo "Uploading release APK to BrowserStack..."
+            RESPONSE=$(curl -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
+              -X POST "https://api-cloud.browserstack.com/app-automate/upload" \
+              -F "file=@$APK_PATH")
+            
+            echo "BrowserStack Response:"
+            echo "$RESPONSE" | jq '.'
+            
+            APP_URL=$(echo "$RESPONSE" | jq -r '.app_url')
+            echo ""
+            echo "✅ Release APK uploaded to BrowserStack!"
+            echo "App URL: $APP_URL"
+          fi
  
     artifacts:
       - android/app/build/outputs/**/*.apk
@@ -71,13 +183,15 @@ workflows:
     publishing:
       email:
         recipients:
-          - mpolobe@example.com
+          - ben.mpolokoso@gmail.com
         notify:
           success: true
           failure: true
-      # Uncomment when ready to publish to Google Play
-      # google_play:
-      #   credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+      
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: true
       #   track: internal  # or alpha, beta, production
       #   submit_as_draft: true
  
