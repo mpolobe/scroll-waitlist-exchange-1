@@ -37,12 +37,26 @@ yarn-error.log*
 # Vite
 .vite
 
-# Android Keystore (NEVER COMMIT!)
+# Android Keystore and Signing (NEVER COMMIT!)
 *.keystore
 *.jks
-key.properties
+android/key.properties
+android/app/*.keystore
+android/app/*.jks
 
-# Capacitor
-android/
-ios/
-capacitor.config.ts
+# Google Play Service Account (NEVER COMMIT!)
+google-play-service-account.json
+*service-account*.json
+
+# Capacitor - Generated directories
+android/app/build/
+android/.gradle/
+android/local.properties
+ios/App/build/
+ios/App/Pods/
+ios/App/Podfile.lock
+
+# Keep these Capacitor files
+# android/ - Pre-configured build files
+# ios/ - Pre-configured build files  
+# capacitor.config.ts - Configuration file
