@@ -30,6 +30,10 @@ workflows:
           include: true
           source: true
     scripts:
+      - name: Install system dependencies
+        script: |
+          brew install jq
+      
       - name: Install dependencies
         script: |
           npm install
@@ -40,15 +44,20 @@ workflows:
  
       - name: Install Capacitor
         script: |
-          if [ ! -f "capacitor.config.ts" ]; then
-            npm install @capacitor/core @capacitor/cli @capacitor/android
-            npx cap init "$APP_NAME" "$PACKAGE_NAME" --web-dir=dist
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          if [ ! -d "android/app" ]; then
             npx cap add android
           fi
  
       - name: Sync Capacitor
         script: |
           npx cap sync android
+          
+      - name: Fix dependency conflicts
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew clean
  
       - name: Build Android APK (Debug)
         script: |
@@ -61,20 +70,26 @@ workflows:
           
           if [ -f "$APK_PATH" ]; then
             echo "Uploading APK to BrowserStack..."
-            RESPONSE=$(curl -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
+            RESPONSE=$(curl -s -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
               -X POST "https://api-cloud.browserstack.com/app-automate/upload" \
               -F "file=@$APK_PATH")
             
             echo "BrowserStack Response:"
-            echo "$RESPONSE" | jq '.'
+            if command -v jq &> /dev/null; then
+              echo "$RESPONSE" | jq '.'
+              APP_URL=$(echo "$RESPONSE" | jq -r '.app_url')
+            else
+              echo "$RESPONSE"
+              APP_URL=$(echo "$RESPONSE" | grep -o '"app_url":"[^"]*"' | cut -d'"' -f4)
+            fi
             
-            APP_URL=$(echo "$RESPONSE" | jq -r '.app_url')
             echo ""
             echo "✅ APK uploaded successfully!"
             echo "App URL: $APP_URL"
             echo "Test at: https://app-live.browserstack.com/"
           else
             echo "⚠️  APK not found at $APK_PATH"
+            exit 1
           fi
  
     artifacts:
@@ -94,12 +109,12 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
-      android_signing:
-        - africoin_release
       groups:
         - africoin_env_vars
         - android_signing
         - browserstack_credentials
+      android_signing:
+        - africoin_release
       vars:
         PACKAGE_NAME: "com.africoin.wallet"
         APP_NAME: "Africoin Wallet"
@@ -117,6 +132,10 @@ workflows:
         - pattern: 'v*.*.*'
           include: true
     scripts:
+      - name: Install system dependencies
+        script: |
+          brew install jq
+      
       - name: Install dependencies
         script: |
           npm install
@@ -127,15 +146,20 @@ workflows:
  
       - name: Install Capacitor
         script: |
-          if [ ! -f "capacitor.config.ts" ]; then
-            npm install @capacitor/core @capacitor/cli @capacitor/android
-            npx cap init "$APP_NAME" "$PACKAGE_NAME" --web-dir=dist
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          if [ ! -d "android/app" ]; then
             npx cap add android
           fi
  
       - name: Sync Capacitor
         script: |
           npx cap sync android
+          
+      - name: Fix dependency conflicts
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew clean
  
       - name: Set up code signing
         script: |
@@ -163,17 +187,26 @@ workflows:
           
           if [ -f "$APK_PATH" ]; then
             echo "Uploading release APK to BrowserStack..."
-            RESPONSE=$(curl -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
+            RESPONSE=$(curl -s -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
               -X POST "https://api-cloud.browserstack.com/app-automate/upload" \
               -F "file=@$APK_PATH")
             
             echo "BrowserStack Response:"
-            echo "$RESPONSE" | jq '.'
+            if command -v jq &> /dev/null; then
+              echo "$RESPONSE" | jq '.'
+              APP_URL=$(echo "$RESPONSE" | jq -r '.app_url')
+            else
+              echo "$RESPONSE"
+              APP_URL=$(echo "$RESPONSE" | grep -o '"app_url":"[^"]*"' | cut -d'"' -f4)
+            fi
             
-            APP_URL=$(echo "$RESPONSE" | jq -r '.app_url')
             echo ""
             echo "✅ Release APK uploaded to BrowserStack!"
             echo "App URL: $APP_URL"
+            echo "Test at: https://app-live.browserstack.com/"
+          else
+            echo "⚠️  APK not found at $APK_PATH"
+            exit 1
           fi
  
     artifacts:
@@ -242,9 +275,8 @@ workflows:
  
       - name: Install Capacitor (if not already installed)
         script: |
-          if [ ! -f "capacitor.config.ts" ]; then
-            npm install @capacitor/core @capacitor/cli @capacitor/ios
-            npx cap init "$APP_NAME" "$PACKAGE_NAME" --web-dir=dist
+          npm install @capacitor/core @capacitor/cli @capacitor/ios
+          if [ ! -d "ios/App" ]; then
             npx cap add ios
           fi
  
@@ -286,7 +318,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - your-email@example.com
+          - ben.mpolokoso@gmail.com
         notify:
           success: true
           failure: true
