@@ -4,6 +4,14 @@ workflows:
     name: Africoin Wallet Android (Debug)
     max_build_duration: 120
     instance_type: mac_mini_m2
+    
+    # Enable caching for faster rebuilds
+    cache:
+      cache_paths:
+        - $HOME/.npm
+        - $HOME/.gradle/caches
+        - node_modules
+    
     environment:
       groups:
         - africoin_env_vars
@@ -32,22 +40,30 @@ workflows:
     scripts:
       - name: Install system dependencies
         script: |
-          brew install jq
+          if ! command -v jq &> /dev/null; then
+            brew install jq
+          fi
       
       - name: Install dependencies
         script: |
-          npm install
+          # Use npm ci for faster, more reliable installs in CI/CD
+          npm ci
  
       - name: Build web app
         script: |
           npm run build
  
-      - name: Install Capacitor
+      - name: Setup Capacitor
         script: |
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          # Always run cap add android to ensure gradlew is created
-          # It will use our pre-configured files if they exist
-          npx cap add android
+          # Only install if not cached
+          if [ ! -d "node_modules/@capacitor/core" ]; then
+            npm install @capacitor/core @capacitor/cli @capacitor/android
+          fi
+          
+          # Only add Android if it doesn't exist
+          if [ ! -d "android/app" ]; then
+            npx cap add android
+          fi
  
       - name: Sync Capacitor
         script: |
@@ -113,6 +129,14 @@ workflows:
     name: Africoin Wallet Android (Release)
     max_build_duration: 120
     instance_type: mac_mini_m2
+    
+    # Enable caching for faster rebuilds
+    cache:
+      cache_paths:
+        - $HOME/.npm
+        - $HOME/.gradle/caches
+        - node_modules
+    
     environment:
       groups:
         - africoin_env_vars
@@ -139,22 +163,30 @@ workflows:
     scripts:
       - name: Install system dependencies
         script: |
-          brew install jq
+          if ! command -v jq &> /dev/null; then
+            brew install jq
+          fi
       
       - name: Install dependencies
         script: |
-          npm install
+          # Use npm ci for faster, more reliable installs in CI/CD
+          npm ci
  
       - name: Build web app
         script: |
           npm run build
  
-      - name: Install Capacitor
+      - name: Setup Capacitor
         script: |
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          # Always run cap add android to ensure gradlew is created
-          # It will use our pre-configured files if they exist
-          npx cap add android
+          # Only install if not cached
+          if [ ! -d "node_modules/@capacitor/core" ]; then
+            npm install @capacitor/core @capacitor/cli @capacitor/android
+          fi
+          
+          # Only add Android if it doesn't exist
+          if [ ! -d "android/app" ]; then
+            npx cap add android
+          fi
  
       - name: Sync Capacitor
         script: |
