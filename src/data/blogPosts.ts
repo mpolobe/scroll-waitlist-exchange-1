@@ -13,6 +13,42 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    id: 'tazara-railway-50-years',
+    title: 'The TAZARA Turns 50: Riding the Railway That Bridges Tanzania and Zambia',
+    excerpt: 'A journey through 50 years of history on the Tanzania-Zambia Railway Authority line, exploring its challenges, significance, and future prospects with major Chinese investment.',
+    content: `In Dar es Salaam's train station, hundreds of passengers sat amid piles of luggage as a listless breeze blew through the open windows. Shortly before their scheduled 3:50pm departure on the Tanzania-Zambia Railway Authority's (TAZARA) Mukuba Express train, an update crackled over the tannoy: the train would be leaving two hours late.
+
+A collective groan rippled through the crowd, and under the soaring roof of the station, pigeons darted back and forth, disappearing into holes left from rotted-out ceiling tiles. But nobody was really surprised. Given the train's reputation for unreliable service, the passengers knew a two-hour delay for the TAZARA was practically on time.
+
+The railway runs from Tanzania's largest city through the country's southern highlands and across the border into Zambia's copper provinces, finally pulling into the town of Kapiri Mposhi some 1,860 kilometres (1,156 miles) away. It's a journey that, according to official timetables, should take about 40 hours.
+
+For regular passengers, it's a cheap way to reach parts of the country that are not located near main highways. For foreign tourists, it's a unique way to see Tanzania's landscapes far from the bustling cities and overcrowded safari parks, provided they are not in a hurry. A first-class sleeper car all the way to Mbeya, a travel hub and border town just to the east of Zambia, surrounded by lush mountains and coffee farms, is just over $20.
+
+This year, the railroad celebrated its 50th anniversary, but it has struggled for most of its existence, requiring foreign investment for basic upkeep and failing to haul the amount of freight it was built to carry. Inconsistent maintenance and limited investment have seen its infrastructure and cars deteriorate from decades of use.
+
+It's hard to determine exactly where a trip on the TAZARA will be at any given time, due to the myriad delays and breakdowns that randomise each journey. Simple derailments from poorly loaded cars and deteriorating tracks are common, and then there's the occasional unfortunate brush with nature — in August, service was cancelled after a passenger train struck an African buffalo while passing through Tanzania's Mwalimu Julius Nyerere National Park.
+
+But since the beginning of 2025, the TAZARA has been plagued by more serious incidents — and fatalities — that reveal the desperate need for an overhaul of both ageing infrastructure and poor safety management. In April, two locomotives being moved from Zambia to a workshop in Mbeya for repairs derailed at a bridge in southern Tanzania, killing both drivers.
+
+Two months later, in June, a train derailed in Zambia and was then struck by the "rescue train" dispatched to assist it. The collision killed one TAZARA employee and injured 10 staff and 19 passengers, according to a media release from the railway.
+
+Citing "unexpected operational challenges," passenger service was briefly suspended in early September. As it turned out, the few operational locomotives the TAZARA could field were stuck in Tanzania, after a fire damaged one of the hundreds of bridges along the track.
+
+But big improvements for TAZARA are on the horizon, thanks to a major investment by the China Civil Engineering Construction Corporation (CCECC), which has pledged $1.4bn to refurbish the ageing rail line over the next three years. Though the continuation of passenger service is mentioned in the agreement, construction work will necessitate some pauses to regular service as the project is completed.
+
+Most of the money will be spent on rehabilitating the tracks, but $400m will go toward 32 new locomotives and 762 wagons, "significantly increasing freight and passenger transport capacity," according to a TAZARA statement. In return, the Chinese state-owned corporation will receive a 30-year concession to run the TAZARA railway and recoup its investment before turning day-to-day management back over to Tanzanian and Zambian authorities.
+
+---
+
+*Article by Paul Stremple with photos by Kang-Chun Cheng. Originally published by Al Jazeera. [Read the full story on Al Jazeera](https://www.aljazeera.com/features/longform/2025/12/28/the-tazara-turns-50-riding-the-railway-that-bridges-tanzania-and-zambia)*`,
+    category: 'Infrastructure',
+    author: 'Paul Stremple',
+    date: 'Dec 28, 2024',
+    image: 'https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285109834_4d14e31e.webp',
+    readTime: '8 min read',
+    featured: true
+  },
+  {
     id: 'africoin-launch-2024',
     title: 'Africoin Officially Launches Across 15 African Countries',
     excerpt: 'We are thrilled to announce the official launch of Africoin, bringing seamless cryptocurrency payments to millions across Africa.',
@@ -86,4 +122,4 @@ export const blogPosts: BlogPost[] = [
   }
 ];
 
-export const categories = ['All', 'Company News', 'Fintech Trends', 'Education', 'Technology', 'Case Studies', 'Interviews'];
+export const categories = ['All', 'Company News', 'Fintech Trends', 'Education', 'Technology', 'Case Studies', 'Interviews', 'Infrastructure'];
