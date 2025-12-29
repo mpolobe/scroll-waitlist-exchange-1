@@ -17,7 +17,7 @@ const MarketingHero = () => {
   };
 
   const handleDownloadApp = () => {
-    window.open('https://drive.google.com/file/d/1_3bPuGzsk7htjT5BCHGC_VA_zxzwp12u/view?usp=drivesdk', '_blank');
+    window.open('https://drive.google.com/file/d/1-z4k7waB7O6pfuPMMHmfX-xqMfCYLAlJ/view?usp=drivesdk', '_blank');
   };
 
 
