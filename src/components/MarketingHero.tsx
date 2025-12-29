@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Smartphone } from 'lucide-react';
 
 const MarketingHero = () => {
   const navigate = useNavigate();
@@ -13,6 +14,10 @@ const MarketingHero = () => {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  const handleDownloadApp = () => {
+    window.open('https://drive.google.com/file/d/1_3bPuGzsk7htjT5BCHGC_VA_zxzwp12u/view?usp=drivesdk', '_blank');
   };
 
 
@@ -44,6 +49,14 @@ const MarketingHero = () => {
             className="bg-white text-orange-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition shadow-xl"
           >
             Sign Up
+          </button>
+
+          <button 
+            onClick={handleDownloadApp}
+            className="bg-green-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-green-700 transition shadow-xl flex items-center justify-center gap-2"
+          >
+            <Smartphone className="w-5 h-5" />
+            Download Android App
           </button>
 
           <button 
