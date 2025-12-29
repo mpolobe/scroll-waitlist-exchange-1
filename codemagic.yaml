@@ -45,9 +45,9 @@ workflows:
       - name: Install Capacitor
         script: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
-          if [ ! -d "android/app" ]; then
-            npx cap add android
-          fi
+          # Always run cap add android to ensure gradlew is created
+          # It will use our pre-configured files if they exist
+          npx cap add android
  
       - name: Sync Capacitor
         script: |
@@ -56,8 +56,13 @@ workflows:
       - name: Fix dependency conflicts
         script: |
           cd android
-          chmod +x gradlew
-          ./gradlew clean
+          # Make gradlew executable and clean build
+          if [ -f "gradlew" ]; then
+            chmod +x gradlew
+            ./gradlew clean
+          else
+            echo "Warning: gradlew not found, skipping clean step"
+          fi
  
       - name: Build Android APK (Debug)
         script: |
@@ -147,9 +152,9 @@ workflows:
       - name: Install Capacitor
         script: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
-          if [ ! -d "android/app" ]; then
-            npx cap add android
-          fi
+          # Always run cap add android to ensure gradlew is created
+          # It will use our pre-configured files if they exist
+          npx cap add android
  
       - name: Sync Capacitor
         script: |
@@ -158,8 +163,13 @@ workflows:
       - name: Fix dependency conflicts
         script: |
           cd android
-          chmod +x gradlew
-          ./gradlew clean
+          # Make gradlew executable and clean build
+          if [ -f "gradlew" ]; then
+            chmod +x gradlew
+            ./gradlew clean
+          else
+            echo "Warning: gradlew not found, skipping clean step"
+          fi
  
       - name: Set up code signing
         script: |
