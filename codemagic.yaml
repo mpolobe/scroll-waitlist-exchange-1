@@ -13,17 +13,17 @@ workflows:
         - node_modules
     
     environment:
-      groups:
-        - africoin_env_vars
-        - browserstack_credentials
       vars:
         PACKAGE_NAME: "com.africoin.wallet"
         APP_NAME: "Africoin Wallet"
-        VITE_ALCHEMY_API_KEY: $VITE_ALCHEMY_API_KEY
-        VITE_ALCHEMY_GAS_POLICY_ID: $VITE_ALCHEMY_GAS_POLICY_ID
-        VITE_SUPABASE_URL: $VITE_SUPABASE_URL
-        VITE_SUPABASE_ANON_KEY: $VITE_SUPABASE_ANON_KEY
-        VITE_GEMINI_API_KEY: $VITE_GEMINI_API_KEY
+        # Environment variables - set these in Codemagic UI if needed
+        # VITE_ALCHEMY_API_KEY: Set in Codemagic environment variables
+        # VITE_ALCHEMY_GAS_POLICY_ID: Set in Codemagic environment variables
+        # VITE_SUPABASE_URL: Set in Codemagic environment variables
+        # VITE_SUPABASE_ANON_KEY: Set in Codemagic environment variables
+        # VITE_GEMINI_API_KEY: Set in Codemagic environment variables
+        # BROWSERSTACK_USERNAME: Set in Codemagic environment variables
+        # BROWSERSTACK_ACCESS_KEY: Set in Codemagic environment variables
       node: 20.19.6
       java: 21
     triggering:
@@ -90,24 +90,31 @@ workflows:
           APK_PATH="android/app/build/outputs/apk/debug/app-debug.apk"
           
           if [ -f "$APK_PATH" ]; then
-            echo "Uploading APK to BrowserStack..."
-            RESPONSE=$(curl -s -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
-              -X POST "https://api-cloud.browserstack.com/app-automate/upload" \
-              -F "file=@$APK_PATH")
-            
-            echo "BrowserStack Response:"
-            if command -v jq &> /dev/null; then
-              echo "$RESPONSE" | jq '.'
-              APP_URL=$(echo "$RESPONSE" | jq -r '.app_url')
+            # Check if BrowserStack credentials are set
+            if [ -z "$BROWSERSTACK_USERNAME" ] || [ -z "$BROWSERSTACK_ACCESS_KEY" ]; then
+              echo "⚠️  BrowserStack credentials not set, skipping upload"
+              echo "To enable BrowserStack upload, set BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY in Codemagic"
+              echo "APK available in build artifacts"
             else
-              echo "$RESPONSE"
-              APP_URL=$(echo "$RESPONSE" | grep -o '"app_url":"[^"]*"' | cut -d'"' -f4)
+              echo "Uploading APK to BrowserStack..."
+              RESPONSE=$(curl -s -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
+                -X POST "https://api-cloud.browserstack.com/app-automate/upload" \
+                -F "file=@$APK_PATH")
+              
+              echo "BrowserStack Response:"
+              if command -v jq &> /dev/null; then
+                echo "$RESPONSE" | jq '.'
+                APP_URL=$(echo "$RESPONSE" | jq -r '.app_url')
+              else
+                echo "$RESPONSE"
+                APP_URL=$(echo "$RESPONSE" | grep -o '"app_url":"[^"]*"' | cut -d'"' -f4)
+              fi
+              
+              echo ""
+              echo "✅ APK uploaded successfully!"
+              echo "App URL: $APP_URL"
+              echo "Test at: https://app-live.browserstack.com/"
             fi
-            
-            echo ""
-            echo "✅ APK uploaded successfully!"
-            echo "App URL: $APP_URL"
-            echo "Test at: https://app-live.browserstack.com/"
           else
             echo "⚠️  APK not found at $APK_PATH"
             exit 1
@@ -138,20 +145,19 @@ workflows:
         - node_modules
     
     environment:
-      groups:
-        - africoin_env_vars
-        - android_signing
-        - browserstack_credentials
       android_signing:
         - africoin_release
       vars:
         PACKAGE_NAME: "com.africoin.wallet"
         APP_NAME: "Africoin Wallet"
-        VITE_ALCHEMY_API_KEY: $VITE_ALCHEMY_API_KEY
-        VITE_ALCHEMY_GAS_POLICY_ID: $VITE_ALCHEMY_GAS_POLICY_ID
-        VITE_SUPABASE_URL: $VITE_SUPABASE_URL
-        VITE_SUPABASE_ANON_KEY: $VITE_SUPABASE_ANON_KEY
-        VITE_GEMINI_API_KEY: $VITE_GEMINI_API_KEY
+        # Environment variables - set these in Codemagic UI if needed
+        # VITE_ALCHEMY_API_KEY: Set in Codemagic environment variables
+        # VITE_ALCHEMY_GAS_POLICY_ID: Set in Codemagic environment variables
+        # VITE_SUPABASE_URL: Set in Codemagic environment variables
+        # VITE_SUPABASE_ANON_KEY: Set in Codemagic environment variables
+        # VITE_GEMINI_API_KEY: Set in Codemagic environment variables
+        # BROWSERSTACK_USERNAME: Set in Codemagic environment variables
+        # BROWSERSTACK_ACCESS_KEY: Set in Codemagic environment variables
       node: 20.19.6
       java: 21
     triggering:
@@ -228,24 +234,31 @@ workflows:
           APK_PATH="android/app/build/outputs/apk/release/app-release.apk"
           
           if [ -f "$APK_PATH" ]; then
-            echo "Uploading release APK to BrowserStack..."
-            RESPONSE=$(curl -s -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
-              -X POST "https://api-cloud.browserstack.com/app-automate/upload" \
-              -F "file=@$APK_PATH")
-            
-            echo "BrowserStack Response:"
-            if command -v jq &> /dev/null; then
-              echo "$RESPONSE" | jq '.'
-              APP_URL=$(echo "$RESPONSE" | jq -r '.app_url')
+            # Check if BrowserStack credentials are set
+            if [ -z "$BROWSERSTACK_USERNAME" ] || [ -z "$BROWSERSTACK_ACCESS_KEY" ]; then
+              echo "⚠️  BrowserStack credentials not set, skipping upload"
+              echo "To enable BrowserStack upload, set BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY in Codemagic"
+              echo "APK available in build artifacts"
             else
-              echo "$RESPONSE"
-              APP_URL=$(echo "$RESPONSE" | grep -o '"app_url":"[^"]*"' | cut -d'"' -f4)
+              echo "Uploading release APK to BrowserStack..."
+              RESPONSE=$(curl -s -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
+                -X POST "https://api-cloud.browserstack.com/app-automate/upload" \
+                -F "file=@$APK_PATH")
+              
+              echo "BrowserStack Response:"
+              if command -v jq &> /dev/null; then
+                echo "$RESPONSE" | jq '.'
+                APP_URL=$(echo "$RESPONSE" | jq -r '.app_url')
+              else
+                echo "$RESPONSE"
+                APP_URL=$(echo "$RESPONSE" | grep -o '"app_url":"[^"]*"' | cut -d'"' -f4)
+              fi
+              
+              echo ""
+              echo "✅ Release APK uploaded to BrowserStack!"
+              echo "App URL: $APP_URL"
+              echo "Test at: https://app-live.browserstack.com/"
             fi
-            
-            echo ""
-            echo "✅ Release APK uploaded to BrowserStack!"
-            echo "App URL: $APP_URL"
-            echo "Test at: https://app-live.browserstack.com/"
           else
             echo "⚠️  APK not found at $APK_PATH"
             exit 1
@@ -281,16 +294,15 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.africoin.wallet
-      groups:
-        - africoin_env_vars
       vars:
         PACKAGE_NAME: "com.africoin.wallet"
         APP_NAME: "Africoin Wallet"
-        VITE_ALCHEMY_API_KEY: $VITE_ALCHEMY_API_KEY
-        VITE_ALCHEMY_GAS_POLICY_ID: $VITE_ALCHEMY_GAS_POLICY_ID
-        VITE_SUPABASE_URL: $VITE_SUPABASE_URL
-        VITE_SUPABASE_ANON_KEY: $VITE_SUPABASE_ANON_KEY
-        VITE_GEMINI_API_KEY: $VITE_GEMINI_API_KEY
+        # Environment variables - set these in Codemagic UI if needed
+        # VITE_ALCHEMY_API_KEY: Set in Codemagic environment variables
+        # VITE_ALCHEMY_GAS_POLICY_ID: Set in Codemagic environment variables
+        # VITE_SUPABASE_URL: Set in Codemagic environment variables
+        # VITE_SUPABASE_ANON_KEY: Set in Codemagic environment variables
+        # VITE_GEMINI_API_KEY: Set in Codemagic environment variables
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
       node: 20.19.6
