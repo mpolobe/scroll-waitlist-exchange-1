@@ -22,8 +22,9 @@ workflows:
         # VITE_SUPABASE_URL: Set in Codemagic environment variables
         # VITE_SUPABASE_ANON_KEY: Set in Codemagic environment variables
         # VITE_GEMINI_API_KEY: Set in Codemagic environment variables
-        # BROWSERSTACK_USERNAME: Set in Codemagic environment variables
-        # BROWSERSTACK_ACCESS_KEY: Set in Codemagic environment variables
+        # BrowserStack credentials (choose one format):
+        # Option 1: BROWSERSTACK_USERNAME and BROWSERSTACK_API_KEY
+        # Option 2: BROWSERSTACK_URL and BROWSERSTACK_API_KEY
       node: 20.19.6
       java: 21
     triggering:
@@ -90,14 +91,26 @@ workflows:
           APK_PATH="android/app/build/outputs/apk/debug/app-debug.apk"
           
           if [ -f "$APK_PATH" ]; then
+            # Extract username from BROWSERSTACK_URL if available
+            if [ -n "$BROWSERSTACK_URL" ]; then
+              BROWSERSTACK_USERNAME=$(echo "$BROWSERSTACK_URL" | sed -n 's|.*://\([^.]*\)\.browserstack\.com.*|\1|p')
+            fi
+            
+            # Support both credential formats
+            BS_KEY="${BROWSERSTACK_API_KEY:-$BROWSERSTACK_ACCESS_KEY}"
+            
             # Check if BrowserStack credentials are set
-            if [ -z "$BROWSERSTACK_USERNAME" ] || [ -z "$BROWSERSTACK_ACCESS_KEY" ]; then
+            if [ -z "$BROWSERSTACK_USERNAME" ] || [ -z "$BS_KEY" ]; then
               echo "⚠️  BrowserStack credentials not set, skipping upload"
-              echo "To enable BrowserStack upload, set BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY in Codemagic"
+              echo "To enable BrowserStack upload, set in Codemagic:"
+              echo "  - BROWSERSTACK_USERNAME and BROWSERSTACK_API_KEY"
+              echo "  OR"
+              echo "  - BROWSERSTACK_URL and BROWSERSTACK_API_KEY"
               echo "APK available in build artifacts"
             else
               echo "Uploading APK to BrowserStack..."
-              RESPONSE=$(curl -s -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
+              echo "Username: $BROWSERSTACK_USERNAME"
+              RESPONSE=$(curl -s -u "$BROWSERSTACK_USERNAME:$BS_KEY" \
                 -X POST "https://api-cloud.browserstack.com/app-automate/upload" \
                 -F "file=@$APK_PATH")
               
@@ -110,10 +123,14 @@ workflows:
                 APP_URL=$(echo "$RESPONSE" | grep -o '"app_url":"[^"]*"' | cut -d'"' -f4)
               fi
               
-              echo ""
-              echo "✅ APK uploaded successfully!"
-              echo "App URL: $APP_URL"
-              echo "Test at: https://app-live.browserstack.com/"
+              if [ -n "$APP_URL" ] && [ "$APP_URL" != "null" ]; then
+                echo ""
+                echo "✅ APK uploaded successfully!"
+                echo "App URL: $APP_URL"
+                echo "Test at: $BROWSERSTACK_URL"
+              else
+                echo "⚠️  Upload may have failed, check response above"
+              fi
             fi
           else
             echo "⚠️  APK not found at $APK_PATH"
@@ -234,14 +251,26 @@ workflows:
           APK_PATH="android/app/build/outputs/apk/release/app-release.apk"
           
           if [ -f "$APK_PATH" ]; then
+            # Extract username from BROWSERSTACK_URL if available
+            if [ -n "$BROWSERSTACK_URL" ]; then
+              BROWSERSTACK_USERNAME=$(echo "$BROWSERSTACK_URL" | sed -n 's|.*://\([^.]*\)\.browserstack\.com.*|\1|p')
+            fi
+            
+            # Support both credential formats
+            BS_KEY="${BROWSERSTACK_API_KEY:-$BROWSERSTACK_ACCESS_KEY}"
+            
             # Check if BrowserStack credentials are set
-            if [ -z "$BROWSERSTACK_USERNAME" ] || [ -z "$BROWSERSTACK_ACCESS_KEY" ]; then
+            if [ -z "$BROWSERSTACK_USERNAME" ] || [ -z "$BS_KEY" ]; then
               echo "⚠️  BrowserStack credentials not set, skipping upload"
-              echo "To enable BrowserStack upload, set BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY in Codemagic"
+              echo "To enable BrowserStack upload, set in Codemagic:"
+              echo "  - BROWSERSTACK_USERNAME and BROWSERSTACK_API_KEY"
+              echo "  OR"
+              echo "  - BROWSERSTACK_URL and BROWSERSTACK_API_KEY"
               echo "APK available in build artifacts"
             else
               echo "Uploading release APK to BrowserStack..."
-              RESPONSE=$(curl -s -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
+              echo "Username: $BROWSERSTACK_USERNAME"
+              RESPONSE=$(curl -s -u "$BROWSERSTACK_USERNAME:$BS_KEY" \
                 -X POST "https://api-cloud.browserstack.com/app-automate/upload" \
                 -F "file=@$APK_PATH")
               
@@ -254,10 +283,14 @@ workflows:
                 APP_URL=$(echo "$RESPONSE" | grep -o '"app_url":"[^"]*"' | cut -d'"' -f4)
               fi
               
-              echo ""
-              echo "✅ Release APK uploaded to BrowserStack!"
-              echo "App URL: $APP_URL"
-              echo "Test at: https://app-live.browserstack.com/"
+              if [ -n "$APP_URL" ] && [ "$APP_URL" != "null" ]; then
+                echo ""
+                echo "✅ Release APK uploaded to BrowserStack!"
+                echo "App URL: $APP_URL"
+                echo "Test at: $BROWSERSTACK_URL"
+              else
+                echo "⚠️  Upload may have failed, check response above"
+              fi
             fi
           else
             echo "⚠️  APK not found at $APK_PATH"
