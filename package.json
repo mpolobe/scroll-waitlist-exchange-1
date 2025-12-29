@@ -11,6 +11,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@account-kit/core": "^4.35.1",
+    "@account-kit/infra": "^4.35.1",
+    "@account-kit/react": "^4.35.1",
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/cli": "^7.4.4",
+    "@capacitor/core": "^8.0.0",
     "@google/generative-ai": "^0.21.0",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
@@ -65,12 +71,9 @@
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.1.0",
     "vaul": "^0.9.3",
-    "zod": "^3.23.8",
-    "@account-kit/core": "^4.35.1",
-    "@account-kit/infra": "^4.35.1",
-    "@account-kit/react": "^4.35.1",
     "viem": "^2.30.0",
-    "wagmi": "^2.15.4"
+    "wagmi": "^2.15.4",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
