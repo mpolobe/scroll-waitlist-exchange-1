@@ -50,11 +50,13 @@ npm install
 echo "→ Building web app..."
 npm run build
 
-# Check if Capacitor is initialized
-if [ ! -f "capacitor.config.ts" ]; then
-    echo "→ Initializing Capacitor..."
+# Check if Capacitor Android is initialized
+if [ ! -d "android/app" ]; then
+    echo "→ Initializing Capacitor Android..."
     npm install @capacitor/core @capacitor/cli @capacitor/android
-    npx cap init "Africoin Wallet" "com.africoin.wallet" --web-dir=dist
+    if [ ! -f "capacitor.config.ts" ]; then
+        npx cap init "Africoin Wallet" "com.africoin.wallet" --web-dir=dist
+    fi
     npx cap add android
 fi
 
