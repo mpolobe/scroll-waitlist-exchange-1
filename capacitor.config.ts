@@ -5,9 +5,14 @@ const config: CapacitorConfig = {
   appName: 'Africoin Wallet',
   webDir: 'dist',
   server: {
-    androidScheme: 'https'
+    androidScheme: 'https',
+    cleartext: true,
+    allowNavigation: ['*']
   },
   android: {
+    allowMixedContent: true,
+    captureInput: true,
+    webContentsDebuggingEnabled: true,
     buildOptions: {
       keystorePath: undefined,
       keystorePassword: undefined,
