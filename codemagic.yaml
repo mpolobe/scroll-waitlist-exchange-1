@@ -271,6 +271,8 @@ workflows:
       #   submit_as_draft: true
  
   # iOS Build Workflow
+  # DISABLED: Requires Apple Developer account and App Store Connect setup
+  # See IOS_CODE_SIGNING_FIX.md for setup instructions
   ios-workflow:
     name: Africoin Wallet iOS
     max_build_duration: 120
@@ -295,17 +297,20 @@ workflows:
       xcode: 15.0
       cocoapods: default
     triggering:
-      events:
-        - push
-        - tag
-        - pull_request
-      branch_patterns:
-        - pattern: 'main'
-          include: true
-          source: true
-        - pattern: 'develop'
-          include: true
-          source: true
+      # Disabled until Apple Developer account is set up
+      events: []
+      # Uncomment when ready:
+      # events:
+      #   - push
+      #   - tag
+      #   - pull_request
+      # branch_patterns:
+      #   - pattern: 'main'
+      #     include: true
+      #     source: true
+      #   - pattern: 'develop'
+      #     include: true
+      #     source: true
     scripts:
       - name: Install dependencies
         script: |
