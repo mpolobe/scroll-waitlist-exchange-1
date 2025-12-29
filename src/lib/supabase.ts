@@ -5,9 +5,13 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing Supabase configuration. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
+  console.warn('Missing Supabase configuration. Using demo mode. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Use dummy values if not configured to prevent app crash
+const finalUrl = supabaseUrl || 'https://demo.supabase.co';
+const finalKey = supabaseKey || 'demo-key';
+
+const supabase = createClient(finalUrl, finalKey);
 
 export { supabase };

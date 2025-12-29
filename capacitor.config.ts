@@ -4,6 +4,7 @@ const config: CapacitorConfig = {
   appId: 'com.africoin.wallet',
   appName: 'Africoin Wallet',
   webDir: 'dist',
+  bundledWebRuntime: false,
   server: {
     androidScheme: 'https',
     cleartext: true,
