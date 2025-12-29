@@ -13,6 +13,8 @@ workflows:
         - node_modules
     
     environment:
+      groups:
+        - browserstack_credentials
       vars:
         PACKAGE_NAME: "com.africoin.wallet"
         APP_NAME: "Africoin Wallet"
@@ -22,9 +24,6 @@ workflows:
         # VITE_SUPABASE_URL: Set in Codemagic environment variables
         # VITE_SUPABASE_ANON_KEY: Set in Codemagic environment variables
         # VITE_GEMINI_API_KEY: Set in Codemagic environment variables
-        # BrowserStack credentials (choose one format):
-        # Option 1: BROWSERSTACK_USERNAME and BROWSERSTACK_API_KEY
-        # Option 2: BROWSERSTACK_URL and BROWSERSTACK_API_KEY
       node: 20.19.6
       java: 21
     triggering:
