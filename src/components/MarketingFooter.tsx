@@ -96,7 +96,7 @@ const MarketingFooter = () => {
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="https://twitter.com/africoin" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">Twitter</a>
             <a href="https://linkedin.com/company/africoin" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">LinkedIn</a>
-            <a href="https://facebook.com/africoin" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">Facebook</a>
+            <a href="https://www.facebook.com/profile.php?id=61584643210653" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">Facebook</a>
             <a href="https://instagram.com/africoin" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">Instagram</a>
           </div>
         </div>
