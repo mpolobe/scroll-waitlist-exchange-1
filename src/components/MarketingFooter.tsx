@@ -83,10 +83,10 @@ const MarketingFooter = () => {
           <div>
             <h4 className="font-bold mb-4">Legal</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="/contact" className="hover:text-white">Privacy Policy</a></li>
-              <li><a href="/contact" className="hover:text-white">Terms of Service</a></li>
-              <li><a href="/contact" className="hover:text-white">Cookie Policy</a></li>
-              <li><a href="/contact" className="hover:text-white">Compliance</a></li>
+              <li><a href="/privacy-policy" className="hover:text-white">Privacy Policy</a></li>
+              <li><a href="/terms-of-service" className="hover:text-white">Terms of Service</a></li>
+              <li><a href="/cookie-policy" className="hover:text-white">Cookie Policy</a></li>
+              <li><a href="/compliance" className="hover:text-white">Compliance</a></li>
             </ul>
           </div>
         </div>

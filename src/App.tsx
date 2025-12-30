@@ -27,6 +27,10 @@ import ContactUs from "./pages/ContactUs";
 import WalletDashboard from "./pages/WalletDashboard";
 import WalletAuth from "./pages/WalletAuth";
 import AfricaRailwaysDemo from "./pages/AfricaRailwaysDemo";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import CookiePolicy from "./pages/CookiePolicy";
+import Compliance from "./pages/Compliance";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +62,10 @@ const App = () => (
                 <Route path="/wallet" element={<WalletDashboard />} />
                 <Route path="/wallet-auth" element={<WalletAuth />} />
                 <Route path="/africa-railways-demo" element={<AfricaRailwaysDemo />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-of-service" element={<TermsOfService />} />
+                <Route path="/cookie-policy" element={<CookiePolicy />} />
+                <Route path="/compliance" element={<Compliance />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <GeminiChatbot />
