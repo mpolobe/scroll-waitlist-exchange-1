@@ -60,11 +60,11 @@ const MarketingFooter = () => {
           <div>
             <h4 className="font-bold mb-4">Company</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white">About Us</a></li>
+              <li><a href="/contact" className="hover:text-white">About Us</a></li>
               <li><a href="/blog" className="hover:text-white">Blog</a></li>
               <li><a href="/merchant" className="hover:text-white">Merchant Portal</a></li>
-              <li><a href="#" className="hover:text-white">Careers</a></li>
-              <li><a href="#" className="hover:text-white">Press Kit</a></li>
+              <li><a href="/contact" className="hover:text-white">Careers</a></li>
+              <li><a href="/contact" className="hover:text-white">Press Kit</a></li>
               <li><a href="/contact" className="hover:text-white">Contact</a></li>
 
             </ul>
@@ -83,10 +83,10 @@ const MarketingFooter = () => {
           <div>
             <h4 className="font-bold mb-4">Legal</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-white">Cookie Policy</a></li>
-              <li><a href="#" className="hover:text-white">Compliance</a></li>
+              <li><a href="/contact" className="hover:text-white">Privacy Policy</a></li>
+              <li><a href="/contact" className="hover:text-white">Terms of Service</a></li>
+              <li><a href="/contact" className="hover:text-white">Cookie Policy</a></li>
+              <li><a href="/contact" className="hover:text-white">Compliance</a></li>
             </ul>
           </div>
         </div>
@@ -94,10 +94,10 @@ const MarketingFooter = () => {
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">© 2025 Africoin. All rights reserved.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-gray-400 hover:text-white">Twitter</a>
-            <a href="#" className="text-gray-400 hover:text-white">LinkedIn</a>
-            <a href="#" className="text-gray-400 hover:text-white">Facebook</a>
-            <a href="#" className="text-gray-400 hover:text-white">Instagram</a>
+            <a href="https://twitter.com/africoin" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">Twitter</a>
+            <a href="https://linkedin.com/company/africoin" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">LinkedIn</a>
+            <a href="https://facebook.com/africoin" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">Facebook</a>
+            <a href="https://instagram.com/africoin" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">Instagram</a>
           </div>
         </div>
       </div>
