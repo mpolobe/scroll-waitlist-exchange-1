@@ -12,6 +12,8 @@
     "deploy": "./scripts/deploy-to-vercel.sh preview",
     "deploy:prod": "./scripts/deploy-to-vercel.sh production",
     "migrate:db": "node scripts/migrate-database.js",
+    "verify:migration": "node scripts/verify-migration.js",
+    "check:migration": "node scripts/check-migration-setup.js"
     "verify:db": "node scripts/verify-db-connection.js"
     "test:migration": "node scripts/test-migration-setup.js"
     "verify:migration": "node scripts/verify-migration.js"

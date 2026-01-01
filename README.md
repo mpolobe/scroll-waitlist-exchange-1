@@ -25,6 +25,39 @@ A modern cryptocurrency wallet application with AI-powered assistance, built wit
 - Twilio account (optional, for SMS/phone auth)
 - Africa Railways API key (optional, for real railway bookings)
 
+## Database Migration from Famous.AI
+
+⚠️ **IMPORTANT**: If your database is empty or showing low activity:
+
+This project uses Supabase for data storage. If you're migrating from Famous.AI or another Supabase project, you need to run the database migration to populate your tables.
+
+**Quick Start:**
+1. Check migration setup: `npm run check:migration`
+2. Follow the comprehensive guide: [FAMOUS_AI_MIGRATION_GUIDE.md](./FAMOUS_AI_MIGRATION_GUIDE.md)
+
+**Symptoms that migration is needed:**
+- Only 6 requests in last 24 hours in Supabase dashboard
+- Empty tables (no users, profiles, etc.)
+- Application shows no data
+
+**Quick Migration:**
+```bash
+# 1. Set up credentials in .env.local (see FAMOUS_AI_MIGRATION_GUIDE.md)
+# 2. Check setup
+npm run check:migration
+
+# 3. Test connection
+node scripts/migrate-database.js --dry-run --debug
+
+# 4. Run migration
+npm run migrate:db
+
+# 5. Verify success
+npm run verify:migration
+```
+
+See [FAMOUS_AI_MIGRATION_GUIDE.md](./FAMOUS_AI_MIGRATION_GUIDE.md) for detailed instructions.
+
 ## Database Migration
 
 If you're migrating from Famous.AI to Vercel, see the comprehensive [Database Migration Guide](DATABASE_MIGRATION_GUIDE.md) for detailed instructions on:
