@@ -42,6 +42,20 @@ npm run deploy:prod
 npm run migrate:db
 ```
 
+### 5. Verify Migration
+
+After running the migration, verify data integrity:
+
+```bash
+npm run verify:migration
+
+# With detailed comparison
+node scripts/verify-migration.js --detailed
+
+# With debug logging
+node scripts/verify-migration.js --debug --detailed
+```
+
 ## Scripts Overview
 
 ### `deploy-supabase-vars.sh`
@@ -181,13 +195,14 @@ Database migration script that copies data from Famous.AI to Vercel.
 
 **Usage:**
 ```bash
-node scripts/migrate-database.js [--debug] [--interactive] [--retry-count=N]
+node scripts/migrate-database.js [--debug] [--interactive] [--retry-count=N] [--dry-run]
 ```
 
 **Options:**
 - `--debug` - Enable detailed debug logging with timestamps
 - `--interactive` - Enable step-by-step interactive prompts for manual control
 - `--retry-count=N` - Set number of retries for failed operations (default: 3)
+- `--dry-run` - Test mode: fetch data but don't insert (useful for testing)
 
 **Environment Variables Required:**
 ```bash
@@ -240,6 +255,9 @@ When `--interactive` is enabled:
 # Basic migration
 node scripts/migrate-database.js
 
+# Test migration without inserting data (dry-run)
+node scripts/migrate-database.js --dry-run
+
 # Migration with debug logging
 node scripts/migrate-database.js --debug
 
@@ -251,9 +269,68 @@ node scripts/migrate-database.js --retry-count=5
 
 # All options combined
 node scripts/migrate-database.js --debug --interactive --retry-count=5
+
+# Dry-run with debug output
+node scripts/migrate-database.js --dry-run --debug
 ```
 
 **Tables Migrated:**
+- profiles
+- users
+- admin_roles
+- loyalty_points
+- points_transactions
+- favorite_posts
+- support_tickets
+
+### `verify-migration.js`
+**NEW** - Database migration verification script.
+
+**Usage:**
+```bash
+node scripts/verify-migration.js [--debug] [--detailed]
+```
+
+**Options:**
+- `--debug` - Enable detailed debug logging with timestamps
+- `--detailed` - Perform detailed data comparison including schema validation
+
+**Environment Variables Required:**
+```bash
+SOURCE_SUPABASE_URL=https://famous-ai-project.supabase.co
+SOURCE_SUPABASE_KEY=service_role_key
+TARGET_SUPABASE_URL=https://vercel-project.supabase.co
+TARGET_SUPABASE_KEY=service_role_key
+```
+
+**What it does:**
+- Verifies row counts match between source and target
+- Compares table structures (in detailed mode)
+- Generates comprehensive verification report
+- Validates data integrity post-migration
+- Tracks verification timing
+
+**Verification Report:**
+The script generates a detailed report including:
+- Row count comparison for each table
+- Schema validation results (detailed mode)
+- Overall match rate percentage
+- List of issues found
+- Total verification time
+
+**Example:**
+```bash
+# Basic verification
+npm run verify:migration
+
+# Detailed verification with debug output
+node scripts/verify-migration.js --debug --detailed
+
+# Quick count check
+node scripts/verify-migration.js
+```
+
+**Tables Verified:**
 - profiles
 - users
 - admin_roles
@@ -450,6 +527,86 @@ All scripts support detailed logging with timestamps:
 node scripts/migrate-database.js --debug 2>&1 | tee migration.log
 ```
 
+## Automated Database Migration (CI/CD)
+
+### GitHub Actions Workflow
+
+The repository includes an automated database migration workflow that can be triggered manually from the GitHub Actions tab.
+
+**Workflow:** `.github/workflows/database-migration.yml`
+
+**Features:**
+- Manual trigger with configurable options
+- Pre-migration health checks
+- Dry-run mode for testing
+- Production migration with verification
+- Post-migration verification
+- Automated deployment to Vercel
+- Artifact upload for logs and reports
+
+**How to Use:**
+
+1. Go to **Actions** tab in GitHub
+2. Select **"Database Migration and Verification"** workflow
+3. Click **"Run workflow"**
+4. Choose options:
+   - **Migration Type:** `dry-run` (test) or `production` (actual migration)
+   - **Verify Only:** Check to only run verification without migration
+5. Click **"Run workflow"** button
+
+**Workflow Steps:**
+
+**Dry-Run Mode:**
+1. Pre-migration health check
+2. Verification of current state
+3. Generates detailed comparison report
+
+**Production Mode:**
+1. Pre-migration health check
+2. Database migration with retry logic
+3. Post-migration verification
+4. Build and deploy to Vercel
+5. Post-deployment smoke tests
+
+**Verify Only Mode:**
+1. Runs comprehensive verification
+2. Generates detailed verification report
+3. Uploads report as artifact
+
+**Required Secrets:**
+
+Configure these in GitHub Settings → Secrets and variables → Actions:
+
+```bash
+# Database credentials
+SOURCE_SUPABASE_URL
+SOURCE_SUPABASE_KEY
+TARGET_SUPABASE_URL
+TARGET_SUPABASE_KEY
+
+# Vercel deployment (for production mode)
+VERCEL_TOKEN
+VERCEL_ORG_ID
+VERCEL_PROJECT_ID
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
+VITE_ALCHEMY_API_KEY
+```
+
+**Viewing Results:**
+
+- **Workflow Logs:** Click on the workflow run to see detailed logs
+- **Artifacts:** Download migration logs and verification reports from the workflow run page
+- **Retention:** Logs are kept for 30 days, verification reports for 90 days
+
+**Best Practices:**
+
+1. Always run in **dry-run** mode first
+2. Review the verification report before production migration
+3. Keep artifacts for audit trail
+4. Run verification regularly to ensure data consistency
+5. Monitor workflow execution time for performance issues
+
 ### Production Database Readiness Check
 
 After migration, verify database is ready:
@@ -463,6 +620,21 @@ node scripts/migrate-database.js --interactive --debug
 # - Failed records count
 # - Duration per table
 # - Retry attempts
+```
+
+### Viewing Detailed Logs (Local)
+
+All scripts support detailed logging with timestamps:
+
+```bash
+# Save logs to file for later analysis
+./scripts/deploy-to-vercel.sh preview --debug 2>&1 | tee deployment.log
+
+# View migration logs with timestamps
+node scripts/migrate-database.js --debug 2>&1 | tee migration.log
+
+# View verification logs
+node scripts/verify-migration.js --debug --detailed 2>&1 | tee verification.log
 ```
 
 ## Security Notes

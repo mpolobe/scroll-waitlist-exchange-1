@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "deploy": "./scripts/deploy-to-vercel.sh preview",
     "deploy:prod": "./scripts/deploy-to-vercel.sh production",
-    "migrate:db": "node scripts/migrate-database.js"
+    "migrate:db": "node scripts/migrate-database.js",
+    "verify:migration": "node scripts/verify-migration.js"
   },
   "dependencies": {
     "@account-kit/core": "^4.35.1",
