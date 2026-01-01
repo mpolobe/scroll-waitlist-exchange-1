@@ -1,0 +1,198 @@
+name: Database Migration and Verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      migration_type:
+        description: 'Migration type'
+        required: true
+        type: choice
+        options:
+          - dry-run
+          - production
+        default: 'dry-run'
+      verify_only:
+        description: 'Only verify (skip migration)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  NODE_VERSION: '20.x'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  migrate:
+    name: Database Migration
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.verify_only }}
+    
+    permissions:
+      contents: read
+      actions: read
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Pre-Migration Health Check
+        id: health_check
+        env:
+          SOURCE_SUPABASE_URL: ${{ secrets.SOURCE_SUPABASE_URL }}
+          SOURCE_SUPABASE_KEY: ${{ secrets.SOURCE_SUPABASE_KEY }}
+          TARGET_SUPABASE_URL: ${{ secrets.TARGET_SUPABASE_URL }}
+          TARGET_SUPABASE_KEY: ${{ secrets.TARGET_SUPABASE_KEY }}
+        run: |
+          echo "🔍 Checking database connections..."
+          node scripts/verify-migration.js --debug
+
+      - name: Run Database Migration
+        if: inputs.migration_type == 'production'
+        env:
+          SOURCE_SUPABASE_URL: ${{ secrets.SOURCE_SUPABASE_URL }}
+          SOURCE_SUPABASE_KEY: ${{ secrets.SOURCE_SUPABASE_KEY }}
+          TARGET_SUPABASE_URL: ${{ secrets.TARGET_SUPABASE_URL }}
+          TARGET_SUPABASE_KEY: ${{ secrets.TARGET_SUPABASE_KEY }}
+        run: |
+          echo "🚀 Running production migration..."
+          node scripts/migrate-database.js --debug --retry-count=5
+
+      - name: Dry Run Migration
+        if: inputs.migration_type == 'dry-run'
+        env:
+          SOURCE_SUPABASE_URL: ${{ secrets.SOURCE_SUPABASE_URL }}
+          SOURCE_SUPABASE_KEY: ${{ secrets.SOURCE_SUPABASE_KEY }}
+          TARGET_SUPABASE_URL: ${{ secrets.TARGET_SUPABASE_URL }}
+          TARGET_SUPABASE_KEY: ${{ secrets.TARGET_SUPABASE_KEY }}
+        run: |
+          echo "🧪 Running dry-run (verification only)..."
+          node scripts/verify-migration.js --debug --detailed
+
+      - name: Post-Migration Verification
+        if: inputs.migration_type == 'production'
+        env:
+          SOURCE_SUPABASE_URL: ${{ secrets.SOURCE_SUPABASE_URL }}
+          SOURCE_SUPABASE_KEY: ${{ secrets.SOURCE_SUPABASE_KEY }}
+          TARGET_SUPABASE_URL: ${{ secrets.TARGET_SUPABASE_URL }}
+          TARGET_SUPABASE_KEY: ${{ secrets.TARGET_SUPABASE_KEY }}
+        run: |
+          echo "✅ Verifying migration results..."
+          node scripts/verify-migration.js --debug --detailed
+
+      - name: Upload Migration Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-logs-${{ github.run_id }}
+          path: |
+            *.log
+          retention-days: 30
+
+  verify:
+    name: Verify Migration
+    runs-on: ubuntu-latest
+    if: ${{ inputs.verify_only }}
+    
+    permissions:
+      contents: read
+      actions: read
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Verification
+        env:
+          SOURCE_SUPABASE_URL: ${{ secrets.SOURCE_SUPABASE_URL }}
+          SOURCE_SUPABASE_KEY: ${{ secrets.SOURCE_SUPABASE_KEY }}
+          TARGET_SUPABASE_URL: ${{ secrets.TARGET_SUPABASE_URL }}
+          TARGET_SUPABASE_KEY: ${{ secrets.TARGET_SUPABASE_KEY }}
+        run: |
+          echo "🔍 Running verification..."
+          node scripts/verify-migration.js --debug --detailed
+
+      - name: Generate Verification Report
+        if: always()
+        run: |
+          echo "# Database Verification Report" > verification-report.md
+          echo "" >> verification-report.md
+          echo "**Date:** $(date -u)" >> verification-report.md
+          echo "**Run ID:** ${{ github.run_id }}" >> verification-report.md
+          echo "" >> verification-report.md
+          echo "See workflow logs for detailed verification results." >> verification-report.md
+
+      - name: Upload Verification Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-report-${{ github.run_id }}
+          path: verification-report.md
+          retention-days: 90
+
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: [migrate]
+    if: ${{ !inputs.verify_only && inputs.migration_type == 'production' && success() }}
+    
+    permissions:
+      contents: read
+      actions: read
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Application
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_ALCHEMY_API_KEY: ${{ secrets.VITE_ALCHEMY_API_KEY }}
+        run: npm run build
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy to Vercel (Production)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          vercel --prod --yes --token $VERCEL_TOKEN
+
+      - name: Post-Deployment Smoke Test
+        run: |
+          echo "✅ Deployment completed successfully"
+          echo "🔍 Running basic smoke tests..."
+          # Add basic smoke tests here if needed

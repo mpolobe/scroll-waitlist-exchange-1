@@ -6,7 +6,12 @@ Quick reference for Gemini AI integration in Africoin Wallet.
 
 **Project:** AfriCoin-Sovereign-Key  
 **Project Number:** 5780586642  
-**API Key:** `AIzaSyAqJaTc_LubzhXsohzA8Qi4PyQ-LtNPrhc`
+**API Key:** Get your API key from https://aistudio.google.com/
+
+1. Go to Google AI Studio: https://aistudio.google.com/
+2. Create or select your project
+3. Generate an API key
+4. Copy the API key for use in your environment variables
 
 ---
 
@@ -25,17 +30,18 @@ export CODEMAGIC_APP_ID="your_app_id"
 **Codemagic:**
 - Group: `africoin_env_vars`
 - Variable: `VITE_GEMINI_API_KEY`
-- Value: `AIzaSyAqJaTc_LubzhXsohzA8Qi4PyQ-LtNPrhc`
+- Value: Your actual Gemini API key (get from https://aistudio.google.com/)
 - Secure: ✅
 
 **GitHub:**
 - Secret: `VITE_GEMINI_API_KEY`
-- Value: `AIzaSyAqJaTc_LubzhXsohzA8Qi4PyQ-LtNPrhc`
+- Value: Your actual Gemini API key (get from https://aistudio.google.com/)
 
 **Local:**
 ```bash
-echo "VITE_GEMINI_API_KEY=AIzaSyAqJaTc_LubzhXsohzA8Qi4PyQ-LtNPrhc" >> .env.local
+echo "VITE_GEMINI_API_KEY=your_actual_gemini_api_key" >> .env.local
 ```
+Replace `your_actual_gemini_api_key` with your key from https://aistudio.google.com/
 
 ---
 
