@@ -2,6 +2,11 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "env": {
+    "VITE_SUPABASE_URL": "@supabase-url",
+    "VITE_SUPABASE_ANON_KEY": "@supabase-anon-key",
+    "EDGE_CONFIG": "@edge-config"
+  },
   "rewrites": [
     {
       "source": "/(.*)",

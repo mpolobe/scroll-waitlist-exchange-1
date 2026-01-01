@@ -13,7 +13,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Gemini API Configuration
-GEMINI_API_KEY="AIzaSyAqJaTc_LubzhXsohzA8Qi4PyQ-LtNPrhc"
+# Note: Replace with your actual Gemini API key from https://aistudio.google.com/
+GEMINI_API_KEY="${VITE_GEMINI_API_KEY:-your_gemini_api_key_here}"
 GEMINI_PROJECT_NAME="AfriCoin-Sovereign-Key"
 GEMINI_PROJECT_NUMBER="5780586642"
 
@@ -25,7 +26,22 @@ echo ""
 echo "📋 Gemini API Details:"
 echo "   Project: $GEMINI_PROJECT_NAME"
 echo "   Project Number: $GEMINI_PROJECT_NUMBER"
-echo "   API Key: ${GEMINI_API_KEY:0:20}..."
+echo "   API Key: ${GEMINI_API_KEY:0:10}... (provide via VITE_GEMINI_API_KEY environment variable)"
+echo ""
+
+# Validate API key is provided
+if [ "$GEMINI_API_KEY" = "your_gemini_api_key_here" ] || [ -z "$GEMINI_API_KEY" ]; then
+    echo -e "${RED}❌ ERROR: GEMINI_API_KEY not set${NC}"
+    echo ""
+    echo "Please set your Gemini API key:"
+    echo "  export VITE_GEMINI_API_KEY='your_actual_api_key'"
+    echo ""
+    echo "Or add it to .env.local:"
+    echo "  echo 'VITE_GEMINI_API_KEY=your_actual_api_key' >> .env.local"
+    echo ""
+    echo "Get your API key from: https://aistudio.google.com/"
+    exit 1
+fi
 echo ""
 
 # ============================================================================

@@ -208,11 +208,13 @@ node scripts/migrate-database.js [--debug] [--interactive] [--retry-count=N] [--
 ```bash
 SOURCE_SUPABASE_URL=https://famous-ai-project.supabase.co
 SOURCE_SUPABASE_KEY=service_role_key
-TARGET_SUPABASE_URL=https://vercel-project.supabase.co
+TARGET_SUPABASE_URL=https://llvprbmrnjvamjzavmhg.supabase.co
 TARGET_SUPABASE_KEY=service_role_key
 ```
 
 **What it does:**
+- Connects to source (Famous.AI) and target (Vercel) databases
+- Validates database connectivity before migration
 - Fetches data from source database
 - Inserts/updates data in target database
 - Processes in batches of 100 records
@@ -273,6 +275,8 @@ node scripts/migrate-database.js --debug --interactive --retry-count=5
 # Dry-run with debug output
 node scripts/migrate-database.js --dry-run --debug
 ```
+
+For detailed migration instructions, see [MIGRATION_GUIDE.md](../MIGRATION_GUIDE.md)
 
 **Tables Migrated:**
 - profiles
@@ -388,7 +392,7 @@ TARGET_SUPABASE_KEY=target_service_role_key
 # Set environment variables
 export SOURCE_SUPABASE_URL="..."
 export SOURCE_SUPABASE_KEY="..."
-export TARGET_SUPABASE_URL="..."
+export TARGET_SUPABASE_URL="https://llvprbmrnjvamjzavmhg.supabase.co"
 export TARGET_SUPABASE_KEY="..."
 
 # Run migration
@@ -413,6 +417,8 @@ node scripts/migrate-database.js --interactive
 # Combine interactive mode with debug logging
 node scripts/migrate-database.js --interactive --debug
 ```
+
+For detailed migration instructions, see [MIGRATION_GUIDE.md](../MIGRATION_GUIDE.md)
 
 ### Check Deployment Status
 
