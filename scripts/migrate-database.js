@@ -357,17 +357,17 @@ async function verifyDataIntegrity(sourceClient, targetClient, tableName) {
   console.log(`\n🔍 Verifying: ${tableName}`);
   
   try {
-    // Count records in source (only fetch id for efficiency)
+    // Count records in source (use select with head:true for count-only operations)
     const { count: sourceCount, error: sourceError } = await sourceClient
       .from(tableName)
-      .select('id', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true });
     
     if (sourceError) throw sourceError;
     
-    // Count records in target (only fetch id for efficiency)
+    // Count records in target (use select with head:true for count-only operations)
     const { count: targetCount, error: targetError } = await targetClient
       .from(tableName)
-      .select('id', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true });
     
     if (targetError) throw targetError;
     
