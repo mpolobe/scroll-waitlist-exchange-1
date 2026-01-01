@@ -8,6 +8,19 @@
 import { createClient } from '@vercel/edge-config';
 
 /**
+ * Database configuration structure from Edge Config
+ */
+interface DatabaseConfig {
+  supabase_url?: string;
+  url?: string;
+  supabase_key?: string;
+  key?: string;
+  service_role_key?: string;
+  token?: string;
+  project_id?: string;
+}
+
+/**
  * Initialize Edge Config client with the provided token
  */
 export function getEdgeConfigClient(connectionString?: string) {
@@ -26,11 +39,11 @@ export function getEdgeConfigClient(connectionString?: string) {
  * @param key - The configuration key to retrieve (default: 'famous-ai-database')
  * @returns Database configuration object
  */
-export async function getDatabaseConfig(key: string = 'famous-ai-database') {
+export async function getDatabaseConfig(key: string = 'famous-ai-database'): Promise<DatabaseConfig> {
   const client = getEdgeConfigClient();
   
   try {
-    const config = await client.get(key);
+    const config = await client.get<DatabaseConfig>(key);
     
     if (!config) {
       throw new Error(`Configuration key '${key}' not found in Edge Config`);
@@ -49,17 +62,11 @@ export async function getDatabaseConfig(key: string = 'famous-ai-database') {
 export async function getFamousAICredentials() {
   const config = await getDatabaseConfig('famous-ai-database');
   
-  if (typeof config !== 'object' || config === null) {
-    throw new Error('Invalid database configuration format');
-  }
-  
-  const dbConfig = config as Record<string, any>;
-  
   return {
-    url: dbConfig.supabase_url || dbConfig.url,
-    key: dbConfig.supabase_key || dbConfig.key || dbConfig.service_role_key,
-    token: dbConfig.token,
-    projectId: dbConfig.project_id
+    url: config.supabase_url || config.url || '',
+    key: config.supabase_key || config.key || config.service_role_key || '',
+    token: config.token,
+    projectId: config.project_id
   };
 }
 
