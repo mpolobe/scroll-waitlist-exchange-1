@@ -88,23 +88,31 @@ async function fetchAllData(client, tableName) {
   let allData = [];
   let from = 0;
   let hasMore = true;
-  let attempts = 0;
 
   while (hasMore) {
-    attempts++;
-    const { data, error } = await client
-      .from(tableName)
-      .select('*')
-      .range(from, from + BATCH_SIZE - 1);
+    let attempts = 0;
+    let success = false;
+    let data = null;
 
-    if (error) {
-      console.error(`❌ Error fetching from ${tableName} (attempt ${attempts}):`, error.message);
-      if (attempts < MAX_RETRIES) {
-        console.log(`   Retrying in ${RETRY_DELAY_MS}ms...`);
-        await delay(RETRY_DELAY_MS);
-        continue;
+    // Retry logic for current batch
+    while (attempts < MAX_RETRIES && !success) {
+      attempts++;
+      const result = await client
+        .from(tableName)
+        .select('*')
+        .range(from, from + BATCH_SIZE - 1);
+
+      if (result.error) {
+        console.error(`❌ Error fetching from ${tableName} (attempt ${attempts}):`, result.error.message);
+        if (attempts < MAX_RETRIES) {
+          console.log(`   Retrying in ${RETRY_DELAY_MS}ms...`);
+          await delay(RETRY_DELAY_MS);
+        } else {
+          throw result.error;
+        }
       } else {
-        throw error;
+        data = result.data;
+        success = true;
       }
     }
 
@@ -112,7 +120,6 @@ async function fetchAllData(client, tableName) {
       allData = allData.concat(data);
       from += BATCH_SIZE;
       console.log(`   Fetched ${allData.length} records so far...`);
-      attempts = 0; // Reset attempts on success
     }
 
     hasMore = data && data.length === BATCH_SIZE;
