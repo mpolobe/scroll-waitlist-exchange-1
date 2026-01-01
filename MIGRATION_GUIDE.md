@@ -345,7 +345,7 @@ If you encounter issues:
 2. Review [DEPLOYMENT.md](./DEPLOYMENT.md) for deployment guidance
 3. Check [Supabase Documentation](https://supabase.com/docs)
 4. Review migration script logs for details
-5. Contact support at support@africoin.com
+5. Contact your project administrator or open an issue on GitHub
 
 ## Additional Resources
 

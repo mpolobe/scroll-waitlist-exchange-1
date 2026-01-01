@@ -47,7 +47,7 @@ async function testConnection(url, key, name) {
     // Try to query a simple table (profiles is common)
     const { data, error, count } = await client
       .from('profiles')
-      .select('*', { count: 'exact', head: true });
+      .select('id', { count: 'exact', head: true });
     
     if (error) {
       // If table doesn't exist (PGRST116), connection is still valid

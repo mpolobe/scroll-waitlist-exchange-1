@@ -74,7 +74,7 @@ async function validateConnections(sourceClient, targetClient) {
   // Test source connection
   console.log('Testing source database connection...');
   try {
-    const { error: sourceError } = await sourceClient.from('profiles').select('count', { count: 'exact', head: true });
+    const { error: sourceError } = await sourceClient.from('profiles').select('id', { count: 'exact', head: true });
     if (sourceError && sourceError.code !== 'PGRST116') {
       console.error('❌ Source database connection failed:', sourceError.message);
       return false;
@@ -89,7 +89,7 @@ async function validateConnections(sourceClient, targetClient) {
   console.log('Testing target database connection...');
   console.log('Target URL:', process.env.TARGET_SUPABASE_URL);
   try {
-    const { error: targetError } = await targetClient.from('profiles').select('count', { count: 'exact', head: true });
+    const { error: targetError } = await targetClient.from('profiles').select('id', { count: 'exact', head: true });
     if (targetError && targetError.code !== 'PGRST116') {
       console.error('❌ Target database connection failed:', targetError.message);
       console.error('Please verify:');
