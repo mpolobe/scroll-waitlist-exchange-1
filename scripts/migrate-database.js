@@ -20,13 +20,17 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+// Note: readline-sync is intentionally used here for simple synchronous prompts in a CLI migration script.
+// This is appropriate for this use case as it's a one-time migration tool, not a production server.
+// The blocking behavior is acceptable and actually desired for interactive confirmation.
 import readlineSync from 'readline-sync';
 
 // Parse command line arguments
 const args = process.argv.slice(2);
 const DEBUG = args.includes('--debug');
 const INTERACTIVE = args.includes('--interactive');
-const RETRY_COUNT = parseInt(args.find(arg => arg.startsWith('--retry-count='))?.split('=')[1] || '3', 10);
+const retryArg = args.find(arg => arg.startsWith('--retry-count='))?.split('=')[1];
+const RETRY_COUNT = retryArg && !isNaN(parseInt(retryArg, 10)) ? parseInt(retryArg, 10) : 3;
 
 // Configuration
 const TABLES_TO_MIGRATE = [
@@ -102,7 +106,8 @@ async function retryOperation(operation, operationName, maxRetries = RETRY_COUNT
       warnLog(`Attempt ${attempt}/${maxRetries} failed for ${operationName}: ${error.message}`);
       
       if (attempt < maxRetries) {
-        const waitTime = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
+        // Exponential backoff with integer arithmetic: 1000, 2000, 4000, 8000, max 10000
+        const waitTime = Math.min(1000 << (attempt - 1), 10000);
         infoLog(`Waiting ${waitTime}ms before retry...`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
       }
