@@ -78,7 +78,7 @@ Main deployment script with database migration.
 ```
 
 ### `migrate-database.js`
-Database migration script that copies data from Famous.AI to Vercel.
+Database migration script that copies data from Famous.AI to Vercel Supabase deployment.
 
 **Usage:**
 ```bash
@@ -89,15 +89,24 @@ node scripts/migrate-database.js
 ```bash
 SOURCE_SUPABASE_URL=https://famous-ai-project.supabase.co
 SOURCE_SUPABASE_KEY=service_role_key
-TARGET_SUPABASE_URL=https://vercel-project.supabase.co
+TARGET_SUPABASE_URL=https://llvprbmrnjvamjzavmhg.supabase.co
 TARGET_SUPABASE_KEY=service_role_key
 ```
 
+**Features:**
+- Batch processing for large datasets (100 records per batch)
+- Automatic retry logic with configurable retries (MAX_RETRIES=3)
+- Comprehensive error handling and detailed error reporting
+- Timing metrics for each table and total migration time
+- Progress tracking with detailed logging at each step
+- Upsert strategy to handle existing records
+
 **What it does:**
-- Fetches data from source database
-- Inserts/updates data in target database
-- Processes in batches of 100 records
-- Provides detailed progress output
+- Validates required environment variables
+- Fetches data from source database with pagination
+- Inserts/updates data in target database using upsert
+- Retries failed operations automatically
+- Provides detailed progress output and summary report
 
 **Tables Migrated:**
 - profiles
@@ -122,14 +131,16 @@ VITE_ALCHEMY_API_KEY=your_alchemy_key
 
 ### Required for Migration
 
-Set these locally in `.env.local`:
+Set these locally in `.env.local` or as environment variables:
 
 ```bash
 SOURCE_SUPABASE_URL=source_database_url
 SOURCE_SUPABASE_KEY=source_service_role_key
-TARGET_SUPABASE_URL=target_database_url
+TARGET_SUPABASE_URL=https://llvprbmrnjvamjzavmhg.supabase.co
 TARGET_SUPABASE_KEY=target_service_role_key
 ```
+
+**Note:** The target Supabase project ID is `llvprbmrnjvamjzavmhg` hosted on Vercel.
 
 ## Common Tasks
 
