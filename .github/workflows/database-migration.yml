@@ -48,7 +48,7 @@ jobs:
           TARGET_SUPABASE_KEY: ${{ secrets.TARGET_SUPABASE_KEY }}
         run: |
           echo "🔍 Checking database connections..."
-          node scripts/verify-migration.js --debug || echo "Pre-check completed with warnings"
+          node scripts/verify-migration.js --debug
 
       - name: Run Database Migration
         if: inputs.migration_type == 'production'

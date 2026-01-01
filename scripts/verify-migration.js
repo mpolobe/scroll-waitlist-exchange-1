@@ -131,10 +131,10 @@ function initClients() {
 async function getTableStats(client, tableName) {
   debugLog(`Fetching statistics for ${tableName}...`);
   
-  // Get row count (only fetch id for efficiency)
+  // Get row count (use select without parameters for count-only operations)
   const { count, error: countError } = await client
     .from(tableName)
-    .select('id', { count: 'exact', head: true });
+    .select('*', { count: 'exact', head: true });
   
   if (countError) throw countError;
   
@@ -169,7 +169,11 @@ function compareSampleRecords(sourceRecords, targetRecords, tableName) {
     const sourceKeys = Object.keys(sourceRecords[0]).sort();
     const targetKeys = Object.keys(targetRecords[0]).sort();
     
-    if (JSON.stringify(sourceKeys) !== JSON.stringify(targetKeys)) {
+    // Compare arrays element by element
+    const keysMatch = sourceKeys.length === targetKeys.length && 
+                     sourceKeys.every((key, index) => key === targetKeys[index]);
+    
+    if (!keysMatch) {
       issues.push('Schema mismatch: columns differ between source and target');
       debugLog(`Source columns: ${sourceKeys.join(', ')}`);
       debugLog(`Target columns: ${targetKeys.join(', ')}`);
