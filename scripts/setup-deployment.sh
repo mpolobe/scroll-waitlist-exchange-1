@@ -190,6 +190,7 @@ if [ ! -f .env.local ]; then
     else
         log_error "$ERROR_ENV_SETUP_FAILED" ".env.example not found"
         echo -e "${RED}❌ .env.example not found${NC}"
+        echo -e "${YELLOW}Please create .env.example template file first or manually create .env.local${NC}"
         exit 1
     fi
 else
