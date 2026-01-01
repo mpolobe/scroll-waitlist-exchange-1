@@ -60,6 +60,7 @@ A modern cryptocurrency wallet application with AI-powered assistance, built wit
    - For production deployments, use your deployment platform's environment variable management (Vercel, Netlify, etc.)
    - For local development, use `.env.local` file (already in `.gitignore`)
    - The `.gitignore` file prevents `supabase.ts` from being tracked to avoid accidental credential commits
+   - If `src/lib/supabase.ts` doesn't exist, copy from `src/lib/supabase.ts.example`
    
    **Setting up Alchemy Account Kit:**
    1. Go to [Alchemy Dashboard](https://dashboard.alchemy.com/)
