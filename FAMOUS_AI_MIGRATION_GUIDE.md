@@ -13,6 +13,22 @@ If you're experiencing:
 
 This is because the **database migration has not been executed yet**. This guide will help you complete the migration.
 
+## Quick Setup (Fastest Way)
+
+Run the automated setup script:
+
+```bash
+./scripts/setup-migration.sh
+```
+
+This will:
+- Create `src/lib/supabase.ts` from template (if needed)
+- Create `.env.local` from example (if needed)
+- Install dependencies (if needed)
+- Show you next steps
+
+Then follow the on-screen instructions to add your credentials and run the migration.
+
 ## Prerequisites
 
 ### 1. Famous.AI Supabase Credentials
