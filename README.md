@@ -54,12 +54,12 @@ A modern cryptocurrency wallet application with AI-powered assistance, built wit
    ```
    
    **⚠️ Security Note for Supabase Configuration:**
-   - The `src/lib/supabase.ts` file is configured to use environment variables only
-   - **NEVER** hardcode credentials directly in `supabase.ts`
+   - The `src/lib/supabase.ts` file is designed to use environment variables for all credentials
+   - **NEVER** hardcode actual Supabase credentials directly in `supabase.ts`
    - All Supabase configuration must come from environment variables (`VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`)
    - For production deployments, use your deployment platform's environment variable management (Vercel, Netlify, etc.)
    - For local development, use `.env.local` file (already in `.gitignore`)
-   - The `.gitignore` file prevents `supabase.ts` from being tracked to avoid accidental credential commits
+   - The `.gitignore` entry for `supabase.ts` prevents accidental commits of modified configuration
    - If `src/lib/supabase.ts` doesn't exist, copy from `src/lib/supabase.ts.example`
    
    **Setting up Alchemy Account Kit:**
@@ -141,8 +141,11 @@ TARGET_SUPABASE_KEY=your_target_service_role_key
 
 **⚠️ Security Notes:**
 - The migration script validates all required environment variables before execution
-- Use service role keys for migration (never commit these to the repository)
-- Set these variables in your CI/CD platform or local environment
+- Use **service role keys** for migration (these have elevated permissions for direct database access)
+  - Service role keys bypass Row Level Security (RLS) policies
+  - Get these from your Supabase project dashboard under Settings > API
+  - **NEVER** commit service role keys to the repository or expose them client-side
+- Set these variables in your CI/CD platform or local environment (not in `.env` files committed to git)
 - See `.env.example` for reference configuration
 - The script includes built-in retry logic and error handling
 
