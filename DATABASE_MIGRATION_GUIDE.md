@@ -40,8 +40,8 @@ The migration process uses:
    {
      "supabase_url": "https://your-famous-ai-project.supabase.co",
      "supabase_key": "your-service-role-key",
-     "project_id": "6928d753085881c25b2cb3fb",
-     "token": "fd6b6ddc-e56a-441f-9b24-abca65e9eb37"
+     "project_id": "your-project-id",
+     "token": "your-famous-ai-token"
    }
    ```
 
@@ -51,7 +51,7 @@ The migration process uses:
    cp .env.example .env
    
    # Edit .env and add:
-   FAMOUS_AI_EDGE_CONFIG_TOKEN=fd6b6ddc-e56a-441f-9b24-abca65e9eb37
+   FAMOUS_AI_EDGE_CONFIG_TOKEN=your-famous-ai-token
    # Or use the full Edge Config connection string:
    EDGE_CONFIG=https://edge-config.vercel.com/your-config-id
    

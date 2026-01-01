@@ -65,6 +65,7 @@ async function getCredentialsFromEdgeConfig() {
 
   try {
     // Build connection string if token is provided
+    // Note: Default Vercel Edge Config URL pattern - can be overridden with EDGE_CONFIG
     const connectionString = edgeConfigConnection || 
       `https://edge-config.vercel.com/${edgeConfigToken}`;
     
