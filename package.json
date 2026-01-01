@@ -11,7 +11,10 @@
     "preview": "vite preview",
     "deploy": "./scripts/deploy-to-vercel.sh preview",
     "deploy:prod": "./scripts/deploy-to-vercel.sh production",
-    "migrate:db": "node scripts/migrate-database.js"
+    "migrate:db": "node scripts/migrate-database.js",
+    "verify:db": "node scripts/verify-db-connection.js"
+    "test:migration": "node scripts/test-migration-setup.js"
+    "verify:migration": "node scripts/verify-migration.js"
   },
   "dependencies": {
     "@account-kit/core": "^4.35.1",
@@ -52,6 +55,7 @@
     "@supabase/supabase-js": "^2.49.4",
     "@tanstack/react-query": "^5.56.2",
     "@types/uuid": "^10.0.0",
+    "@vercel/edge-config": "^1.4.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
