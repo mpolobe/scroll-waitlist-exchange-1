@@ -213,3 +213,38 @@ See `AFRICA_RAILWAYS_INTEGRATION.md` for:
 - **Blockchain**: Alchemy Account Kit (Sepolia testnet)
 - **AI**: Google Gemini Pro
 - **State**: React Context + TanStack Query
+
+## Database Migration
+
+This project uses Supabase for database management. The database is currently configured to use:
+- **Production Database**: https://llvprbmrnjvamjzavmhg.supabase.co (supabase-teal-window)
+
+### Migration from Famous.AI
+
+If you need to migrate data from Famous.AI to the Vercel Supabase instance:
+
+1. **Verify Database Connection**:
+   ```bash
+   npm run verify:db
+   ```
+
+2. **Run Migration**:
+   ```bash
+   npm run migrate:db
+   ```
+
+For detailed migration instructions, see [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md).
+
+### Migration Features
+- Automated data transfer between Supabase instances
+- Batch processing (100 records at a time)
+- Connection validation before migration
+- Upsert strategy (safe to run multiple times)
+- Detailed progress logging
+
+### Tables Migrated
+- User profiles and authentication
+- Admin roles and permissions
+- Loyalty points and transactions
+- Favorite posts
+- Support tickets
