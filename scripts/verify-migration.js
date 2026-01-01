@@ -131,14 +131,14 @@ function initClients() {
 async function getTableStats(client, tableName) {
   debugLog(`Fetching statistics for ${tableName}...`);
   
-  // Get row count
+  // Get row count (only fetch id for efficiency)
   const { count, error: countError } = await client
     .from(tableName)
-    .select('*', { count: 'exact', head: true });
+    .select('id', { count: 'exact', head: true });
   
   if (countError) throw countError;
   
-  // Get sample of first and last records
+  // Get sample of first records (select all fields for detailed comparison)
   const { data: firstRecords, error: firstError } = await client
     .from(tableName)
     .select('*')
