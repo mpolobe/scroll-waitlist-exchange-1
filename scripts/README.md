@@ -16,7 +16,15 @@ This will:
 - Create `.env.local` from template
 - Link to Vercel project
 
-### 2. Deploy
+### 2. Configure Supabase Environment Variables
+
+```bash
+./scripts/deploy-supabase-vars.sh
+```
+
+This will configure Supabase environment variables in Vercel. See [Supabase Environment Variables](#deploy-supabase-varssh) section for details.
+
+### 3. Deploy
 
 **Preview Deployment:**
 ```bash
@@ -28,13 +36,62 @@ npm run deploy
 npm run deploy:prod
 ```
 
-### 3. Migrate Database Only
+### 4. Migrate Database Only
 
 ```bash
 npm run migrate:db
 ```
 
 ## Scripts Overview
+
+### `deploy-supabase-vars.sh`
+**NEW** - Automated Supabase environment variable configuration for Vercel.
+
+**Usage:**
+```bash
+# Using environment variables (recommended for CI/CD)
+export SUPABASE_URL="https://llvprbmrnjvamjzavmhg.supabase.co"
+export SUPABASE_SECRET="your_supabase_anon_key"
+./scripts/deploy-supabase-vars.sh
+
+# Or use interactive prompts
+./scripts/deploy-supabase-vars.sh
+```
+
+**What it does:**
+- Validates Vercel CLI installation and authentication
+- Prompts for Supabase URL and Secret (or uses environment variables)
+- Allows selection of target environment (production, preview, development, or all)
+- Configures `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel
+- Verifies deployment
+
+**Security Notes:**
+- **Never hardcode secrets in the script file**
+- Script is added to `.gitignore` to prevent accidental commits
+- Use environment variables for CI/CD pipelines
+- Use the Supabase **Anon Key** (not Service Role Key) for frontend
+- Ensure Row Level Security (RLS) is enabled on all Supabase tables
+
+**Interactive Mode:**
+The script will prompt you for:
+1. Supabase URL (hidden after first 30 characters)
+2. Supabase Secret/Anon Key (hidden input for security)
+3. Target environment selection
+
+**Example Output:**
+```
+╔════════════════════════════════════════════════════════════╗
+║   Supabase Environment Variables Deployment               ║
+║   Africoin Wallet - Vercel Configuration                  ║
+╚════════════════════════════════════════════════════════════╝
+
+✅ Vercel CLI installed
+✅ Logged into Vercel as: user@example.com
+✅ Supabase credentials provided
+✅ Selected environment: production
+✅ VITE_SUPABASE_URL configured
+✅ VITE_SUPABASE_ANON_KEY configured
+```
 
 ### `setup-deployment.sh`
 Initial setup script for deployment environment.
