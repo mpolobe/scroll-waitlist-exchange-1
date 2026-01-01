@@ -64,8 +64,11 @@ src/
 
 ### Environment Variables
 ```env
-VITE_GEMINI_API_KEY=AIzaSyDYwx8F7_TEp_WuGBl_ngmvOzoMqQFMRR8
-VITE_ALCHEMY_API_KEY=4-gxorN-H4MhqZWrskRQ-
+# Get your API keys from the respective platforms:
+# Gemini: https://aistudio.google.com/
+# Alchemy: https://dashboard.alchemy.com/
+VITE_GEMINI_API_KEY=your_actual_gemini_api_key
+VITE_ALCHEMY_API_KEY=your_actual_alchemy_api_key
 ```
 
 ### API Keys Configured
