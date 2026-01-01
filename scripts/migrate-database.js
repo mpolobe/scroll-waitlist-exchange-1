@@ -8,13 +8,23 @@
  *   node scripts/migrate-database.js
  * 
  * Environment Variables Required:
- *   SOURCE_SUPABASE_URL - Famous.AI Supabase URL
- *   SOURCE_SUPABASE_KEY - Famous.AI Supabase service role key
- *   TARGET_SUPABASE_URL - Vercel deployment Supabase URL
- *   TARGET_SUPABASE_KEY - Vercel deployment Supabase service role key
+ *   Option 1: Use Edge Config (Recommended for Famous.AI)
+ *     EDGE_CONFIG - Vercel Edge Config connection string
+ *     or
+ *     FAMOUS_AI_EDGE_CONFIG_TOKEN - Famous.AI Edge Config token
+ *   
+ *   Option 2: Direct credentials
+ *     SOURCE_SUPABASE_URL - Famous.AI Supabase URL
+ *     SOURCE_SUPABASE_KEY - Famous.AI Supabase service role key
+ *   
+ *   Required for both options:
+ *     TARGET_SUPABASE_URL - Vercel deployment Supabase URL
+ *     TARGET_SUPABASE_KEY - Vercel deployment Supabase service role key
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createClient as createEdgeConfigClient } from '@vercel/edge-config';
+import readline from 'readline';
 
 // Configuration
 const TABLES_TO_MIGRATE = [
@@ -29,33 +39,102 @@ const TABLES_TO_MIGRATE = [
 
 const BATCH_SIZE = 100;
 
-// Validate environment variables
-function validateEnv() {
-  const required = [
-    'SOURCE_SUPABASE_URL',
-    'SOURCE_SUPABASE_KEY',
-    'TARGET_SUPABASE_URL',
-    'TARGET_SUPABASE_KEY'
-  ];
+// Create readline interface for user prompts
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
-  const missing = required.filter(key => !process.env[key]);
+// Prompt user for confirmation
+function promptUser(question) {
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      resolve(answer.toLowerCase().trim() === 'yes' || answer.toLowerCase().trim() === 'y');
+    });
+  });
+}
+
+// Retrieve Famous.AI credentials from Edge Config
+async function getCredentialsFromEdgeConfig() {
+  const edgeConfigToken = process.env.FAMOUS_AI_EDGE_CONFIG_TOKEN;
+  const edgeConfigConnection = process.env.EDGE_CONFIG;
   
-  if (missing.length > 0) {
-    console.error('❌ Missing required environment variables:');
-    missing.forEach(key => console.error(`   - ${key}`));
-    console.error('\nPlease set these variables before running the script.');
-    process.exit(1);
+  if (!edgeConfigToken && !edgeConfigConnection) {
+    return null;
+  }
+
+  try {
+    // Build connection string if token is provided
+    const connectionString = edgeConfigConnection || 
+      `https://edge-config.vercel.com/${edgeConfigToken}`;
+    
+    const client = createEdgeConfigClient(connectionString);
+    
+    // Try to get database configuration
+    const config = await client.get('famous-ai-database');
+    
+    if (!config || typeof config !== 'object') {
+      console.log('⚠️  No database configuration found in Edge Config');
+      return null;
+    }
+
+    console.log('✅ Retrieved credentials from Edge Config');
+    
+    return {
+      url: config.supabase_url || config.url,
+      key: config.supabase_key || config.key || config.service_role_key
+    };
+  } catch (error) {
+    console.error('⚠️  Failed to retrieve from Edge Config:', error.message);
+    return null;
   }
 }
 
-// Initialize Supabase clients
-function initClients() {
-  const sourceClient = createClient(
-    process.env.SOURCE_SUPABASE_URL,
-    process.env.SOURCE_SUPABASE_KEY
-  );
+// Validate environment variables
+async function validateEnv() {
+  console.log('🔍 Validating configuration...\n');
+  
+  // Check if we can get credentials from Edge Config
+  const edgeConfigCreds = await getCredentialsFromEdgeConfig();
+  
+  let sourceUrl, sourceKey;
+  
+  if (edgeConfigCreds) {
+    sourceUrl = edgeConfigCreds.url;
+    sourceKey = edgeConfigCreds.key;
+    console.log('✅ Using Edge Config for source database credentials');
+  } else {
+    sourceUrl = process.env.SOURCE_SUPABASE_URL;
+    sourceKey = process.env.SOURCE_SUPABASE_KEY;
+    
+    if (!sourceUrl || !sourceKey) {
+      console.error('❌ Missing source database credentials.');
+      console.error('   Please provide either:');
+      console.error('   - EDGE_CONFIG or FAMOUS_AI_EDGE_CONFIG_TOKEN (preferred)');
+      console.error('   - SOURCE_SUPABASE_URL and SOURCE_SUPABASE_KEY');
+      rl.close();
+      process.exit(1);
+    }
+    console.log('✅ Using environment variables for source database');
+  }
+  
+  if (!process.env.TARGET_SUPABASE_URL || !process.env.TARGET_SUPABASE_KEY) {
+    console.error('❌ Missing target database credentials:');
+    console.error('   - TARGET_SUPABASE_URL');
+    console.error('   - TARGET_SUPABASE_KEY');
+    rl.close();
+    process.exit(1);
+  }
+  
+  console.log('✅ All required credentials found\n');
+  
+  return { sourceUrl, sourceKey };
+}
 
-  const targetClient = createClient(
+// Initialize Supabase clients
+function initClients(sourceUrl, sourceKey) {
+  const sourceClient = createSupabaseClient(sourceUrl, sourceKey);
+  const targetClient = createSupabaseClient(
     process.env.TARGET_SUPABASE_URL,
     process.env.TARGET_SUPABASE_KEY
   );
@@ -162,12 +241,36 @@ async function migrateTable(sourceClient, targetClient, tableName) {
 
 // Main migration function
 async function migrate() {
-  console.log('🚀 Starting database migration...\n');
-  console.log('Source:', process.env.SOURCE_SUPABASE_URL);
-  console.log('Target:', process.env.TARGET_SUPABASE_URL);
+  console.log('🚀 Starting database migration from Famous.AI to Vercel...\n');
+  
+  // Display migration information
+  console.log('📋 Migration Details:');
+  console.log('   Tables to migrate:', TABLES_TO_MIGRATE.length);
+  console.log('   Batch size:', BATCH_SIZE);
+  console.log('   Target:', process.env.TARGET_SUPABASE_URL);
   console.log('');
 
-  const { sourceClient, targetClient } = initClients();
+  // Safety prompt
+  console.log('⚠️  SAFETY CHECK');
+  console.log('═'.repeat(50));
+  console.log('This will migrate data from Famous.AI to your Vercel database.');
+  console.log('Existing data in the target database will be updated or preserved.');
+  console.log('Tables:', TABLES_TO_MIGRATE.join(', '));
+  console.log('═'.repeat(50));
+  console.log('');
+
+  const confirmed = await promptUser('Do you want to proceed? (yes/no): ');
+  
+  if (!confirmed) {
+    console.log('\n❌ Migration cancelled by user.');
+    rl.close();
+    process.exit(0);
+  }
+
+  console.log('\n✅ Starting migration...\n');
+
+  const credentials = await validateEnv();
+  const { sourceClient, targetClient } = initClients(credentials.sourceUrl, credentials.sourceKey);
   const results = [];
 
   // Migrate each table
@@ -206,22 +309,28 @@ async function migrate() {
   console.log(`Failed tables: ${failedTables}/${results.length}`);
   console.log('='.repeat(50));
 
+  rl.close();
+
   if (failedTables > 0) {
     console.log('\n⚠️  Some tables failed to migrate. Check the errors above.');
     process.exit(1);
   } else {
     console.log('\n🎉 Migration completed successfully!');
+    console.log('\n📝 Next Steps:');
+    console.log('   1. Update your .env file with new database credentials');
+    console.log('   2. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
+    console.log('   3. Deploy your application to Vercel');
   }
 }
 
 // Run migration
 (async () => {
   try {
-    validateEnv();
     await migrate();
   } catch (error) {
     console.error('\n❌ Migration failed:', error.message);
     console.error(error.stack);
+    rl.close();
     process.exit(1);
   }
 })();
