@@ -12,7 +12,8 @@
     "deploy": "./scripts/deploy-to-vercel.sh preview",
     "deploy:prod": "./scripts/deploy-to-vercel.sh production",
     "migrate:db": "node scripts/migrate-database.js",
-    "verify:migration": "node scripts/verify-migration.js"
+    "verify:migration": "node scripts/verify-migration.js",
+    "check:migration": "node scripts/check-migration-setup.js"
   },
   "dependencies": {
     "@account-kit/core": "^4.35.1",
