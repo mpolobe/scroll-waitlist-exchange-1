@@ -1,28 +1,31 @@
-name: NodeJS with Webpack
+name: Build with webpack
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - secure-env-setup
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - secure-env-setup
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
-
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 16
 
-    - name: Build
-      run: |
-        npm install
-        npx webpack
+    - name: Install dependencies
+      run: npm install
+
+    - name: Install webpack-cli globally
+      run: npm install -g webpack-cli
+
+    - name: Build project
+      run: npx webpack-cli
