@@ -32,13 +32,14 @@ Create a `.env.local` file with your credentials:
 SOURCE_SUPABASE_URL=https://your-famous-ai-project.supabase.co
 SOURCE_SUPABASE_KEY=your-famous-ai-service-role-key
 
-# Target Database (Vercel Deployment)
-TARGET_SUPABASE_URL=https://your-vercel-project.supabase.co
+# Target Database (Vercel Deployment - supabase-teal-window)
+# Project URL: https://llvprbmrnjvamjzavmhg.supabase.co
+TARGET_SUPABASE_URL=https://llvprbmrnjvamjzavmhg.supabase.co
 TARGET_SUPABASE_KEY=your-vercel-service-role-key
 
 # Application Environment Variables
 VITE_ALCHEMY_API_KEY=your_alchemy_api_key
-VITE_SUPABASE_URL=https://your-vercel-project.supabase.co
+VITE_SUPABASE_URL=https://llvprbmrnjvamjzavmhg.supabase.co
 VITE_SUPABASE_ANON_KEY=your_vercel_anon_key
 VITE_GEMINI_API_KEY=your_gemini_api_key
 ```
@@ -79,12 +80,14 @@ vercel --prod
 # Set environment variables
 export SOURCE_SUPABASE_URL="https://your-famous-ai-project.supabase.co"
 export SOURCE_SUPABASE_KEY="your-famous-ai-service-role-key"
-export TARGET_SUPABASE_URL="https://your-vercel-project.supabase.co"
+export TARGET_SUPABASE_URL="https://llvprbmrnjvamjzavmhg.supabase.co"
 export TARGET_SUPABASE_KEY="your-vercel-service-role-key"
 
 # Run migration
 node scripts/migrate-database.js
 ```
+
+**Note:** For detailed migration instructions, see [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)
 
 ## Database Migration Details
 
