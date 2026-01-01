@@ -10,8 +10,12 @@
  * Environment Variables Required:
  *   SOURCE_SUPABASE_URL - Famous.AI Supabase URL
  *   SOURCE_SUPABASE_KEY - Famous.AI Supabase service role key
- *   TARGET_SUPABASE_URL - Vercel deployment Supabase URL
+ *   TARGET_SUPABASE_URL - Vercel deployment Supabase URL (https://llvprbmrnjvamjzavmhg.supabase.co)
  *   TARGET_SUPABASE_KEY - Vercel deployment Supabase service role key
+ * 
+ * Famous.AI Configuration:
+ *   Edge Configuration Name: Famous-AI
+ *   Token: fd6b6ddc-e56a-441f-9b24-abca65e9eb37
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -61,6 +65,47 @@ function initClients() {
   );
 
   return { sourceClient, targetClient };
+}
+
+// Validate database connections
+async function validateConnections(sourceClient, targetClient) {
+  console.log('🔍 Validating database connections...\n');
+  
+  // Test source connection
+  console.log('Testing source database connection...');
+  try {
+    const { error: sourceError } = await sourceClient.from('profiles').select('count', { count: 'exact', head: true });
+    if (sourceError && sourceError.code !== 'PGRST116') {
+      console.error('❌ Source database connection failed:', sourceError.message);
+      return false;
+    }
+    console.log('✅ Source database connection successful\n');
+  } catch (error) {
+    console.error('❌ Source database connection failed:', error.message);
+    return false;
+  }
+
+  // Test target connection
+  console.log('Testing target database connection...');
+  console.log('Target URL:', process.env.TARGET_SUPABASE_URL);
+  try {
+    const { error: targetError } = await targetClient.from('profiles').select('count', { count: 'exact', head: true });
+    if (targetError && targetError.code !== 'PGRST116') {
+      console.error('❌ Target database connection failed:', targetError.message);
+      console.error('Please verify:');
+      console.error('  1. The Supabase project is active (not paused)');
+      console.error('  2. The service role key is correct');
+      console.error('  3. The URL is correct: https://llvprbmrnjvamjzavmhg.supabase.co');
+      return false;
+    }
+    console.log('✅ Target database connection successful\n');
+  } catch (error) {
+    console.error('❌ Target database connection failed:', error.message);
+    console.error('Please verify the Supabase project is unpaused and accessible.');
+    return false;
+  }
+
+  return true;
 }
 
 // Fetch all data from a table with pagination
@@ -168,6 +213,14 @@ async function migrate() {
   console.log('');
 
   const { sourceClient, targetClient } = initClients();
+  
+  // Validate connections before proceeding
+  const connectionsValid = await validateConnections(sourceClient, targetClient);
+  if (!connectionsValid) {
+    console.error('\n❌ Database connection validation failed. Aborting migration.');
+    process.exit(1);
+  }
+
   const results = [];
 
   // Migrate each table
