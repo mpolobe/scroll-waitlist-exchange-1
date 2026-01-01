@@ -56,7 +56,90 @@ node scripts/verify-migration.js --detailed
 node scripts/verify-migration.js --debug --detailed
 ```
 
+### 6. Check Links and Endpoints
+
+```bash
+npm run check:links
+
+# With verbose output
+node scripts/check-links.js --verbose
+```
+
 ## Scripts Overview
+
+### `check-links.js`
+**NEW** - Link validation and endpoint verification script.
+
+**Usage:**
+```bash
+# Standard check
+npm run check:links
+
+# Verbose mode with detailed output
+node scripts/check-links.js --verbose
+```
+
+**What it does:**
+- Validates all external API endpoints documented in the codebase
+- Checks accessibility of documentation links
+- Verifies database migration infrastructure
+- Checks Supabase configuration files
+- Generates comprehensive validation report
+
+**Categories Checked:**
+- Africa Railways API
+- Merchant Payment API
+- Alchemy services
+- Supabase documentation
+- Google Cloud Platform
+- BrowserStack testing services
+- Google Play Console
+- Apple Developer Portal
+- Documentation sites (Capacitor, Vercel, etc.)
+- Social media links
+- Blockchain explorers
+
+**Output:**
+- Overall summary of link checks
+- Results by category
+- List of failed links (if any)
+- Database migration status
+- Supabase configuration status
+
+**Example:**
+```bash
+$ npm run check:links
+
+🔍 Starting link validation...
+Total links to check: 24
+
+📊 Link Validation Report
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Overall Summary:
+  Total Links Checked: 24
+  ✓ Accessible: 17
+  🔒 Requires Authentication: 5
+  ⏭️  Skipped (API endpoints): 2
+  ✗ Failed: 0
+
+✅ All public links are accessible!
+
+📊 Database Migration Status Check
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Required Migration Files:
+  ✓ Migration Verification Report: Present
+  ✓ Migration Runbook: Present
+  ✓ Migration Script: Present
+  ✓ Verification Script: Present
+
+✅ All required migration files are present
+✅ Migration scripts are ready to use
+```
+
+**Notes:**
+- API endpoints requiring authentication will be marked as "requires auth" or "skipped"
+- Network timeouts are set to 10 seconds per link
+- Failed links don't necessarily indicate a problem (may be behind authentication)
 
 ### `deploy-supabase-vars.sh`
 **NEW** - Automated Supabase environment variable configuration for Vercel.
