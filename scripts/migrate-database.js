@@ -5,12 +5,13 @@
  * Copies data from Famous.AI Supabase to Vercel deployment Supabase
  * 
  * Usage:
- *   node scripts/migrate-database.js [--debug] [--interactive] [--retry-count=3]
+ *   node scripts/migrate-database.js [--debug] [--interactive] [--retry-count=3] [--dry-run]
  * 
  * Options:
  *   --debug          Enable detailed debug logging
  *   --interactive    Enable step-by-step interactive prompts
  *   --retry-count=N  Set number of retries for failed operations (default: 3)
+ *   --dry-run        Fetch data but don't insert (test mode)
  * 
  * Environment Variables Required:
  *   SOURCE_SUPABASE_URL - Famous.AI Supabase URL
@@ -29,6 +30,7 @@ import readlineSync from 'readline-sync';
 const args = process.argv.slice(2);
 const DEBUG = args.includes('--debug');
 const INTERACTIVE = args.includes('--interactive');
+const DRY_RUN = args.includes('--dry-run');
 const retryArg = args.find(arg => arg.startsWith('--retry-count='))?.split('=')[1];
 const RETRY_COUNT = retryArg && !isNaN(parseInt(retryArg, 10)) ? parseInt(retryArg, 10) : 3;
 
@@ -237,6 +239,12 @@ async function insertData(client, tableName, data) {
     return { success: true, count: 0, failed: 0 };
   }
 
+  if (DRY_RUN) {
+    infoLog(`[DRY-RUN] Would insert ${data.length} records into ${tableName}`);
+    console.log(`🧪 [DRY-RUN] Would insert ${data.length} records into ${tableName}`);
+    return { success: true, count: data.length, failed: 0, duration: Date.now() - startTime };
+  }
+
   infoLog(`📤 Inserting ${data.length} records into ${tableName}...`);
   
   let inserted = 0;
@@ -342,12 +350,69 @@ async function migrateTable(sourceClient, targetClient, tableName) {
   }
 }
 
+// Verify data integrity between source and target
+async function verifyDataIntegrity(sourceClient, targetClient, tableName) {
+  const startTime = Date.now();
+  infoLog(`🔍 Verifying data integrity for ${tableName}...`);
+  console.log(`\n🔍 Verifying: ${tableName}`);
+  
+  try {
+    // Count records in source (use select with head:true for count-only operations)
+    const { count: sourceCount, error: sourceError } = await sourceClient
+      .from(tableName)
+      .select('*', { count: 'exact', head: true });
+    
+    if (sourceError) throw sourceError;
+    
+    // Count records in target (use select with head:true for count-only operations)
+    const { count: targetCount, error: targetError } = await targetClient
+      .from(tableName)
+      .select('*', { count: 'exact', head: true });
+    
+    if (targetError) throw targetError;
+    
+    const duration = Date.now() - startTime;
+    const match = sourceCount === targetCount;
+    
+    if (match) {
+      infoLog(`✅ Verification passed for ${tableName}: ${sourceCount} records match`);
+      console.log(`   ✅ ${sourceCount} records (matched)`);
+    } else {
+      warnLog(`⚠️  Count mismatch for ${tableName}: source=${sourceCount}, target=${targetCount}`);
+      console.log(`   ⚠️  Mismatch: source=${sourceCount}, target=${targetCount}`);
+    }
+    
+    return {
+      table: tableName,
+      sourceCount,
+      targetCount,
+      match,
+      duration
+    };
+  } catch (error) {
+    errorLog(`Failed to verify ${tableName}`, ERROR_CODES.FETCH_ERROR, { error: error.message });
+    return {
+      table: tableName,
+      sourceCount: 0,
+      targetCount: 0,
+      match: false,
+      error: error.message,
+      duration: Date.now() - startTime
+    };
+  }
+}
+
 // Main migration function
 async function migrate() {
   const migrationStartTime = Date.now();
   
   console.log('🚀 Starting database migration...\n');
   infoLog('🚀 Database migration started');
+  
+  if (DRY_RUN) {
+    console.log('🧪 DRY-RUN MODE - No data will be inserted\n');
+    infoLog('DRY-RUN MODE enabled - testing only');
+  }
   
   // Log configuration (excluding sensitive data)
   const sourceUrl = process.env.SOURCE_SUPABASE_URL;
@@ -364,7 +429,8 @@ async function migrate() {
     retryCount: RETRY_COUNT,
     tablesCount: TABLES_TO_MIGRATE.length,
     debugMode: DEBUG,
-    interactiveMode: INTERACTIVE
+    interactiveMode: INTERACTIVE,
+    dryRun: DRY_RUN
   });
   
   if (INTERACTIVE) {
@@ -382,6 +448,18 @@ async function migrate() {
   for (const tableName of TABLES_TO_MIGRATE) {
     const result = await migrateTable(sourceClient, targetClient, tableName);
     results.push(result);
+  }
+  
+  // Verify data integrity after migration
+  console.log('\n' + '='.repeat(50));
+  console.log('🔍 Verifying Data Integrity');
+  console.log('='.repeat(50));
+  infoLog('Starting data integrity verification...');
+  
+  const verificationResults = [];
+  for (const tableName of TABLES_TO_MIGRATE) {
+    const verification = await verifyDataIntegrity(sourceClient, targetClient, tableName);
+    verificationResults.push(verification);
   }
 
   // Print summary
@@ -436,6 +514,33 @@ async function migrate() {
   console.log(`Total migration time: ${migrationDuration}ms (${(migrationDuration / 1000).toFixed(2)}s)`);
   console.log('='.repeat(50));
 
+  // Print verification summary
+  console.log('\n' + '='.repeat(50));
+  console.log('📊 Verification Summary');
+  console.log('='.repeat(50));
+  
+  let verifiedTables = 0;
+  let verificationErrors = 0;
+  
+  verificationResults.forEach(result => {
+    const status = result.match ? '✅' : '⚠️';
+    const errorInfo = result.error ? ` (Error: ${result.error})` : '';
+    console.log(`${status} ${result.table}: Source=${result.sourceCount}, Target=${result.targetCount}${errorInfo}`);
+    
+    if (result.match) {
+      verifiedTables++;
+    } else if (result.error) {
+      verificationErrors++;
+    }
+  });
+  
+  console.log('─'.repeat(50));
+  console.log(`Verified tables: ${verifiedTables}/${verificationResults.length}`);
+  if (verificationErrors > 0) {
+    console.log(`Verification errors: ${verificationErrors}`);
+  }
+  console.log('='.repeat(50));
+
   infoLog('Migration completed', {
     totalRecords,
     totalFailed,
@@ -443,6 +548,8 @@ async function migrate() {
     failedTables,
     skippedTables,
     totalTables: results.length,
+    verifiedTables,
+    verificationErrors,
     duration: migrationDuration
   });
 
@@ -450,9 +557,13 @@ async function migrate() {
     warnLog('Some tables failed to migrate. Check the errors above.');
     console.log('\n⚠️  Some tables failed to migrate. Check the errors above.');
     process.exit(1);
+  } else if (verifiedTables < TABLES_TO_MIGRATE.length - skippedTables) {
+    warnLog('Some tables failed verification. Check the warnings above.');
+    console.log('\n⚠️  Some tables failed verification. Please review the data manually.');
+    process.exit(1);
   } else {
     infoLog('🎉 Migration completed successfully!');
-    console.log('\n🎉 Migration completed successfully!');
+    console.log('\n🎉 Migration and verification completed successfully!');
   }
 }
 
@@ -467,6 +578,9 @@ async function migrate() {
     }
     if (INTERACTIVE) {
       console.log('🎮 INTERACTIVE MODE ENABLED');
+    }
+    if (DRY_RUN) {
+      console.log('🧪 DRY-RUN MODE ENABLED (no data will be inserted)');
     }
     console.log(`🔄 Retry count: ${RETRY_COUNT}\n`);
     
