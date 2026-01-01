@@ -18,7 +18,8 @@ node_modules/
 .env.production.local
 
 # Supabase configuration (prevent accidental credential commits)
-src/lib/supabase.ts
+# Note: supabase.ts is now committed as it uses environment variables
+# src/lib/supabase.ts
 
 # Logs
 npm-debug.log*
