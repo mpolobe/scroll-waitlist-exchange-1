@@ -60,3 +60,6 @@ ios/App/Podfile.lock
 # android/ - Pre-configured build files
 # ios/ - Pre-configured build files  
 # capacitor.config.ts - Configuration file
+
+# Deployment scripts with hardcoded credentials (NEVER COMMIT!)
+scripts/deploy-supabase-vars.sh
