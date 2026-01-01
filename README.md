@@ -25,6 +25,23 @@ A modern cryptocurrency wallet application with AI-powered assistance, built wit
 - Twilio account (optional, for SMS/phone auth)
 - Africa Railways API key (optional, for real railway bookings)
 
+## Database Migration
+
+If you're migrating from Famous.AI to Vercel, see the comprehensive [Database Migration Guide](DATABASE_MIGRATION_GUIDE.md) for detailed instructions on:
+- Using Vercel Edge Config for secure credential management
+- Batch processing with safety prompts
+- Table migration and data integrity
+- Post-migration configuration
+
+Quick start:
+```bash
+# Test migration setup
+npm run test:migration
+
+# Run the migration
+npm run migrate:db
+```
+
 ## Setup
 
 1. **Install dependencies:**
