@@ -16,7 +16,7 @@
     "check:migration": "node scripts/check-migration-setup.js",
     "verify:db": "node scripts/verify-db-connection.js",
     "test:migration": "node scripts/test-migration-setup.js",
-    "verify:migration": "node scripts/verify-migration.js"
+    "verify:migration": "node scripts/verify-migration.js",
     "start": "node index.js",
     "test": "jest",
     "migration-setup": "node scripts/check-migration-setup.js",
