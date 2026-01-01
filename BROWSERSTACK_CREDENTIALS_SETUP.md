@@ -8,14 +8,19 @@
 
 ## BrowserStack Credentials
 
-You have the following BrowserStack credentials:
+You need to configure your BrowserStack credentials. Get them from your BrowserStack account:
+
+1. Go to: https://www.browserstack.com/accounts/settings
+2. Copy your username and access key
+3. Set them as environment variables
 
 ```bash
-BROWSERSTACK_API_KEY="YkRwgayd5JiTUZWKBCNp"
-BROWSERSTACK_URL="http://benjaminmpolokos_dzbone.browserstack.com"
+# Example format (replace with your actual credentials):
+BROWSERSTACK_API_KEY="your_browserstack_access_key"
+BROWSERSTACK_URL="http://your_username.browserstack.com"
 ```
 
-**Username extracted from URL:** `benjaminmpolokos_dzbone`
+**Note:** Never commit these credentials to the repository. Always use environment variables.
 
 ---
 
@@ -33,13 +38,13 @@ This is the simplest approach as it extracts the username automatically from the
    
    **Variable 1:**
    - Name: `BROWSERSTACK_URL`
-   - Value: `http://benjaminmpolokos_dzbone.browserstack.com`
+   - Value: `http://your_username.browserstack.com` (replace with your actual BrowserStack URL)
    - Secure: ✅ (check this box)
    - Group: Leave empty or create "browserstack_credentials"
 
    **Variable 2:**
    - Name: `BROWSERSTACK_API_KEY`
-   - Value: `YkRwgayd5JiTUZWKBCNp`
+   - Value: Your actual BrowserStack access key (get from https://www.browserstack.com/accounts/settings)
    - Secure: ✅ (check this box)
    - Group: Leave empty or create "browserstack_credentials"
 
@@ -57,13 +62,13 @@ If you prefer to set the username explicitly:
    
    **Variable 1:**
    - Name: `BROWSERSTACK_USERNAME`
-   - Value: `benjaminmpolokos_dzbone`
+   - Value: Your BrowserStack username (get from https://www.browserstack.com/accounts/settings)
    - Secure: ✅ (check this box)
    - Group: Leave empty or create "browserstack_credentials"
 
    **Variable 2:**
    - Name: `BROWSERSTACK_API_KEY`
-   - Value: `YkRwgayd5JiTUZWKBCNp`
+   - Value: Your actual BrowserStack access key (get from https://www.browserstack.com/accounts/settings)
    - Secure: ✅ (check this box)
    - Group: Leave empty or create "browserstack_credentials"
 
@@ -134,8 +139,8 @@ Test at: http://benjaminmpolokos_dzbone.browserstack.com
 You can test the credentials locally before setting them in Codemagic:
 
 ```bash
-# Test credentials
-curl -u "benjaminmpolokos_dzbone:YkRwgayd5JiTUZWKBCNp" \
+# Test credentials (replace with your actual credentials)
+curl -u "your_username:your_access_key" \
   https://api-cloud.browserstack.com/app-automate/plan.json
 
 # Expected response: Your BrowserStack plan details
@@ -144,8 +149,8 @@ curl -u "benjaminmpolokos_dzbone:YkRwgayd5JiTUZWKBCNp" \
 ### Upload Test APK
 
 ```bash
-# Upload a test APK
-curl -u "benjaminmpolokos_dzbone:YkRwgayd5JiTUZWKBCNp" \
+# Upload a test APK (replace with your actual credentials)
+curl -u "your_username:your_access_key" \
   -X POST "https://api-cloud.browserstack.com/app-automate/upload" \
   -F "file=@android/app/build/outputs/apk/debug/app-debug.apk"
 
@@ -158,12 +163,11 @@ curl -u "benjaminmpolokos_dzbone:YkRwgayd5JiTUZWKBCNp" \
 
 ### BrowserStack App Live
 
-1. Go to: http://benjaminmpolokos_dzbone.browserstack.com
-2. Or: https://app-live.browserstack.com/
-3. Sign in with your BrowserStack account
-4. Find your uploaded APK in the list
-5. Select a device to test on
-6. Install and test the app
+1. Go to: https://app-live.browserstack.com/
+2. Sign in with your BrowserStack account
+3. Find your uploaded APK in the list
+4. Select a device to test on
+5. Install and test the app
 
 ### BrowserStack App Automate
 
@@ -278,9 +282,11 @@ This approach:
 
 **Credentials to add:**
 ```
-BROWSERSTACK_URL = http://benjaminmpolokos_dzbone.browserstack.com
-BROWSERSTACK_API_KEY = YkRwgayd5JiTUZWKBCNp
+BROWSERSTACK_URL = http://your_username.browserstack.com
+BROWSERSTACK_API_KEY = your_access_key
 ```
+
+Get these from: https://www.browserstack.com/accounts/settings
 
 **Where to add:** Codemagic → App → Environment variables
 
