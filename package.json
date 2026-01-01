@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "jest"
+    "test": "jest",
+    "migration-setup": "node scripts/check-migration-setup.js",
+    "verify:db": "node scripts/verify-db-connection.js"
   },
   "repository": {
     "type": "git",
