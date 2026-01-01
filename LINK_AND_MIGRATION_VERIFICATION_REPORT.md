@@ -42,8 +42,10 @@ All required database migration files are present and ready for use:
 
 | File | Status | Notes |
 |------|--------|-------|
-| `src/lib/supabase.ts` | ✅ Created | Configured from template |
-| `src/lib/supabase.ts.example` | ✅ Present | Template file for reference |
+| `src/lib/supabase.ts` | ✅ Created | Configured from template (ignored by git for security) |
+| `src/lib/supabase.ts.example` | ✅ Present | Template file for reference (committed to repo) |
+
+**Note:** `src/lib/supabase.ts` is intentionally excluded from version control via `.gitignore` to prevent accidental credential commits. Users must create this file from the example template before running the application.
 
 ### Database Migration Details
 
@@ -432,7 +434,9 @@ For production deployment, manually verify these critical links:
 1. `ENDPOINTS_DOCUMENTATION.md` - Complete API endpoint reference
 2. `LINK_AND_MIGRATION_VERIFICATION_REPORT.md` - This comprehensive report
 3. `scripts/check-links.js` - Link validation utility
-4. `src/lib/supabase.ts` - Supabase configuration file
+4. `src/lib/supabase.ts` - Supabase configuration file (created locally, excluded from git for security)
+
+**Note:** The `src/lib/supabase.ts` file is created from `src/lib/supabase.ts.example` and is intentionally excluded from version control to prevent credential leaks. Users must create this file locally before running the application.
 
 **Verified:**
 - ✅ Database migration scripts present and functional
