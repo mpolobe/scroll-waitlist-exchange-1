@@ -5,12 +5,13 @@
  * Copies data from Famous.AI Supabase to Vercel deployment Supabase
  * 
  * Usage:
- *   node scripts/migrate-database.js [--debug] [--interactive] [--retry-count=3]
+ *   node scripts/migrate-database.js [--debug] [--interactive] [--retry-count=3] [--dry-run]
  * 
  * Options:
  *   --debug          Enable detailed debug logging
  *   --interactive    Enable step-by-step interactive prompts
  *   --retry-count=N  Set number of retries for failed operations (default: 3)
+ *   --dry-run        Fetch data but don't insert (test mode)
  * 
  * Environment Variables Required:
  *   SOURCE_SUPABASE_URL - Famous.AI Supabase URL
@@ -29,6 +30,7 @@ import readlineSync from 'readline-sync';
 const args = process.argv.slice(2);
 const DEBUG = args.includes('--debug');
 const INTERACTIVE = args.includes('--interactive');
+const DRY_RUN = args.includes('--dry-run');
 const retryArg = args.find(arg => arg.startsWith('--retry-count='))?.split('=')[1];
 const RETRY_COUNT = retryArg && !isNaN(parseInt(retryArg, 10)) ? parseInt(retryArg, 10) : 3;
 
@@ -237,6 +239,12 @@ async function insertData(client, tableName, data) {
     return { success: true, count: 0, failed: 0 };
   }
 
+  if (DRY_RUN) {
+    infoLog(`[DRY-RUN] Would insert ${data.length} records into ${tableName}`);
+    console.log(`🧪 [DRY-RUN] Would insert ${data.length} records into ${tableName}`);
+    return { success: true, count: data.length, failed: 0, duration: Date.now() - startTime };
+  }
+
   infoLog(`📤 Inserting ${data.length} records into ${tableName}...`);
   
   let inserted = 0;
@@ -401,6 +409,11 @@ async function migrate() {
   console.log('🚀 Starting database migration...\n');
   infoLog('🚀 Database migration started');
   
+  if (DRY_RUN) {
+    console.log('🧪 DRY-RUN MODE - No data will be inserted\n');
+    infoLog('DRY-RUN MODE enabled - testing only');
+  }
+  
   // Log configuration (excluding sensitive data)
   const sourceUrl = process.env.SOURCE_SUPABASE_URL;
   const targetUrl = process.env.TARGET_SUPABASE_URL;
@@ -416,7 +429,8 @@ async function migrate() {
     retryCount: RETRY_COUNT,
     tablesCount: TABLES_TO_MIGRATE.length,
     debugMode: DEBUG,
-    interactiveMode: INTERACTIVE
+    interactiveMode: INTERACTIVE,
+    dryRun: DRY_RUN
   });
   
   if (INTERACTIVE) {
@@ -564,6 +578,9 @@ async function migrate() {
     }
     if (INTERACTIVE) {
       console.log('🎮 INTERACTIVE MODE ENABLED');
+    }
+    if (DRY_RUN) {
+      console.log('🧪 DRY-RUN MODE ENABLED (no data will be inserted)');
     }
     console.log(`🔄 Retry count: ${RETRY_COUNT}\n`);
     

@@ -195,13 +195,14 @@ Database migration script that copies data from Famous.AI to Vercel.
 
 **Usage:**
 ```bash
-node scripts/migrate-database.js [--debug] [--interactive] [--retry-count=N]
+node scripts/migrate-database.js [--debug] [--interactive] [--retry-count=N] [--dry-run]
 ```
 
 **Options:**
 - `--debug` - Enable detailed debug logging with timestamps
 - `--interactive` - Enable step-by-step interactive prompts for manual control
 - `--retry-count=N` - Set number of retries for failed operations (default: 3)
+- `--dry-run` - Test mode: fetch data but don't insert (useful for testing)
 
 **Environment Variables Required:**
 ```bash
@@ -254,6 +255,9 @@ When `--interactive` is enabled:
 # Basic migration
 node scripts/migrate-database.js
 
+# Test migration without inserting data (dry-run)
+node scripts/migrate-database.js --dry-run
+
 # Migration with debug logging
 node scripts/migrate-database.js --debug
 
@@ -265,6 +269,9 @@ node scripts/migrate-database.js --retry-count=5
 
 # All options combined
 node scripts/migrate-database.js --debug --interactive --retry-count=5
+
+# Dry-run with debug output
+node scripts/migrate-database.js --dry-run --debug
 ```
 
 **Tables Migrated:**
