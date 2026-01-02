@@ -89,6 +89,7 @@ export default defineConfig({
 
 **Before:**
 ```typescript
+const supabaseUrl = "";
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseKey) {
@@ -100,6 +101,7 @@ const supabase = createClient(supabaseUrl, supabaseKey); // Crashes if empty
 
 **After:**
 ```typescript
+const supabaseUrl = "";
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseKey) {
