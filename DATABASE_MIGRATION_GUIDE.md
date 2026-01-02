@@ -114,7 +114,6 @@ The following tables will be migrated:
 1. **Update Application Configuration**:
    ```bash
    # Update your .env or Vercel environment variables:
-   VITE_SUPABASE_URL=https://your-vercel-project.supabase.co
    VITE_SUPABASE_ANON_KEY=your_vercel_anon_key
    ```
 

@@ -136,7 +136,6 @@ const supabase = createClient(finalUrl, finalKey);
 
 ```typescript
 console.log('Africoin Wallet - Environment check:', {
-  hasSupabaseUrl: !!import.meta.env.VITE_SUPABASE_URL,
   hasSupabaseKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
   hasAlchemyKey: !!import.meta.env.VITE_ALCHEMY_API_KEY,
   hasGeminiKey: !!import.meta.env.VITE_GEMINI_API_KEY,
@@ -367,7 +366,6 @@ After next build, verify:
    - Enable automatic upload
 
 4. **Set Environment Variables** (Optional)
-   - Add VITE_SUPABASE_URL
    - Add VITE_SUPABASE_ANON_KEY
    - Add VITE_ALCHEMY_API_KEY
    - Enable full functionality

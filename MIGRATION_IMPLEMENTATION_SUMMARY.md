@@ -45,7 +45,6 @@ Successfully implemented a comprehensive database migration solution from Famous
    - Updated migration credential documentation
 
 2. **`vercel.json`** - Added environment variable references:
-   - `VITE_SUPABASE_URL` mapped to `@supabase-url`
    - `VITE_SUPABASE_ANON_KEY` mapped to `@supabase-anon-key`
    - `EDGE_CONFIG` mapped to `@edge-config`
 
@@ -162,7 +161,6 @@ Failed tables: 0/7
 
 📝 Next Steps:
    1. Update your .env file with new database credentials
-   2. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
    3. Deploy your application to Vercel
 ```
 
