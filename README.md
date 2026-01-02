@@ -91,7 +91,7 @@ npm run migrate:db
    VITE_ALCHEMY_GAS_POLICY_ID=your-gas-policy-id  # Optional, for sponsored transactions
    
    # Supabase (Authentication & Database)
-   VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+   VITE_SUPABASE_ANON_KEY=sb_publishable_mvf27GcPR10HH9wCFm2rTA_oN1YXo6l
    
    # Gemini AI (Optional)
    VITE_GEMINI_API_KEY=your-gemini-api-key
