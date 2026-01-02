@@ -1,1 +1,26 @@
-Sync deployment files from Vercel
+name: Sync deployment files from Vercel
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'  # Run every 6 hours
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Sync deployment files
+        run: |
+          echo "Syncing deployment files from Vercel"
+          # Add your sync logic here
+          
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: 'chore: sync deployment files from Vercel'
+          title: 'Sync deployment files from Vercel'
+          body: 'Automated sync of deployment files from Vercel'
+          branch: vercel-sync
