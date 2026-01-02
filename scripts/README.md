@@ -76,7 +76,6 @@ export SUPABASE_SECRET="your_supabase_anon_key"
 - Validates Vercel CLI installation and authentication
 - Prompts for Supabase URL and Secret (or uses environment variables)
 - Allows selection of target environment (production, preview, development, or all)
-- Configures `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel
 - Verifies deployment
 
 **Security Notes:**
@@ -103,7 +102,6 @@ The script will prompt you for:
 ✅ Logged into Vercel as: user@example.com
 ✅ Supabase credentials provided
 ✅ Selected environment: production
-✅ VITE_SUPABASE_URL configured
 ✅ VITE_SUPABASE_ANON_KEY configured
 ```
 
@@ -350,7 +348,6 @@ node scripts/verify-migration.js
 Set these in Vercel Dashboard:
 
 ```bash
-VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_anon_key
 VITE_ALCHEMY_API_KEY=your_alchemy_key
 ```
@@ -594,7 +591,6 @@ TARGET_SUPABASE_KEY
 VERCEL_TOKEN
 VERCEL_ORG_ID
 VERCEL_PROJECT_ID
-VITE_SUPABASE_URL
 VITE_SUPABASE_ANON_KEY
 VITE_ALCHEMY_API_KEY
 ```

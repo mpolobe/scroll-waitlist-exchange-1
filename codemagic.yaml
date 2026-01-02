@@ -22,7 +22,6 @@ workflows:
         # Environment variables - set these in Codemagic UI if needed
         # VITE_ALCHEMY_API_KEY: Set in Codemagic environment variables
         # VITE_ALCHEMY_GAS_POLICY_ID: Set in Codemagic environment variables
-        # VITE_SUPABASE_URL: Set in Codemagic environment variables
         # VITE_SUPABASE_ANON_KEY: Set in Codemagic environment variables
         # VITE_GEMINI_API_KEY: Set in Codemagic environment variables
       node: 20.19.6
@@ -170,7 +169,6 @@ workflows:
         # Environment variables - set these in Codemagic UI if needed
         # VITE_ALCHEMY_API_KEY: Set in Codemagic environment variables
         # VITE_ALCHEMY_GAS_POLICY_ID: Set in Codemagic environment variables
-        # VITE_SUPABASE_URL: Set in Codemagic environment variables
         # VITE_SUPABASE_ANON_KEY: Set in Codemagic environment variables
         # VITE_GEMINI_API_KEY: Set in Codemagic environment variables
         # BROWSERSTACK_USERNAME: Set in Codemagic environment variables
@@ -333,7 +331,6 @@ workflows:
         # Environment variables - set these in Codemagic UI if needed
         # VITE_ALCHEMY_API_KEY: Set in Codemagic environment variables
         # VITE_ALCHEMY_GAS_POLICY_ID: Set in Codemagic environment variables
-        # VITE_SUPABASE_URL: Set in Codemagic environment variables
         # VITE_SUPABASE_ANON_KEY: Set in Codemagic environment variables
         # VITE_GEMINI_API_KEY: Set in Codemagic environment variables
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
