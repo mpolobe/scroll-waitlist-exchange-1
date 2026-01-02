@@ -762,7 +762,7 @@ async function migrate() {
     console.log('\n🎉 Migration completed successfully!');
     console.log('\n📝 Next Steps:');
     console.log('   1. Update your .env file with new database credentials');
-    console.log('   2. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
+    console.log('   2. Set VITE_SUPABASE_ANON_KEY');
     console.log('   3. Deploy your application to Vercel');
     infoLog('🎉 Migration completed successfully!');
     console.log('\n🎉 Migration and verification completed successfully!');
