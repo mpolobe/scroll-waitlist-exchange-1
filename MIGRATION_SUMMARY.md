@@ -82,7 +82,6 @@ npm run migrate:db
 
 ### After Migration
 1. Update Vercel environment variables:
-   - `VITE_SUPABASE_URL=https://llvprbmrnjvamjzavmhg.supabase.co`
    - `VITE_SUPABASE_ANON_KEY=your_vercel_anon_key`
 
 2. Redeploy application to Vercel

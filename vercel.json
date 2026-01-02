@@ -3,8 +3,7 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "env": {
-    "VITE_SUPABASE_URL": "@supabase-url",
-    "VITE_SUPABASE_ANON_KEY": "@supabase-anon-key",
+    "VITE_SUPABASE_ANON_KEY": "@sb_publishable_mvf27GcPR10HH9wCFm2rTA_oN1YXo6l",
     "EDGE_CONFIG": "@edge-config"
   },
   "rewrites": [
