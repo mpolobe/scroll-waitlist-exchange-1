@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 
 const MarketingFooter = () => {
   const navigate = useNavigate();
@@ -60,12 +60,12 @@ const MarketingFooter = () => {
           <div>
             <h4 className="font-bold mb-4">Company</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="/contact" className="hover:text-white">About Us</a></li>
-              <li><a href="/blog" className="hover:text-white">Blog</a></li>
-              <li><a href="/merchant" className="hover:text-white">Merchant Portal</a></li>
-              <li><a href="/contact" className="hover:text-white">Careers</a></li>
-              <li><a href="/contact" className="hover:text-white">Press Kit</a></li>
-              <li><a href="/contact" className="hover:text-white">Contact</a></li>
+              <li><Link to="/contact" className="hover:text-white">About Us</Link></li>
+              <li><Link to="/blog" className="hover:text-white">Blog</Link></li>
+              <li><Link to="/merchant" className="hover:text-white">Merchant Portal</Link></li>
+              <li><Link to="/contact" className="hover:text-white">Careers</Link></li>
+              <li><Link to="/contact" className="hover:text-white">Press Kit</Link></li>
+              <li><Link to="/contact" className="hover:text-white">Contact</Link></li>
 
             </ul>
           </div>
@@ -83,10 +83,10 @@ const MarketingFooter = () => {
           <div>
             <h4 className="font-bold mb-4">Legal</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="/privacy-policy" className="hover:text-white">Privacy Policy</a></li>
-              <li><a href="/terms-of-service" className="hover:text-white">Terms of Service</a></li>
-              <li><a href="/cookie-policy" className="hover:text-white">Cookie Policy</a></li>
-              <li><a href="/compliance" className="hover:text-white">Compliance</a></li>
+              <li><Link to="/privacy-policy" className="hover:text-white">Privacy Policy</Link></li>
+              <li><Link to="/terms-of-service" className="hover:text-white">Terms of Service</Link></li>
+              <li><Link to="/cookie-policy" className="hover:text-white">Cookie Policy</Link></li>
+              <li><Link to="/compliance" className="hover:text-white">Compliance</Link></li>
             </ul>
           </div>
         </div>
