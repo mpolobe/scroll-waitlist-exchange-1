@@ -4,7 +4,7 @@ import { AuthModal } from './auth/AuthModal';
 import { Button } from './ui/button';
 import { SmartWalletConnect } from './wallet/SmartWalletConnect';
 import { User, LogOut, Menu, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const MarketingNav = () => {
   const { user, signOut } = useAuth();
@@ -39,10 +39,10 @@ const MarketingNav = () => {
           <div className="hidden md:flex space-x-6 items-center">
             <button onClick={() => scrollToSection('features')} className="text-gray-700 hover:text-orange-500 transition text-sm">Features</button>
             <button onClick={() => scrollToSection('rates')} className="text-gray-700 hover:text-orange-500 transition text-sm">Rates</button>
-            <a href="/blog" className="text-gray-700 hover:text-orange-500 transition text-sm">Blog</a>
-            <a href="/merchant" className="text-gray-700 hover:text-orange-500 transition text-sm">Merchant</a>
-            <a href="/railway-booking" className="text-gray-700 hover:text-orange-500 transition text-sm">Book Tickets</a>
-            <a href="/wallet" className="text-gray-700 hover:text-orange-500 transition text-sm">Wallet</a>
+            <Link to="/blog" className="text-gray-700 hover:text-orange-500 transition text-sm">Blog</Link>
+            <Link to="/merchant" className="text-gray-700 hover:text-orange-500 transition text-sm">Merchant</Link>
+            <Link to="/railway-booking" className="text-gray-700 hover:text-orange-500 transition text-sm">Book Tickets</Link>
+            <Link to="/wallet" className="text-gray-700 hover:text-orange-500 transition text-sm">Wallet</Link>
             
             <SmartWalletConnect />
 
@@ -73,10 +73,10 @@ const MarketingNav = () => {
           <div className="md:hidden py-4 space-y-3">
             <button onClick={() => scrollToSection('features')} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Features</button>
             <button onClick={() => scrollToSection('rates')} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Exchange Rates</button>
-            <a href="/blog" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Blog</a>
-            <a href="/merchant" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Merchant Portal</a>
-            <a href="/railway-booking" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Book Tickets</a>
-            <a href="/wallet" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Wallet</a>
+            <Link to="/blog" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Blog</Link>
+            <Link to="/merchant" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Merchant Portal</Link>
+            <Link to="/railway-booking" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Book Tickets</Link>
+            <Link to="/wallet" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Wallet</Link>
             {user ? (
               <>
                 <button onClick={() => { navigate('/dashboard'); setMobileMenuOpen(false); }} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Dashboard</button>
