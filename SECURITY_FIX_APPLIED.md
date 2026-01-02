@@ -12,7 +12,7 @@ Hardcoded Supabase credentials were found in `src/lib/supabase.ts`:
 
 ```typescript
 // ❌ BEFORE (INSECURE)
-const supabaseUrl = 'https://xlbdtzmkncxycaddevnn.databasepad.com';
+const supabaseUrl = "";
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjNiMjY5M2Q3LWEzN2EtNGVmMC1hOGNmLTE2YWRjYTI1YjA1MCJ9...';
 ```
 

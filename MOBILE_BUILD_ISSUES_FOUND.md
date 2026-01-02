@@ -14,7 +14,7 @@
 
 **Issue:**
 ```typescript
-const supabaseUrl = 'https://xlbdtzmkncxycaddevnn.databasepad.com';
+const supabaseUrl = "";
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjNiMjY5M2Q3LWEzN2EtNGVmMC1hOGNmLTE2YWRjYTI1YjA1MCJ9...';
 ```
 
@@ -127,7 +127,7 @@ apiKey: import.meta.env.VITE_ALCHEMY_API_KEY || "demo-api-key"
 **Incorrect Usage:**
 ```typescript
 // src/lib/supabase.ts - HARDCODED!
-const supabaseUrl = 'https://xlbdtzmkncxycaddevnn.databasepad.com';
+const supabaseUrl = "";
 ```
 
 **Fix Required:**

@@ -74,7 +74,7 @@ Capacitor packages are installed during build but not declared in `package.json`
 
 **Issue:**
 ```typescript
-const supabaseUrl = 'https://xlbdtzmkncxycaddevnn.databasepad.com';
+const supabaseUrl = "";
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjNiMjY5M2Q3...';
 ```
 
