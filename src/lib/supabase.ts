@@ -1,7 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase URL should be configured through other means
-export const supabase = createClient(
-  '',
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+// Initialize Supabase client with Vercel Supabase project
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://llvprbmrnjvamjzavmhg.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+if (!supabaseKey) {
+  console.warn('Missing VITE_SUPABASE_ANON_KEY environment variable');
+}
+
+export const supabase = createClient(supabaseUrl, supabaseKey);
