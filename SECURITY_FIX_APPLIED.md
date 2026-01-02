@@ -30,11 +30,9 @@ Updated `src/lib/supabase.ts` to use environment variables:
 
 ```typescript
 // ✅ AFTER (SECURE)
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing Supabase configuration. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -61,7 +59,6 @@ The exposed credentials should be rotated immediately:
 Create a `.env` file (already in .gitignore):
 
 ```bash
-VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-new-anon-key
 ```
 
@@ -72,7 +69,6 @@ Add to Codemagic environment variables:
 1. Go to Codemagic app settings
 2. Navigate to Environment variables
 3. Add to `supabase_credentials` group:
-   - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
 
 #### For Production Deployment
@@ -80,7 +76,6 @@ Add to Codemagic environment variables:
 Add to your hosting platform (Vercel, Netlify, etc.):
 
 ```bash
-VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-new-anon-key
 ```
 

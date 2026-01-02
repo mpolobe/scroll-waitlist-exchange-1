@@ -101,7 +101,6 @@ node scripts/verify-migration.js --detailed --debug
 - VERCEL_TOKEN
 - VERCEL_ORG_ID
 - VERCEL_PROJECT_ID
-- VITE_SUPABASE_URL
 - VITE_SUPABASE_ANON_KEY
 - VITE_ALCHEMY_API_KEY
 

@@ -65,7 +65,6 @@ environment:
     APP_NAME: "Africoin Wallet"
     VITE_ALCHEMY_API_KEY: $VITE_ALCHEMY_API_KEY
     VITE_ALCHEMY_GAS_POLICY_ID: $VITE_ALCHEMY_GAS_POLICY_ID
-    VITE_SUPABASE_URL: $VITE_SUPABASE_URL
     VITE_SUPABASE_ANON_KEY: $VITE_SUPABASE_ANON_KEY
     VITE_GEMINI_API_KEY: $VITE_GEMINI_API_KEY
   node: 20.19.6
@@ -307,7 +306,6 @@ targetSdkVersion = 35
 1. **africoin_env_vars:**
    - `VITE_ALCHEMY_API_KEY`
    - `VITE_ALCHEMY_GAS_POLICY_ID`
-   - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
    - `VITE_GEMINI_API_KEY`
 
@@ -478,7 +476,6 @@ triggering:
 #### africoin_env_vars
 - [ ] `VITE_ALCHEMY_API_KEY` - From Alchemy dashboard
 - [ ] `VITE_ALCHEMY_GAS_POLICY_ID` - From Alchemy Gas Manager
-- [ ] `VITE_SUPABASE_URL` - From Supabase project settings
 - [ ] `VITE_SUPABASE_ANON_KEY` - From Supabase project settings
 - [ ] `VITE_GEMINI_API_KEY` - From Google AI Studio
 
