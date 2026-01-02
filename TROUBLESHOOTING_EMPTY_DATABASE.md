@@ -147,7 +147,6 @@ After migration, verify your Vercel application is configured correctly:
 vercel env ls
 
 # Should show:
-# VITE_SUPABASE_URL = https://llvprbmrnjvamjzavmhg.supabase.co
 # VITE_SUPABASE_ANON_KEY = (your anon key for llvprbmrnjvamjzavmhg)
 ```
 
@@ -155,7 +154,6 @@ If these are missing or wrong:
 
 ```bash
 # Set correct values
-vercel env add VITE_SUPABASE_URL production
 # Enter: https://llvprbmrnjvamjzavmhg.supabase.co
 
 vercel env add VITE_SUPABASE_ANON_KEY production
