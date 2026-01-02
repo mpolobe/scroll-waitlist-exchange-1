@@ -259,7 +259,6 @@ The migration will copy these tables from Famous.AI to Vercel Supabase:
 
 This likely means:
 1. Migration hasn't been run yet → Follow this guide
-2. Application isn't configured to use target database → Check `VITE_SUPABASE_URL` in Vercel environment
 3. Frontend cache needs to be cleared → Redeploy application
 
 **Solution:**
@@ -280,12 +279,10 @@ After migration, ensure your application is using the target database:
    ```
 
 2. Verify these are set:
-   - `VITE_SUPABASE_URL=https://llvprbmrnjvamjzavmhg.supabase.co`
    - `VITE_SUPABASE_ANON_KEY=<your-anon-key-for-llvprbmrnjvamjzavmhg>`
 
 3. If missing or incorrect, update them:
    ```bash
-   vercel env add VITE_SUPABASE_URL production
    # Enter: https://llvprbmrnjvamjzavmhg.supabase.co
    
    vercel env add VITE_SUPABASE_ANON_KEY production

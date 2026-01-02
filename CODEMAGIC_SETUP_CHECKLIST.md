@@ -24,7 +24,6 @@ Application environment variables:
 |--------------|-------|--------|----------|
 | `VITE_ALCHEMY_API_KEY` | Your Alchemy API key | ✅ Yes | ✅ Yes |
 | `VITE_ALCHEMY_GAS_POLICY_ID` | Your Gas Manager Policy ID | ✅ Yes | ❌ No |
-| `VITE_SUPABASE_URL` | Your Supabase project URL | ❌ No | ✅ Yes |
 | `VITE_SUPABASE_ANON_KEY` | Your Supabase anon key | ✅ Yes | ✅ Yes |
 | `VITE_GEMINI_API_KEY` | Your Gemini API key | ✅ Yes | ✅ Yes |
 
