@@ -16,5 +16,11 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  "devDependencies": {
+    "webpack": "^5.104.1",
+    "webpack-cli": "^5.1.4"
+  },
+  "scripts": {
+    "build": "webpack --mode production"
   }
 }
