@@ -45,7 +45,7 @@ Successfully implemented a comprehensive database migration solution from Famous
    - Updated migration credential documentation
 
 2. **`vercel.json`** - Added environment variable references:
-   - `VITE_SUPABASE_ANON_KEY` mapped to `@supabase-anon-key`
+   - `VITE_SUPABASE_ANON_KEY` mapped to `@sb_publishable_mvf27GcPR10HH9wCFm2rTA_oN1YXo6l`
    - `EDGE_CONFIG` mapped to `@edge-config`
 
 3. **`package.json`** - Added npm scripts:
