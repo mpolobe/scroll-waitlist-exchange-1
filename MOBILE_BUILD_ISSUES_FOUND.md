@@ -14,7 +14,7 @@
 
 **Issue:**
 ```typescript
-const supabaseUrl = 'https://xlbdtzmkncxycaddevnn.databasepad.com';
+const supabaseUrl = "";
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjNiMjY5M2Q3LWEzN2EtNGVmMC1hOGNmLTE2YWRjYTI1YjA1MCJ9...';
 ```
 
@@ -30,11 +30,9 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjNiMjY5M2Q3LWE
 // src/lib/supabase.ts
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing Supabase configuration. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -129,7 +127,7 @@ apiKey: import.meta.env.VITE_ALCHEMY_API_KEY || "demo-api-key"
 **Incorrect Usage:**
 ```typescript
 // src/lib/supabase.ts - HARDCODED!
-const supabaseUrl = 'https://xlbdtzmkncxycaddevnn.databasepad.com';
+const supabaseUrl = "";
 ```
 
 **Fix Required:**

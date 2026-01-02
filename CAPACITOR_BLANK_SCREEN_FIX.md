@@ -89,7 +89,6 @@ export default defineConfig({
 
 **Before:**
 ```typescript
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseKey) {
@@ -101,7 +100,6 @@ const supabase = createClient(supabaseUrl, supabaseKey); // Crashes if empty
 
 **After:**
 ```typescript
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseKey) {
@@ -129,7 +127,6 @@ const supabase = createClient(finalUrl, finalKey);
 ```typescript
 // Log environment status for debugging
 console.log('Africoin Wallet - Environment check:', {
-  hasSupabaseUrl: !!import.meta.env.VITE_SUPABASE_URL,
   hasSupabaseKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
   hasAlchemyKey: !!import.meta.env.VITE_ALCHEMY_API_KEY,
   hasGeminiKey: !!import.meta.env.VITE_GEMINI_API_KEY,

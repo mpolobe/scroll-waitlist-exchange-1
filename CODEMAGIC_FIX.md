@@ -55,7 +55,6 @@ environment:
     # Environment variables - set these in Codemagic UI if needed
     # VITE_ALCHEMY_API_KEY: Set in Codemagic environment variables
     # VITE_ALCHEMY_GAS_POLICY_ID: Set in Codemagic environment variables
-    # VITE_SUPABASE_URL: Set in Codemagic environment variables
     # VITE_SUPABASE_ANON_KEY: Set in Codemagic environment variables
     # VITE_GEMINI_API_KEY: Set in Codemagic environment variables
     # BROWSERSTACK_USERNAME: Set in Codemagic environment variables
@@ -115,7 +114,6 @@ If you need to use environment variables, set them in the Codemagic UI:
 4. Add variables:
    - `VITE_ALCHEMY_API_KEY`
    - `VITE_ALCHEMY_GAS_POLICY_ID`
-   - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
    - `VITE_GEMINI_API_KEY`
    - `BROWSERSTACK_USERNAME`
@@ -129,7 +127,6 @@ If you need to use environment variables, set them in the Codemagic UI:
 4. Add variables:
    - `VITE_ALCHEMY_API_KEY`
    - `VITE_ALCHEMY_GAS_POLICY_ID`
-   - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
    - `VITE_GEMINI_API_KEY`
 5. Create group: `browserstack_credentials`
