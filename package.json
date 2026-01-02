@@ -1,12 +1,11 @@
 {
-  "type": "module",
   "devDependencies": {
     "webpack": "^5.104.1",
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
     "build": "webpack --mode production",
-    "test:database": "node scripts/test-database-connection.js",
-    "verify:migration": "node scripts/verify-migration.js"
+    "test:database": "node --input-type=module scripts/test-database-connection.js",
+    "verify:migration": "node --input-type=module scripts/verify-migration.js"
   }
 }
