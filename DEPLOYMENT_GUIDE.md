@@ -324,7 +324,6 @@ defaultConfig {
 1. **africoin_env_vars**
    - `VITE_ALCHEMY_API_KEY`
    - `VITE_ALCHEMY_GAS_POLICY_ID`
-   - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
    - `VITE_GEMINI_API_KEY`
 

@@ -91,8 +91,7 @@ npm run migrate:db
    VITE_ALCHEMY_GAS_POLICY_ID=your-gas-policy-id  # Optional, for sponsored transactions
    
    # Supabase (Authentication & Database)
-   VITE_SUPABASE_URL=your-supabase-url
-   VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+   VITE_SUPABASE_ANON_KEY=sb_publishable_mvf27GcPR10HH9wCFm2rTA_oN1YXo6l
    
    # Gemini AI (Optional)
    VITE_GEMINI_API_KEY=your-gemini-api-key
@@ -106,7 +105,7 @@ npm run migrate:db
    **⚠️ Security Note for Supabase Configuration:**
    - The `src/lib/supabase.ts` file is designed to use environment variables for all credentials
    - **NEVER** hardcode actual Supabase credentials directly in `supabase.ts`
-   - All Supabase configuration must come from environment variables (`VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`)
+   - All Supabase configuration must come from environment variables (`VITE_SUPABASE_ANON_KEY`)
    - For production deployments, use your deployment platform's environment variable management (Vercel, Netlify, etc.)
    - For local development, use `.env.local` file (already in `.gitignore`)
    - The `.gitignore` entry for `supabase.ts` prevents accidental commits of modified configuration
