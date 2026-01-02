@@ -62,7 +62,6 @@ TARGET_SUPABASE_URL=https://llvprbmrnjvamjzavmhg.supabase.co
 TARGET_SUPABASE_KEY=your_vercel_service_role_key
 
 # Application Configuration (for Vercel deployment)
-VITE_SUPABASE_URL=https://llvprbmrnjvamjzavmhg.supabase.co
 VITE_SUPABASE_ANON_KEY=your_vercel_anon_key
 ```
 
@@ -197,7 +196,6 @@ After successful migration, configure your Vercel deployment:
 4. Add/Update the following:
 
 ```
-VITE_SUPABASE_URL=https://llvprbmrnjvamjzavmhg.supabase.co
 VITE_SUPABASE_ANON_KEY=your_vercel_anon_key
 ```
 

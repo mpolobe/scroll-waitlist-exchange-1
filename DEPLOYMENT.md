@@ -39,7 +39,6 @@ TARGET_SUPABASE_KEY=your-vercel-service-role-key
 
 # Application Environment Variables
 VITE_ALCHEMY_API_KEY=your_alchemy_api_key
-VITE_SUPABASE_URL=https://llvprbmrnjvamjzavmhg.supabase.co
 VITE_SUPABASE_ANON_KEY=your_vercel_anon_key
 VITE_GEMINI_API_KEY=your_gemini_api_key
 ```
@@ -126,7 +125,6 @@ Edit `scripts/migrate-database.js` and modify the `TABLES_TO_MIGRATE` array.
 Set these in Vercel Dashboard (Settings → Environment Variables):
 
 **Required:**
-- `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 - `VITE_ALCHEMY_API_KEY`
 
@@ -187,7 +185,6 @@ npm run build
 
 **Issue:** Application can't connect to database  
 **Solution:**
-1. Verify `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set
 2. Check Supabase project is active
 3. Verify API keys are correct
 

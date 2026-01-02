@@ -165,8 +165,7 @@ verifyOTP(email: string, token: string)
 
 ```env
 # Supabase Configuration
-VITE_SUPABASE_URL=your-supabase-project-url
-VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_SUPABASE_ANON_KEY=sb_publishable_mvf27GcPR10HH9wCFm2rTA_oN1YXo6l
 
 # Twilio Configuration (configured in Supabase Dashboard)
 # These are set in Supabase, not in your app
