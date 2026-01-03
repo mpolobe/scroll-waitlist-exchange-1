@@ -246,6 +246,285 @@ See `AFRICA_RAILWAYS_INTEGRATION.md` for:
 - **AI**: Google Gemini Pro
 - **State**: React Context + TanStack Query
 
+## Deployment
+
+### Vercel Deployment
+
+This project is optimized for deployment on Vercel. Follow these steps for a successful deployment:
+
+#### 1. Environment Variables Setup
+
+**Required Environment Variables:**
+- `VITE_SUPABASE_URL` - Your Supabase project URL
+- `VITE_SUPABASE_ANON_KEY` - Your Supabase anonymous/public key
+- `VITE_ALCHEMY_API_KEY` - Your Alchemy API key (for wallet features)
+
+**Optional Environment Variables:**
+- `VITE_ALCHEMY_GAS_POLICY_ID` - For sponsored transactions
+- `VITE_GEMINI_API_KEY` - For AI chatbot features
+
+**Setting Variables in Vercel Dashboard:**
+1. Go to your project in [Vercel Dashboard](https://vercel.com/dashboard)
+2. Navigate to **Settings → Environment Variables**
+3. Add each variable with appropriate values for:
+   - **Production** (required)
+   - **Preview** (recommended)
+   - **Development** (optional)
+
+**Using the Deployment Helper Script:**
+```bash
+# Run the helper script to guide you through the setup
+./scripts/deploy-supabase-vars.sh
+```
+
+This script will:
+- Check your local `.env.local` configuration
+- Provide step-by-step instructions for Vercel CLI
+- Show exactly what commands to run
+
+#### 2. Deploy to Vercel
+
+**Option A: Using Vercel Dashboard (Recommended for first-time deployment)**
+1. Push your code to GitHub
+2. Go to [Vercel Dashboard](https://vercel.com/new)
+3. Import your repository
+4. Configure environment variables as described above
+5. Click "Deploy"
+
+**Option B: Using Vercel CLI**
+```bash
+# Install Vercel CLI globally
+npm i -g vercel
+
+# Login to Vercel
+vercel login
+
+# Deploy to production
+vercel --prod
+```
+
+#### 3. Post-Deployment Verification
+
+After deployment, verify that:
+1. The application loads without errors
+2. Supabase connection is working (check browser console for errors)
+3. Wallet features are functional (if Alchemy is configured)
+4. No environment variable errors in Vercel logs
+
+### Local Development Deployment
+
+For local development with production-like environment:
+
+```bash
+# 1. Create .env.local from template
+cp .env.example .env.local
+
+# 2. Edit .env.local with your actual credentials
+# Add at minimum:
+#   VITE_SUPABASE_URL=https://your-project.supabase.co
+#   VITE_SUPABASE_ANON_KEY=your-key
+#   VITE_ALCHEMY_API_KEY=your-key
+
+# 3. Install dependencies
+npm install
+
+# 4. Start development server
+npm run dev
+
+# 5. Build for production testing
+npm run build
+npm run preview
+```
+
+## Troubleshooting
+
+### Common Build Issues
+
+#### Issue 1: "ENOENT: no such file or directory"
+
+**Symptoms:**
+- Build fails with file not found errors
+- Module resolution errors during Vite build
+
+**Solutions:**
+1. **Clear node_modules and reinstall:**
+   ```bash
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
+
+2. **Verify vite.config.ts has correct alias:**
+   ```typescript
+   resolve: {
+     alias: {
+       "@": path.resolve(__dirname, "./src"),
+     },
+   }
+   ```
+
+3. **Check that all imports use the correct path:**
+   ```typescript
+   // Correct
+   import { supabase } from '@/lib/supabase';
+   
+   // Incorrect (if using @ alias)
+   import { supabase } from '../lib/supabase';
+   ```
+
+#### Issue 2: "Missing Supabase environment variables"
+
+**Symptoms:**
+- Console error: "Error: Missing Supabase environment variables!"
+- Application fails to connect to database
+- Blank pages or authentication errors
+
+**Solutions:**
+1. **Check environment variables are set:**
+   ```bash
+   # For local development, verify .env.local exists
+   cat .env.local | grep VITE_SUPABASE
+   
+   # Should show:
+   # VITE_SUPABASE_URL=https://your-project.supabase.co
+   # VITE_SUPABASE_ANON_KEY=your-key
+   ```
+
+2. **For Vercel deployments:**
+   - Go to Vercel Dashboard → Your Project → Settings → Environment Variables
+   - Verify both `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set
+   - Redeploy after adding/updating variables
+
+3. **Verify .env.example has both variables:**
+   ```bash
+   grep VITE_SUPABASE .env.example
+   ```
+
+4. **Check that src/lib/supabase.ts is properly configured:**
+   ```typescript
+   // Should use import.meta.env (Vite) not process.env
+   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+   ```
+
+#### Issue 3: "webpack-cli not found" or Webpack errors during deployment
+
+**Symptoms:**
+- Build requests webpack-cli during deployment
+- "Cannot find module 'webpack-cli'" errors
+
+**Solutions:**
+1. **Ensure webpack-cli is in devDependencies:**
+   ```bash
+   npm install --save-dev webpack-cli
+   ```
+
+2. **Verify package.json includes:**
+   ```json
+   "devDependencies": {
+     "webpack-cli": "^5.1.4"
+   }
+   ```
+
+3. **This project uses Vite (not Webpack) for building. If you see Webpack errors:**
+   - Remove any Webpack configurations if not needed
+   - Ensure `npm run build` uses `vite build` (check package.json scripts)
+   - The webpack.config.js in this project is for legacy compatibility only
+
+#### Issue 4: Vercel Build Failures
+
+**Symptoms:**
+- Build succeeds locally but fails on Vercel
+- "Command failed" errors in Vercel logs
+
+**Solutions:**
+1. **Check Node.js version:**
+   - Ensure Vercel uses Node.js 18 or higher
+   - Add to package.json:
+     ```json
+     "engines": {
+       "node": ">=18.0.0"
+     }
+     ```
+
+2. **Verify build command in Vercel:**
+   - Should be: `npm run build` or `vite build`
+   - Output directory: `dist`
+
+3. **Check Vercel logs for specific errors:**
+   - Go to Vercel Dashboard → Deployments → Select failed deployment
+   - Review build logs for specific error messages
+   - Look for missing dependencies or environment variables
+
+4. **Test production build locally:**
+   ```bash
+   npm run build
+   # Should complete without errors
+   
+   npm run preview
+   # Should serve the built application
+   ```
+
+#### Issue 5: Import Errors or TypeScript Issues
+
+**Symptoms:**
+- "Cannot find module" errors
+- TypeScript compilation errors during build
+
+**Solutions:**
+1. **Verify tsconfig.json paths:**
+   ```json
+   {
+     "compilerOptions": {
+       "paths": {
+         "@/*": ["./src/*"]
+       }
+     }
+   }
+   ```
+
+2. **Check file extensions in imports:**
+   ```typescript
+   // Correct (no extension needed with TypeScript)
+   import { supabase } from '@/lib/supabase';
+   
+   // Incorrect
+   import { supabase } from '@/lib/supabase.ts';
+   ```
+
+3. **Reinstall TypeScript:**
+   ```bash
+   npm install --save-dev typescript@latest
+   ```
+
+### Getting Help
+
+If you encounter issues not covered here:
+
+1. **Check Vercel deployment logs** for specific error messages
+2. **Review browser console** for client-side errors
+3. **Verify all environment variables** are correctly set
+4. **Test the build locally** before deploying:
+   ```bash
+   npm run build
+   ```
+5. **Open an issue** on GitHub with:
+   - Error message and full stack trace
+   - Steps to reproduce
+   - Build logs (if deployment issue)
+   - Environment (Node version, OS, etc.)
+
+### Debug Mode
+
+Enable debug logging for troubleshooting:
+
+```bash
+# Add to .env.local
+VITE_DEBUG=true
+
+# Rebuild and check console for detailed logs
+npm run build
+```
+
 ## Database Migration
 
 This project uses Supabase for database management. The database is currently configured to use:
