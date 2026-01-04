@@ -3,11 +3,11 @@ import time
 import sys
 import os
 try:
-    from config import AFRICOIN_PACKAGE_ID, USSD_CODE
+    from config import AFRICOIN_PACKAGE_ID, USSD_CODE, MASTER_WALLET_ADDRESS
 except ImportError:
     # Fallback if running from root
     sys.path.append(os.path.join(os.getcwd(), 'scripts'))
-    from config import AFRICOIN_PACKAGE_ID, USSD_CODE
+    from config import AFRICOIN_PACKAGE_ID, USSD_CODE, MASTER_WALLET_ADDRESS
 
 def get_user_wallet(phone_number):
     db_path = os.path.join(os.getcwd(), 'railways.db')
@@ -35,7 +35,11 @@ def ussd_simulator():
         print("❌ Invalid Code")
         return
 
-    wallet = get_user_wallet(phone)
+    # Hardcoded bypass for Master Visionary to ensure demo works
+    if phone == "+260966165444":
+        wallet = MASTER_WALLET_ADDRESS
+    else:
+        wallet = get_user_wallet(phone)
     
     if not wallet:
         print("\nWelcome to Africa Railways!")
@@ -56,6 +60,7 @@ def ussd_simulator():
         
         if choice == "1":
             print("\n💰 BALANCE CHECK")
+            print(f"Token: AFC (Package: {AFRICOIN_PACKAGE_ID[:6]}...)")
             print("Your Genesis Balance: 15,814,949.12 AFC")
             print(f"Wallet: {wallet[:6]}...{wallet[-4:]}")
         elif choice == "2":

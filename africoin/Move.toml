@@ -6,4 +6,4 @@ version = "0.0.1"
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
 
 [addresses]
-africoin = "0xc685b7e800000000000000000000000000000000000000000000000000000000" # Placeholder: Replace with full Package ID from MovePump
+africoin = "0xc68c4cfb63d702227db09c28837e75abd23bbb3adc192e3bc45fecca4dd5b7e8" # Placeholder: Replace with full Package ID from MovePump
