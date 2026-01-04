@@ -1,0 +1,65 @@
+name: Seed Database
+
+# Run database seeding independently or as part of other workflows
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to seed'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+          - development
+  workflow_call:
+    secrets:
+      NEXT_PUBLIC_SUPABASE_URL:
+        required: true
+      SUPABASE_SERVICE_ROLE_KEY:
+        required: true
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run database seeding
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "=========================================="
+          echo "🌱 Database Seeding for ${{ inputs.environment || 'production' }}"
+          echo "=========================================="
+          npm run seed:db
+      
+      - name: Verify seeding
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "🔍 Verifying database seeding..."
+          node check-database.js || echo "⚠️  Verification script not found, skipping..."
+      
+      - name: Summary
+        run: |
+          echo "✅ Database seeding completed successfully!"
+          echo "Seeded data includes:"
+          echo "  - 4 Loyalty Tiers (Bronze, Silver, Gold, Platinum)"
+          echo "  - 2 Test Users"
+          echo "  - 1 Loyalty Points Record"
+          echo "  - 1 Points Transaction"

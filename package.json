@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "seed:db": "node scripts/seed-database.js",
     "test:database": "node --input-type=module scripts/test-database-connection.js",
     "verify:migration": "node --input-type=module scripts/verify-migration.js"
   },
@@ -53,6 +54,7 @@
     "input-otp": "^1.4.1",
     "lucide-react": "^0.469.0",
     "next-themes": "^0.4.4",
+    "pg": "^8.16.3",
     "react": "^18.3.1",
     "react-day-picker": "^9.4.4",
     "react-dom": "^18.3.1",

@@ -48,6 +48,11 @@ workflows:
         script: |
           # Use npm ci for faster, more reliable installs in CI/CD
           npm ci
+      
+      - name: Seed database
+        script: |
+          echo "🌱 Seeding database with initial data..."
+          npm run seed:db
  
       - name: Build web app
         script: |
