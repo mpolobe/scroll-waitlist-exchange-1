@@ -4,25 +4,36 @@ import { AuthModal } from './auth/AuthModal';
 import { Button } from './ui/button';
 import { SmartWalletConnect } from './wallet/SmartWalletConnect';
 import { User, LogOut, Menu, X } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 const MarketingNav = () => {
   const { user, signOut } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const scrollToSection = (id: string) => {
-    navigate('/');
-    setMobileMenuOpen(false);
-    setTimeout(() => {
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 500);
+    } else {
       const element = document.getElementById(id);
       if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+    }
+    setMobileMenuOpen(false);
   };
 
   const handleSignUp = () => {
     navigate('/signup');
+    setMobileMenuOpen(false);
+  };
+
+  const handleSignIn = () => {
+    navigate('/signup?tab=login');
     setMobileMenuOpen(false);
   };
 
@@ -56,7 +67,10 @@ const MarketingNav = () => {
                 </Button>
               </>
             ) : (
-              <Button onClick={handleSignUp} size="sm" className="bg-gradient-to-r from-orange-500 to-purple-600">Sign Up</Button>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={handleSignIn}>Sign In</Button>
+                <Button onClick={handleSignUp} size="sm" className="bg-gradient-to-r from-orange-500 to-purple-600">Sign Up</Button>
+              </div>
             )}
           </div>
 
@@ -83,7 +97,10 @@ const MarketingNav = () => {
                 <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
               </>
             ) : (
-              <Button onClick={handleSignUp} className="mx-4 w-[calc(100%-2rem)] bg-gradient-to-r from-orange-500 to-purple-600">Sign Up</Button>
+              <>
+                <button onClick={handleSignIn} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Sign In</button>
+                <Button onClick={handleSignUp} className="mx-4 w-[calc(100%-2rem)] bg-gradient-to-r from-orange-500 to-purple-600">Sign Up</Button>
+              </>
             )}
           </div>
         )}
