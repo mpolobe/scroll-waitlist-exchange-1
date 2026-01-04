@@ -1,23 +1,30 @@
-# Troubleshooting: Empty Database (superbase-teal-window)
+# Troubleshooting: Empty Database & Broken Links
 
-## Problem
+## Status Check
+- **Vercel Database**: Connected (`llvprbmrnjvamjzavmhg.supabase.co`)
+- **Migration Status**: ❌ Not Complete (Database is empty)
+- **Application**: Menu links may be broken because they rely on data that hasn't been migrated yet.
 
-You're experiencing:
-- Database name: **superbase-teal-window** (Supabase project ID: llvprbmrnjvamjzavmhg)
-- Only **6 requests** in the last 24 hours
-- **No tables populated** from famous.ai
-- Application shows no data or empty states
+## Findings
+1. **Empty Database**: The Vercel Supabase instance has 19 tables but **0 records**.
+2. **Broken Links**: If the application fetches menu items or page content from the database, they will fail to load.
+3. **Famous AI Connection**: Found `src/lib/edge-config.ts` which attempts to fetch Famous AI credentials from Vercel Edge Config. This might be the "missing link" if the app was previously connecting dynamically.
 
-## Root Cause
+## Solution
+Since we cannot access the Famous AI database (credits expired) or its credentials directly, we must **seed the Vercel database** with the data we have.
 
-The database is empty because the **migration from Famous.AI has not been executed**. The migration scripts and infrastructure exist in this repository, but they require manual configuration and execution.
+### Action Plan
+1. **Run Seed Script**: Populate the database with the known data (Loyalty Tiers, Users, Points).
+2. **Verify App**: Check if the menu links work after data is present.
 
-## Solution Overview
+## How to Fix
+Run the following command to seed the database immediately:
 
-You need to:
-1. ✅ Get credentials from Famous.AI Supabase project (source)
-2. ✅ Configure environment variables
-3. ✅ Run database migration script
+```bash
+npm run seed:db
+```
+
+(Note: This requires `SUPABASE_SERVICE_ROLE_KEY` to be set in your environment)
 4. ✅ Verify migration success
 5. ✅ Redeploy application to use populated database
 
