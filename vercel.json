@@ -4,7 +4,7 @@
   "framework": "vite",
   "env": {
     "VITE_SUPABASE_URL": "https://llvprbmrnjvamjzavmhg.supabase.co",
-    "VITE_SUPABASE_ANON_KEY": "@sb_publishable_mvf27GcPR10HH9wCFm2rTA_oN1YXo6l",
+    "VITE_SUPABASE_ANON_KEY": "@supabase_anon_key",
     "EDGE_CONFIG": "@edge-config"
   },
   "rewrites": [
