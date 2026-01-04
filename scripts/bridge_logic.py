@@ -1,8 +1,17 @@
 import time
+import sys
+import os
+
+try:
+    from config import AFRICOIN_PACKAGE_ID, MASTER_WALLET_ADDRESS
+except ImportError:
+    sys.path.append(os.path.join(os.getcwd(), 'scripts'))
+    from config import AFRICOIN_PACKAGE_ID, MASTER_WALLET_ADDRESS
 
 def bridge_to_ethereum(sui_address, amount):
     print(f"\n🌉 BRIDGE INITIATED: SUI -> ETHEREUM")
     print("------------------------------------")
+    print(f"Token Package: {AFRICOIN_PACKAGE_ID}")
     print(f"Source: {sui_address}")
     print(f"Amount: {amount:,.2f} AFC")
     
@@ -23,5 +32,4 @@ def bridge_to_ethereum(sui_address, amount):
 
 if __name__ == "__main__":
     # Example usage for Master Visionary
-    master_wallet = "0x4284dee31121675fce54b211eddf0eb786ed5d6880b8ec728d2c0a3cc104e3c8"
-    bridge_to_ethereum(master_wallet, 1000000.00)
+    bridge_to_ethereum(MASTER_WALLET_ADDRESS, 1000000.00)
