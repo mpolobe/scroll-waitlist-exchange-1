@@ -14,6 +14,8 @@
     "@account-kit/infra": "^4.4.2",
     "@account-kit/react": "^4.4.2",
     "@google/generative-ai": "^0.21.0",
+    "@mysten/sui": "^1.0.0",
+    "@mysten/zklogin": "^0.1.0",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.4",
     "@radix-ui/react-aspect-ratio": "^1.1.1",
