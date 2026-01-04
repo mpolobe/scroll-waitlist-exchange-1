@@ -36,6 +36,15 @@ const MarketingHero = () => {
           alt="Africoin" 
           className="h-24 w-24 mx-auto mb-6 animate-pulse"
         />
+        
+        <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/50 rounded-full px-4 py-1.5 mb-6 backdrop-blur-sm">
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+          </span>
+          <span className="text-blue-100 font-medium text-sm tracking-wide uppercase">Now Live on Sui Mainnet</span>
+        </div>
+
         <h1 className="text-5xl md:text-7xl font-bold mb-6">
           The Future of African Currency
         </h1>
