@@ -13,7 +13,8 @@ import { TwoFactorSettings } from '@/components/wallet/TwoFactorSettings';
 import { AuthMethodSelector } from '@/components/wallet/AuthMethodSelector';
 import { MarketingNav } from '@/components/MarketingNav';
 import { MarketingFooter } from '@/components/MarketingFooter';
-import { Send, QrCode, LogOut, Copy, CheckCircle, Wallet, Shield, Settings, Loader2 } from 'lucide-react';
+import { SuiWalletCard } from '@/components/wallet/SuiWalletCard';
+import { Send, QrCode, LogOut, Copy, CheckCircle, Wallet, Shield, Settings, Loader2, Train } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { activeChain } from '@/lib/alchemyConfig';
 import { useAuthenticate, useSignerStatus } from '@account-kit/react';
@@ -66,6 +67,7 @@ export default function WalletDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white shadow-sm">
             <TabsTrigger value="wallet" className="gap-2"><Wallet className="w-4 h-4" />Wallet</TabsTrigger>
+            <TabsTrigger value="sui-wallet" className="gap-2"><Train className="w-4 h-4" />Africa Railways</TabsTrigger>
             <TabsTrigger value="security" className="gap-2"><Shield className="w-4 h-4" />Security</TabsTrigger>
             <TabsTrigger value="settings" className="gap-2"><Settings className="w-4 h-4" />Settings</TabsTrigger>
           </TabsList>
@@ -100,6 +102,33 @@ export default function WalletDashboard() {
               </>
             )}
           </TabsContent>
+
+          <TabsContent value="sui-wallet">
+            <div className="grid lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
+                <SuiWalletCard />
+                <Card className="p-6">
+                  <h3 className="font-semibold mb-4">Recent Railway Transactions</h3>
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No recent railway bookings found</p>
+                    <Button variant="link" onClick={() => navigate('/railway-booking')} className="mt-2 text-orange-600">Book a ticket now</Button>
+                  </div>
+                </Card>
+              </div>
+              <div className="space-y-6">
+                <Card className="p-6 bg-orange-50 border-orange-100">
+                  <h3 className="font-semibold mb-2 text-orange-800">About Africa Railways</h3>
+                  <p className="text-sm text-orange-700 mb-4">
+                    Your SUI wallet is automatically created when you sign up for Africa Railways. Use it to pay for tickets and earn rewards.
+                  </p>
+                  <Button variant="outline" className="w-full border-orange-200 text-orange-700 hover:bg-orange-100" onClick={() => navigate('/africa-railways-demo')}>
+                    Learn More
+                  </Button>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
           <TabsContent value="security"><div className="max-w-2xl space-y-6"><TwoFactorSettings /><Card className="p-6"><h3 className="font-semibold mb-2">Password</h3><p className="text-sm text-gray-500 mb-4">Change your account password</p><Button variant="outline" onClick={() => navigate('/reset-password')}>Change Password</Button></Card></div></TabsContent>
           <TabsContent value="settings"><div className="max-w-2xl"><Card className="p-6"><h3 className="font-semibold mb-4">Account Information</h3><div className="space-y-3"><div><span className="text-gray-500">Email:</span> <span className="ml-2">{user.email}</span></div>{address && <div><span className="text-gray-500">Wallet:</span> <span className="ml-2 font-mono text-sm">{shortAddr}</span></div>}</div></Card></div></TabsContent>
         </Tabs>
