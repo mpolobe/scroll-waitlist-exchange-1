@@ -1,23 +1,69 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { BlogSearch } from '@/components/blog/BlogSearch';
-import { blogPosts, categories } from '@/data/blogPosts';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import MarketingNav from '@/components/MarketingNav';
+import { supabase } from '@/lib/supabase';
+import { Loader2 } from 'lucide-react';
+
+interface BlogPost {
+  id: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  author: string;
+  date: string;
+  image: string;
+  read_time: string;
+  featured: boolean;
+}
+
+const categories = ['All', 'Company News', 'Fintech Trends', 'Education', 'Case Studies', 'Infrastructure'];
 
 export default function Blog() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredPosts = blogPosts.filter(post => {
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (error) throw error;
+      if (data) setPosts(data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const featuredPosts = blogPosts.filter(post => post.featured);
+  const featuredPosts = posts.filter(post => post.featured);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -37,7 +83,7 @@ export default function Blog() {
           <h2 className="text-3xl font-bold mb-8">Featured Articles</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {featuredPosts.map(post => (
-              <BlogCard key={post.id} {...post} />
+              <BlogCard key={post.id} {...post} readTime={post.read_time} />
             ))}
           </div>
         </section>
@@ -65,7 +111,7 @@ export default function Blog() {
           {filteredPosts.length > 0 ? (
             <div className="grid md:grid-cols-3 gap-8">
               {filteredPosts.map(post => (
-                <BlogCard key={post.id} {...post} />
+                <BlogCard key={post.id} {...post} readTime={post.read_time} />
               ))}
             </div>
           ) : (
