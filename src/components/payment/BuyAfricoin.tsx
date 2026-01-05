@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PaymentMethodSelector } from './PaymentMethodSelector';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 const currencies = [
@@ -18,6 +19,7 @@ const currencies = [
 ];
 
 export function BuyAfricoin({ onSuccess }: { onSuccess?: () => void }) {
+  const { user } = useAuth();
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState('KES');
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -34,13 +36,18 @@ export function BuyAfricoin({ onSuccess }: { onSuccess?: () => void }) {
       return;
     }
 
+    if (!user) {
+      setStatus({ type: 'error', message: 'You must be logged in to purchase.' });
+      return;
+    }
+
     setLoading(true);
     setStatus(null);
 
     try {
       const { data, error } = await supabase.functions.invoke('process-payment', {
         body: {
-          userId: 'user-123',
+          userId: user.id,
           amount: parseFloat(amount),
           currency,
           paymentMethod,

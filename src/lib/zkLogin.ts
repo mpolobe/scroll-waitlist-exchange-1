@@ -1,5 +1,5 @@
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import { generateNonce, generateRandomness } from '@mysten/zklogin';
+import { generateNonce, generateRandomness, getExtendedEphemeralPublicKey, computeZkLoginAddress } from '@mysten/zklogin';
 import { jwtDecode } from "jwt-decode";
 
 const SUI_PROVER_URL = 'https://prover-dev.mystenlabs.com/v1';
@@ -31,7 +31,8 @@ export const setupZkLogin = async () => {
     randomness,
     nonce
   };
-  sessionStorage.setItem('zk_login_session', JSON.stringify(session));
+  // Use localStorage to persist across redirects more reliably
+  localStorage.setItem('zk_login_session', JSON.stringify(session));
 
   return { nonce, ephemeralKeyPair };
 };
@@ -48,35 +49,57 @@ export const getGoogleLoginUrl = (nonce: string) => {
 };
 
 export const completeZkLogin = async (idToken: string) => {
-  const sessionStr = sessionStorage.getItem('zk_login_session');
+  const sessionStr = localStorage.getItem('zk_login_session');
   if (!sessionStr) throw new Error('No zkLogin session found');
   
   const session: ZkLoginSession = JSON.parse(sessionStr);
   const { ephemeralPrivateKey, maxEpoch, randomness } = session;
 
-  // 1. Decode token to get salt (in production, fetch salt from a service)
+  // 1. Reconstruct Keypair
+  const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(ephemeralPrivateKey);
+  const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(ephemeralKeyPair.getPublicKey());
+
+  // 2. Decode token to get salt (in production, fetch salt from a service)
   const decoded = jwtDecode(idToken);
   const salt = '0'; // In production, this should be a user-specific salt
 
-  // 2. Generate Zero Knowledge Proof
-  // Note: This usually requires a call to a proving service
-  const proofResponse = await fetch(SUI_PROVER_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jwt: idToken,
-      extendedEphemeralPublicKey: new Ed25519Keypair({ secretKey: ephemeralPrivateKey }).getPublicKey().toSuiAddress(), // Simplified
-      maxEpoch,
-      jwtRandomness: randomness,
-      salt,
-      keyClaimName: "sub"
-    })
+  // 3. Derive Address
+  const zkLoginAddress = computeZkLoginAddress({
+    claimName: 'sub',
+    claimValue: decoded.sub as string,
+    iss: decoded.iss as string,
+    aud: decoded.aud as string,
+    userSalt: BigInt(salt),
   });
 
-  if (!proofResponse.ok) {
-    throw new Error('Failed to generate ZK Proof');
-  }
+  // 4. Generate Zero Knowledge Proof
+  // Note: This usually requires a call to a proving service
+  // We return the address immediately so the UI can show it
+  // The proof generation might fail in this demo environment
+  
+  try {
+    const proofResponse = await fetch(SUI_PROVER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jwt: idToken,
+        extendedEphemeralPublicKey,
+        maxEpoch,
+        jwtRandomness: randomness,
+        salt,
+        keyClaimName: "sub"
+      })
+    });
 
-  const zkProof = await proofResponse.json();
-  return { zkProof, salt, ephemeralPrivateKey };
+    if (!proofResponse.ok) {
+      console.warn('Prover service failed, but we derived the address.');
+      return { zkProof: null, salt, ephemeralPrivateKey, zkLoginAddress };
+    }
+
+    const zkProof = await proofResponse.json();
+    return { zkProof, salt, ephemeralPrivateKey, zkLoginAddress };
+  } catch (e) {
+    console.warn('Prover error:', e);
+    return { zkProof: null, salt, ephemeralPrivateKey, zkLoginAddress };
+  }
 };

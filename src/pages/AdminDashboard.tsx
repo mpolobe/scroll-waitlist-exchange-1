@@ -9,6 +9,7 @@ import { AdminTransactions } from '@/components/admin/AdminTransactions';
 import { AdminTickets } from '@/components/admin/AdminTickets';
 import { AdminAnalytics } from '@/components/admin/AdminAnalytics';
 import { AdminEmailCampaigns } from '@/components/admin/AdminEmailCampaigns';
+import { TreasuryDashboard } from '@/components/admin/TreasuryDashboard';
 
 
 export default function AdminDashboard() {
@@ -28,6 +29,11 @@ export default function AdminDashboard() {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+      
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4">Institutional Treasury (Polygon)</h2>
+        <TreasuryDashboard />
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Card><CardHeader className="flex flex-row items-center justify-between pb-2">

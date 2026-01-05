@@ -31,11 +31,14 @@ export default function AuthCallback() {
         // Note: In a real app, we would wait for this, but for demo we might mock it or let it run
         // We'll try to run it but catch errors gracefully if the prover service is not reachable
         try {
-          const { zkProof, ephemeralPrivateKey } = await completeZkLogin(idToken!);
-          console.log('ZkLogin Proof generated:', zkProof);
+          const { zkProof, ephemeralPrivateKey, zkLoginAddress } = await completeZkLogin(idToken!);
+          console.log('ZkLogin Address:', zkLoginAddress);
           // Store proof/key in context or local storage for the wallet to use
           localStorage.setItem('sui_zk_proof', JSON.stringify(zkProof));
           localStorage.setItem('sui_ephemeral_key', ephemeralPrivateKey);
+          if (zkLoginAddress) {
+            localStorage.setItem('sui_zk_address', zkLoginAddress);
+          }
         } catch (zkError) {
           console.warn('ZkLogin generation failed (expected in demo without prover):', zkError);
           // Continue to app login even if zkLogin fails in this demo environment
