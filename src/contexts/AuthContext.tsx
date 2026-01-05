@@ -12,7 +12,7 @@ interface AuthContextType {
   isAdmin: boolean;
   adminRole: string | null;
   walletAddress: string | null;
-  signUp: (email: string, password: string, fullName: string, country: string) => Promise<any>;
+  signUp: (email: string, password: string, fullName: string, country: string, phone?: string) => Promise<any>;
   signUpWithPhone: (phone: string, fullName: string, country: string) => Promise<any>;
   signIn: (email: string, password: string) => Promise<any>;
   signInWithPhone: (phone: string) => Promise<any>;
@@ -123,7 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
 
-  const signUp = async (email: string, password: string, fullName: string, country: string) => {
+  const signUp = async (email: string, password: string, fullName: string, country: string, phone?: string) => {
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (!error && data.user) {
       // Generate verification token
@@ -135,6 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await supabase.from('users').insert({ 
         id: data.user.id, 
         email, 
+        phone: phone || null,
         full_name: fullName,
         country,
         email_verified: false,
@@ -247,6 +248,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       token,
       type: 'email'
     });
+
+    if (!error && data.user) {
+      // Check/Create Sui Wallet
+      let walletAddress: string | null = null;
+      
+      // Check existing
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('wallet_address')
+        .eq('id', data.user.id)
+        .single();
+        
+      if (existingUser?.wallet_address) {
+        walletAddress = existingUser.wallet_address;
+      } else {
+        // Generate new Sui Keypair
+        const kp = new Ed25519Keypair();
+        walletAddress = kp.toSuiAddress();
+        // Store private key locally
+        localStorage.setItem(`sui_private_key_${data.user.id}`, kp.getSecretKey());
+        
+        // Update user with new wallet
+        await supabase.from('users').update({ wallet_address: walletAddress }).eq('id', data.user.id);
+      }
+      
+      if (walletAddress) setWalletAddress(walletAddress);
+    }
+
     return { data, error };
   };
 

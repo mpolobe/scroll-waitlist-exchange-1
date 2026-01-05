@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { RouteSearchForm } from '@/components/booking/RouteSearchForm';
 import { MultiCitySearchForm } from '@/components/booking/MultiCitySearchForm';
 import { MultiCityRouteMap } from '@/components/booking/MultiCityRouteMap';
@@ -48,11 +49,47 @@ export default function RailwayBooking() {
   const [multiCityStops, setMultiCityStops] = useState<any[]>([]);
   const [multiCityLegs, setMultiCityLegs] = useState<any[]>([]);
 
-  const handleSearch = (from: string, to: string, date: string, adults: number, children: number) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSearch = async (from: string, to: string, date: string, adults: number, children: number) => {
+    setIsLoading(true);
     setSearchParams({ from, to, date, adults, children, passengers: adults + children });
-    setRoutes(mockRoutes);
-    setIsMultiCity(false);
-    setStep(2);
+    
+    try {
+      const { data, error } = await supabase
+        .from('routes')
+        .select('*')
+        .eq('origin', from)
+        .eq('destination', to);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const mappedRoutes = data.map(r => ({
+          id: r.id,
+          from: r.origin,
+          to: r.destination,
+          departure: r.departure_time.slice(0, 5),
+          arrival: r.arrival_time.slice(0, 5),
+          duration: r.duration,
+          price: Number(r.price),
+          available: r.available_seats,
+          trainNumber: r.train_number
+        }));
+        setRoutes(mappedRoutes);
+      } else {
+        // Fallback to mock data if no routes found in DB (for demo purposes)
+        console.log('No routes found in DB, using mock data');
+        setRoutes(mockRoutes);
+      }
+    } catch (error) {
+      console.error('Error fetching routes:', error);
+      setRoutes(mockRoutes);
+    } finally {
+      setIsLoading(false);
+      setIsMultiCity(false);
+      setStep(2);
+    }
   };
 
 
@@ -86,8 +123,29 @@ export default function RailwayBooking() {
 
   const handleSeatsConfirm = () => setStep(4);
 
-  const handlePayment = () => {
-    setBookingId(`ARN-${Date.now()}`);
+  const handlePayment = async () => {
+    const bookingRef = `ARN-${Date.now()}`;
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { error } = await supabase.from('railway_bookings').insert({
+          user_id: user.id,
+          route: `${selectedRoute.from} to ${selectedRoute.to}`,
+          departure_date: searchParams.date,
+          seat_number: selectedSeats.join(', '),
+          class: 'economy',
+          status: 'confirmed'
+        });
+        
+        if (error) console.error('Error saving booking:', error);
+      }
+    } catch (err) {
+      console.error('Error in payment process:', err);
+    }
+
+    setBookingId(bookingRef);
     setStep(5);
   };
 

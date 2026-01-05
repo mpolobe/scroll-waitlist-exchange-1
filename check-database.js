@@ -1,6 +1,6 @@
 // check-database.js
 // Check what data exists in your Vercel Supabase database
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 // Your Vercel Supabase
 const SUPABASE_URL = 'https://llvprbmrnjvamjzavmhg.supabase.co';
@@ -14,7 +14,8 @@ const TABLES = [
   'railway_bookings', 'bookings', 'passenger_info',
   'transactions', 'user_transactions', 'points_transactions',
   'train_positions', 'support_tickets', 'support_requests',
-  'favorite_routes', 'favorite_posts'
+  'favorite_routes', 'favorite_posts',
+  'routes', 'bonds', 'blog_posts'
 ];
 
 async function checkTable(tableName) {
