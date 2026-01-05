@@ -2,14 +2,20 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useSmartWallet } from '@/contexts/SmartWalletContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Copy, CheckCircle, ExternalLink, QrCode } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { activeChain } from '@/lib/alchemyConfig';
 
 export function WalletAddressCard() {
-  const { address } = useSmartWallet();
+  const { address: smartWalletAddress } = useSmartWallet();
+  const { walletAddress: suiAddress } = useAuth();
   const [copied, setCopied] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
+
+  // Prefer Sui address for users
+  const address = suiAddress || smartWalletAddress;
+  const isSui = !!suiAddress;
 
   const copyAddress = () => {
     if (address) {
@@ -20,7 +26,9 @@ export function WalletAddressCard() {
   };
 
   const shortAddress = address ? `${address.slice(0, 10)}...${address.slice(-8)}` : '';
-  const explorerUrl = `https://sepolia.etherscan.io/address/${address}`;
+  const explorerUrl = isSui 
+    ? `https://suiscan.xyz/mainnet/account/${address}`
+    : `https://sepolia.etherscan.io/address/${address}`;
 
   return (
     <>
@@ -28,7 +36,7 @@ export function WalletAddressCard() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold">Wallet Address</h3>
           <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-            {activeChain.name}
+            {isSui ? 'Sui Mainnet' : activeChain.name}
           </span>
         </div>
         

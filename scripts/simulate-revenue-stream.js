@@ -10,6 +10,21 @@
 
 import fs from 'fs';
 import path from 'path';
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = process.env.VITE_SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  console.error('Error: Missing Supabase credentials in .env file');
+  process.exit(1);
+}
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Configuration
 const SUI_NETWORK = 'mainnet';
@@ -47,6 +62,27 @@ async function simulateTransaction(type) {
   
   console.log(`✅ Transaction Finalized on Sui (Object ID: ${generateSuiAddress().substring(0, 20)}...)`);
   
+  // Log to Supabase for Dashboard Visibility
+  const { error } = await supabase.from('transactions').insert({
+    user_id: 'simulated-user', // In real app, this would be the user's ID
+    amount: amount,
+    type: type === 'PASSENGER' ? 'ticket_purchase' : 'freight_payment',
+    status: 'completed',
+    description: description,
+    network: 'sui_mainnet',
+    metadata: {
+      sui_address: userSuiAddress,
+      phone: userPhone,
+      bridged_to_polygon: true
+    }
+  });
+
+  if (error) {
+    console.error('Error logging to Supabase:', error.message);
+  } else {
+    console.log(`✅ Transaction Logged to Supabase Audit Trail`);
+  }
+
   // Bridge Logic
   console.log(`\n--- Bridging Revenue to Capital Layer ---`);
   console.log(`Source: Sui Utility Layer`);
