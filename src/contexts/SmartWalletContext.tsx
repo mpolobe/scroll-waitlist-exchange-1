@@ -1,7 +1,10 @@
 import { createContext, useContext, ReactNode, useMemo, useCallback, useState, useEffect } from 'react';
-import { useUser, useSmartAccountClient, useLogout, useAccount } from '@account-kit/react';
+import { useUser, useSmartAccountClient, useLogout, useAccount, AlchemyAccountProvider } from '@account-kit/react';
 import { type Address } from 'viem';
 import { getEthBalance, getTokenBalances, getTokenMetadata, formatTokenBalance } from '@/lib/tokenService';
+import { useAuth } from '@/contexts/AuthContext';
+import { alchemyConfig } from '@/lib/alchemyConfig';
+import { useQueryClient } from '@tanstack/react-query';
 
 export interface Transaction {
   id: string;
@@ -42,7 +45,7 @@ const SmartWalletContext = createContext<SmartWalletContextType | undefined>(und
 
 const STORAGE_KEY = 'africoin_transactions';
 
-export function SmartWalletProvider({ children }: { children: ReactNode }) {
+function InnerSmartWalletProvider({ children }: { children: ReactNode }) {
   const user = useUser();
   const { account, isLoadingAccount } = useAccount({ type: "ModularAccountV2" });
   const { client } = useSmartAccountClient({ type: "ModularAccountV2" });
@@ -127,6 +130,40 @@ export function SmartWalletProvider({ children }: { children: ReactNode }) {
   }), [address, isConnected, isConnecting, isLoadingBalances, balance, tokens, transactions, disconnect, fetchBalances, addTransaction, updateTransaction, client]);
 
   return <SmartWalletContext.Provider value={value}>{children}</SmartWalletContext.Provider>;
+}
+
+function DummySmartWalletProvider({ children }: { children: ReactNode }) {
+  const value = useMemo(() => ({
+    address: null,
+    isConnected: false,
+    isConnecting: false,
+    isLoadingBalances: false,
+    balance: '0.00',
+    tokens: [],
+    transactions: [],
+    disconnect: () => {},
+    refreshBalances: async () => {},
+    addTransaction: () => {},
+    updateTransaction: () => {},
+    client: undefined
+  }), []);
+
+  return <SmartWalletContext.Provider value={value}>{children}</SmartWalletContext.Provider>;
+}
+
+export function SmartWalletProvider({ children }: { children: ReactNode }) {
+  const { isAdmin } = useAuth();
+  const queryClient = useQueryClient();
+
+  if (isAdmin) {
+    return (
+      <AlchemyAccountProvider config={alchemyConfig} queryClient={queryClient}>
+        <InnerSmartWalletProvider>{children}</InnerSmartWalletProvider>
+      </AlchemyAccountProvider>
+    );
+  }
+
+  return <DummySmartWalletProvider>{children}</DummySmartWalletProvider>;
 }
 
 export const useSmartWallet = () => {

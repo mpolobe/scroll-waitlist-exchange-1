@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { User } from '@supabase/supabase-js';
+import { setupZkLogin } from '@/lib/zkLogin';
+import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 
 interface AuthContextType {
   user: User | null;
@@ -187,8 +189,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       type: 'sms'
     });
     
-    // If this is a new signup, create user record
     if (!error && data.user) {
+      // Check/Create Sui Wallet
+      let walletAddress: string | null = null;
+      
+      // Check existing
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('wallet_address')
+        .eq('id', data.user.id)
+        .single();
+        
+      if (existingUser?.wallet_address) {
+        walletAddress = existingUser.wallet_address;
+      } else {
+        // Generate new Sui Keypair
+        const kp = new Ed25519Keypair();
+        walletAddress = kp.toSuiAddress();
+        // Store private key locally
+        localStorage.setItem(`sui_private_key_${data.user.id}`, kp.getSecretKey());
+      }
+
       const pendingInfo = sessionStorage.getItem('pending_user_info');
       if (pendingInfo) {
         const { fullName, country } = JSON.parse(pendingInfo);
@@ -197,10 +218,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           phone,
           full_name: fullName,
           country,
-          email_verified: false
+          email_verified: false,
+          wallet_address: walletAddress
         });
         sessionStorage.removeItem('pending_user_info');
+      } else if (walletAddress && !existingUser?.wallet_address) {
+        // Update existing user with new wallet
+        await supabase.from('users').update({ wallet_address: walletAddress }).eq('id', data.user.id);
       }
+      
+      if (walletAddress) setWalletAddress(walletAddress);
     }
     
     return { data, error };
@@ -235,9 +262,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
+    // Prepare zkLogin (generate ephemeral key and nonce)
+    const { nonce } = await setupZkLogin();
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/` },
+      options: { 
+        redirectTo: `${window.location.origin}/`,
+        queryParams: { nonce }
+      },
     });
     return { data, error };
   };
