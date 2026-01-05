@@ -15,6 +15,7 @@ type SignupView = 'form' | 'otp' | 'magiclink' | 'wallet';
 
 export default function SignupWithWallet() {
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [referralCode, setReferralCode] = useState('');
@@ -42,7 +43,9 @@ export default function SignupWithWallet() {
     if (!email || !password || !fullName) { setError('Please fill in all required fields'); return; }
     if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
     setIsLoading(true);
-    const { error: signUpError } = await signUp(email, password, fullName, referralCode);
+    // Pass phone number if provided
+    const { error: signUpError } = await signUp(email, password, fullName, referralCode, phone);
+    
     if (signUpError) { setError(signUpError.message); setIsLoading(false); return; }
     setIsLoading(false);
     setSignupView('wallet');
@@ -119,6 +122,10 @@ export default function SignupWithWallet() {
       <div>
         <Label htmlFor="signup-email">Email *</Label>
         <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" className="mt-1" />
+      </div>
+      <div>
+        <Label htmlFor="signup-phone">Phone Number (optional)</Label>
+        <Input id="signup-phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Enter your phone number" className="mt-1" />
       </div>
       <div>
         <Label htmlFor="signup-password">Password *</Label>

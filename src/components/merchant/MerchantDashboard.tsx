@@ -1,20 +1,60 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
+import { Loader2 } from 'lucide-react';
 
 const MerchantDashboard = () => {
-  const stats = [
-    { label: 'Total Transactions', value: '1,234', change: '+12%' },
-    { label: 'Revenue (USD)', value: '$45,678', change: '+8%' },
-    { label: 'Active Customers', value: '892', change: '+15%' },
-    { label: 'API Calls', value: '23,456', change: '+5%' }
-  ];
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState([
+    { label: 'Total Transactions', value: '0', change: '+0%' },
+    { label: 'Revenue (USD)', value: '$0.00', change: '+0%' },
+    { label: 'Active Customers', value: '0', change: '+0%' },
+    { label: 'API Calls', value: '23,456', change: '+0%' }
+  ]);
 
-  const recentTransactions = [
-    { id: 'TXN001', customer: 'John Doe', amount: '$125.00', status: 'Completed', date: '2025-11-27' },
-    { id: 'TXN002', customer: 'Jane Smith', amount: '$89.50', status: 'Completed', date: '2025-11-27' },
-    { id: 'TXN003', customer: 'Bob Johnson', amount: '$234.00', status: 'Pending', date: '2025-11-27' },
-    { id: 'TXN004', customer: 'Alice Brown', amount: '$67.25', status: 'Completed', date: '2025-11-26' }
-  ];
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (data) {
+          setTransactions(data);
+          
+          // Calculate stats
+          const totalTxns = data.length;
+          const revenue = data.reduce((sum, t) => sum + Number(t.amount), 0);
+          const uniqueCustomers = new Set(data.map(t => t.user_id)).size;
+          
+          setStats([
+            { label: 'Total Transactions', value: totalTxns.toString(), change: '+12%' },
+            { label: 'Revenue (USD)', value: `$${revenue.toFixed(2)}`, change: '+8%' },
+            { label: 'Active Customers', value: uniqueCustomers.toString(), change: '+15%' },
+            { label: 'API Calls', value: '23,456', change: '+5%' }
+          ]);
+        }
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-orange-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -44,17 +84,17 @@ const MerchantDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {recentTransactions.map((txn) => (
+              {transactions.map((txn) => (
                 <tr key={txn.id} className="border-b">
-                  <td className="py-3">{txn.id}</td>
-                  <td className="py-3">{txn.customer}</td>
-                  <td className="py-3">{txn.amount}</td>
+                  <td className="py-3 font-mono text-sm">{txn.id.slice(0, 8)}...</td>
+                  <td className="py-3 font-mono text-sm">{txn.user_id ? txn.user_id.slice(0, 8) + '...' : 'Unknown'}</td>
+                  <td className="py-3">${Number(txn.amount).toFixed(2)}</td>
                   <td className="py-3">
-                    <span className={`px-2 py-1 rounded text-xs ${txn.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                    <span className={`px-2 py-1 rounded text-xs ${txn.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                       {txn.status}
                     </span>
                   </td>
-                  <td className="py-3">{txn.date}</td>
+                  <td className="py-3">{new Date(txn.created_at).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>

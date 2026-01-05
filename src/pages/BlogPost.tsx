@@ -1,13 +1,73 @@
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, User, ArrowLeft, Share2, Twitter, Linkedin, Facebook } from 'lucide-react';
-import { blogPosts } from '@/data/blogPosts';
+import { Calendar, User, ArrowLeft, Share2, Twitter, Linkedin, Facebook, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { BlogCard } from '@/components/blog/BlogCard';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+
+interface BlogPost {
+  id: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  author: string;
+  date: string;
+  image: string;
+  read_time: string;
+  featured: boolean;
+}
 
 export default function BlogPost() {
   const { id } = useParams();
-  const post = blogPosts.find(p => p.id === id);
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (id) fetchPost(id);
+  }, [id]);
+
+  const fetchPost = async (postId: string) => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('id', postId)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setPost(data);
+        fetchRelatedPosts(data.category, data.id);
+      }
+    } catch (error) {
+      console.error('Error fetching post:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRelatedPosts = async (category: string, currentId: string) => {
+    const { data } = await supabase
+      .from('blog_posts')
+      .select('*')
+      .eq('category', category)
+      .neq('id', currentId)
+      .limit(3);
+    
+    if (data) setRelatedPosts(data);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
+      </div>
+    );
+  }
 
   if (!post) {
     return (
@@ -19,8 +79,6 @@ export default function BlogPost() {
       </div>
     );
   }
-
-  const relatedPosts = blogPosts.filter(p => p.category === post.category && p.id !== post.id).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,7 +104,7 @@ export default function BlogPost() {
                 <Calendar className="w-5 h-5" />
                 {post.date}
               </span>
-              <span>{post.readTime}</span>
+              <span>{post.read_time}</span>
             </div>
 
             <div className="prose prose-lg max-w-none mb-8">
@@ -68,7 +126,11 @@ export default function BlogPost() {
             <h2 className="text-3xl font-bold mb-8">Related Articles</h2>
             <div className="grid md:grid-cols-3 gap-8">
               {relatedPosts.map(post => (
-                <BlogCard key={post.id} {...post} />
+                <BlogCard 
+                  key={post.id} 
+                  {...post} 
+                  readTime={post.read_time}
+                />
               ))}
             </div>
           </div>
