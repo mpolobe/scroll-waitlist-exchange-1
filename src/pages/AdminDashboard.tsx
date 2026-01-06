@@ -114,6 +114,19 @@ export default function AdminDashboard() {
         <TabsContent value="analytics"><AdminAnalytics /></TabsContent>
         <TabsContent value="campaigns"><AdminEmailCampaigns /></TabsContent>
       </Tabs>
+
+      <div className="mt-8 text-center text-xs text-gray-400 font-mono">
+        <p>
+          Need to verify if Vercel is running the latest build? <br/>
+          Check this Commit Hash against your GitHub repo: 
+          <span className="font-bold ml-1 text-gray-500">
+            {(import.meta.env as any).VITE_GIT_COMMIT_HASH || 'DEV-BUILD'}
+          </span>
+        </p>
+        <p className="mt-1 opacity-75">
+          Built: {new Date((import.meta.env as any).VITE_BUILD_DATE).toLocaleString()}
+        </p>
+      </div>
     </div>
   );
 }
