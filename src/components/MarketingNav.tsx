@@ -3,11 +3,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from './auth/AuthModal';
 import { Button } from './ui/button';
 import { SmartWalletConnect } from './wallet/SmartWalletConnect';
-import { User, LogOut, Menu, X } from 'lucide-react';
+import { User, LogOut, Menu, X, Shield } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 const MarketingNav = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -59,6 +59,11 @@ const MarketingNav = () => {
 
             {user ? (
               <>
+                {isAdmin && (
+                  <Button variant="ghost" size="sm" onClick={() => navigate('/admin')}>
+                    <Shield className="h-4 w-4 mr-1" />Admin
+                  </Button>
+                )}
                 <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
                   <User className="h-4 w-4 mr-1" />Dashboard
                 </Button>
@@ -93,6 +98,9 @@ const MarketingNav = () => {
             <Link to="/wallet" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Wallet</Link>
             {user ? (
               <>
+                {isAdmin && (
+                  <button onClick={() => { navigate('/admin'); setMobileMenuOpen(false); }} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Admin Dashboard</button>
+                )}
                 <button onClick={() => { navigate('/dashboard'); setMobileMenuOpen(false); }} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Dashboard</button>
                 <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
               </>
