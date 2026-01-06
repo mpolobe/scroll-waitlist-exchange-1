@@ -1,5 +1,6 @@
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import { generateNonce, generateRandomness, getExtendedEphemeralPublicKey, computeZkLoginAddress } from '@mysten/zklogin';
+import { generateNonce, generateRandomness } from '@mysten/zklogin';
+import { getExtendedEphemeralPublicKey, computeZkLoginAddress } from '@mysten/sui/zklogin';
 import { jwtDecode } from "jwt-decode";
 
 const SUI_PROVER_URL = 'https://prover-dev.mystenlabs.com/v1';
