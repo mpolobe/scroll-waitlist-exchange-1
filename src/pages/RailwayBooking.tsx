@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { RouteSearchForm } from '@/components/booking/RouteSearchForm';
 import { MultiCitySearchForm } from '@/components/booking/MultiCitySearchForm';
 import { MultiCityRouteMap } from '@/components/booking/MultiCityRouteMap';
