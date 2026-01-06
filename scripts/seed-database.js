@@ -5,7 +5,7 @@
  * Runs automatically as part of the build process
  */
 
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 // Get credentials from environment variables
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
