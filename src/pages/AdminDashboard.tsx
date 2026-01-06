@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, DollarSign, Ticket, TrendingUp, Mail } from 'lucide-react';
+import { Users, DollarSign, Ticket, TrendingUp, Mail, Bot, Play, Square } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { AdminUsers } from '@/components/admin/AdminUsers';
 import { AdminTransactions } from '@/components/admin/AdminTransactions';
 import { AdminTickets } from '@/components/admin/AdminTickets';
@@ -15,7 +17,21 @@ import { TreasuryDashboard } from '@/components/admin/TreasuryDashboard';
 export default function AdminDashboard() {
   const { isAdmin, loading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [stats, setStats] = useState({ users: 0, transactions: 0, volume: 0, tickets: 0 });
+  const [botStatus, setBotStatus] = useState<'stopped' | 'running'>('stopped');
+
+  const toggleBot = () => {
+    const newStatus = botStatus === 'stopped' ? 'running' : 'stopped';
+    setBotStatus(newStatus);
+    toast({
+      title: `Africoin Bot ${newStatus === 'running' ? 'Activated' : 'Stopped'}`,
+      description: newStatus === 'running' 
+        ? "Institutional Terminal is now polling Sui Mainnet." 
+        : "Bot process terminated.",
+      variant: newStatus === 'running' ? 'default' : 'destructive',
+    });
+  };
 
   useEffect(() => {
     if (!loading && !isAdmin) {
@@ -35,7 +51,7 @@ export default function AdminDashboard() {
         <TreasuryDashboard />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <Card><CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">Total Users</CardTitle>
           <Users className="h-4 w-4 text-muted-foreground" /></CardHeader>
@@ -55,6 +71,32 @@ export default function AdminDashboard() {
           <CardTitle className="text-sm font-medium">Open Tickets</CardTitle>
           <Ticket className="h-4 w-4 text-muted-foreground" /></CardHeader>
           <CardContent><div className="text-2xl font-bold">{stats.tickets}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Africoin Bot Status</CardTitle>
+            <Bot className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-2">
+              <div className="text-2xl font-bold capitalize flex items-center gap-2">
+                <span className={`h-3 w-3 rounded-full ${botStatus === 'running' ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                {botStatus === 'running' ? 'Active' : 'Offline'}
+              </div>
+              <Button 
+                onClick={toggleBot} 
+                size="sm" 
+                variant={botStatus === 'running' ? "destructive" : "default"}
+                className="w-full"
+              >
+                {botStatus === 'running' ? (
+                  <><Square className="mr-2 h-4 w-4"/> Stop Bot</>
+                ) : (
+                  <><Play className="mr-2 h-4 w-4"/> Start Bot</>
+                )}
+              </Button>
+            </div>
+          </CardContent>
         </Card>
       </div>
 
