@@ -33,12 +33,21 @@ jobs:
         run: npm ci
       
       - name: Seed database
+        if: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           echo "🌱 Seeding database with initial data..."
           npm run seed:db
+      
+      - name: Skip database seeding
+        if: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL == '' || secrets.SUPABASE_SERVICE_ROLE_KEY == '' }}
+        run: |
+          echo "⚠️  Skipping database seeding - Supabase credentials not configured"
+          echo "To enable database seeding, add the following secrets to your repository:"
+          echo "  - NEXT_PUBLIC_SUPABASE_URL"
+          echo "  - SUPABASE_SERVICE_ROLE_KEY"
       
       - name: Build project
         run: npm run build
