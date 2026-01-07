@@ -20,6 +20,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import AdminDashboard from "./pages/AdminDashboard";
+import RailwayApi from "./pages/RailwayApi";
 import NotFound from "./pages/NotFound";
 import RailwayIntegration from "./pages/RailwayIntegration";
 import Partners from "./pages/Partners";
@@ -54,6 +55,7 @@ const App = () => (
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/merchant" element={<MerchantPortal />} />
+                <Route path="/railway-api" element={<RailwayApi />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:id" element={<BlogPost />} />
                 <Route path="/dashboard" element={<UserDashboard />} />
