@@ -18,6 +18,7 @@ import Signup from "./pages/Signup";
 import VerifyEmailSent from "./pages/VerifyEmailSent";
 import VerifyEmail from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
+import ForgotPassword from "./pages/ForgotPassword";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import RailwayIntegration from "./pages/RailwayIntegration";
@@ -50,6 +51,7 @@ const App = () => (
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/verify-email-sent" element={<VerifyEmailSent />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/merchant" element={<MerchantPortal />} />
                 <Route path="/blog" element={<Blog />} />
