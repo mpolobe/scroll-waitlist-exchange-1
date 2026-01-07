@@ -30,10 +30,12 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies
+        # Running from root folder
         run: npm ci
       
       - name: Seed database
-        if: "${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}"
+        # FIXED: Wrapped condition in ${{ }} for proper secret evaluation
+        if: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -42,12 +44,11 @@ jobs:
           npm run seed:db
       
       - name: Skip database seeding
-        if: "${{ secrets.NEXT_PUBLIC_SUPABASE_URL == '' || secrets.SUPABASE_SERVICE_ROLE_KEY == '' }}"
+        # FIXED: Wrapped condition in ${{ }}
+        if: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL == '' || secrets.SUPABASE_SERVICE_ROLE_KEY == '' }}
         run: |
           echo "⚠️  Skipping database seeding - Supabase credentials not configured"
-          echo "To enable database seeding, add the following secrets to your repository:"
-          echo "  - NEXT_PUBLIC_SUPABASE_URL"
-          echo "  - SUPABASE_SERVICE_ROLE_KEY"
+          echo "To enable database seeding, add the following secrets to your repository settings."
       
       - name: Build project
         run: npm run build
@@ -64,6 +65,7 @@ jobs:
       - name: Deploy Project Artifacts to Vercel
         id: deploy
         run: |
+          # Captures the URL output from the Vercel CLI
           DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
           echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "✅ Deployed to: $DEPLOYMENT_URL"
@@ -77,28 +79,13 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🚀 Deployment successful!\n\n**URL:** ${{ steps.deploy.outputs.deployment-url }}\n\n✅ Database seeded with initial data`
+              body: `🚀 Deployment successful!\n\n**URL:** ${{ steps.deploy.outputs.deployment-url }}\n\n✅ Database seeded (if credentials were provided).`
             })
       
       - name: Create deployment summary
+        if: always()
         run: |
-          echo "## 🚀 Production Deployment Successful" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Deployment URL" >> $GITHUB_STEP_SUMMARY
-          echo "**Production:** [${{ steps.deploy.outputs.deployment-url }}](${{ steps.deploy.outputs.deployment-url }})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Details" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL:** ${{ steps.deploy.outputs.deployment-url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** Success" >> $GITHUB_STEP_SUMMARY
           echo "- **Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Environment:** Production" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Quick Links" >> $GITHUB_STEP_SUMMARY
-          echo "- 🌐 [Visit Site](${{ steps.deploy.outputs.deployment-url }})" >> $GITHUB_STEP_SUMMARY
-          echo "- 📊 [Vercel Dashboard](https://vercel.com/dashboard)" >> $GITHUB_STEP_SUMMARY
-          echo "- 🗄️ [Supabase Dashboard](https://supabase.com/dashboard)" >> $GITHUB_STEP_SUMMARY
-      
-      - name: Verify deployment
-        run: |
-          echo "Deployment URL: ${{ steps.deploy.outputs.deployment-url }}"
-          echo "✅ Deployment completed successfully"
