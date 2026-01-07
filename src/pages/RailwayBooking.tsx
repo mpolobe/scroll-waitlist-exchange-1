@@ -78,8 +78,7 @@ export default function RailwayBooking() {
         }));
         setRoutes(mappedRoutes);
       } else {
-        // Fallback to mock data if no routes found in DB (for demo purposes)
-        console.log('No routes found in DB, using mock data');
+        // Fallback to mock data if no routes found in DB
         setRoutes(mockRoutes);
       }
     } catch (error) {

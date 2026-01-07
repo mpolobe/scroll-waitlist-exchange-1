@@ -70,7 +70,7 @@ export default function ResetPassword() {
             body: { email: data.user.email }
           });
         } catch (err) {
-          console.log('Success email skipped');
+          // Success email failed - non-critical
         }
       }
 

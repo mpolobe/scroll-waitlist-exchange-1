@@ -186,7 +186,7 @@ class AfricaRailwaysAPI {
     };
 
     ws.onclose = () => {
-      console.log('WebSocket connection closed');
+      // WebSocket connection closed
     };
 
     // Return cleanup function

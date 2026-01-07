@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
         }
       } catch (error) {
-        console.log('Profile sync skipped:', error);
+        // Profile sync failed - non-critical, continue
       }
     }
   };
@@ -149,7 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           body: { email, fullName, verificationToken }
         });
       } catch (err) {
-        console.log('Email sending skipped - edge function not available');
+        // Email sending failed - edge function may not be deployed
       }
 
     }
@@ -349,7 +349,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           body: { email, resetLink }
         });
       } catch (err) {
-        console.log('Custom email skipped');
+        // Custom email failed - using default Supabase email
       }
     }
 
