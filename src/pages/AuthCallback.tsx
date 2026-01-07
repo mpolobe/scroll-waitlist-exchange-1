@@ -32,7 +32,6 @@ export default function AuthCallback() {
         // We'll try to run it but catch errors gracefully if the prover service is not reachable
         try {
           const { zkProof, ephemeralPrivateKey, zkLoginAddress } = await completeZkLogin(idToken!);
-          console.log('ZkLogin Address:', zkLoginAddress);
           // Store proof/key in context or local storage for the wallet to use
           localStorage.setItem('sui_zk_proof', JSON.stringify(zkProof));
           localStorage.setItem('sui_ephemeral_key', ephemeralPrivateKey);
