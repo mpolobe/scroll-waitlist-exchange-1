@@ -80,6 +80,24 @@ jobs:
               body: `🚀 Deployment successful!\n\n**URL:** ${{ steps.deploy.outputs.deployment-url }}\n\n✅ Database seeded with initial data`
             })
       
+      - name: Create deployment summary
+        run: |
+          echo "## 🚀 Production Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployment URL" >> $GITHUB_STEP_SUMMARY
+          echo "**Production:** [${{ steps.deploy.outputs.deployment-url }}](${{ steps.deploy.outputs.deployment-url }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** Production" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Quick Links" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌐 [Visit Site](${{ steps.deploy.outputs.deployment-url }})" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 [Vercel Dashboard](https://vercel.com/dashboard)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🗄️ [Supabase Dashboard](https://supabase.com/dashboard)" >> $GITHUB_STEP_SUMMARY
+      
       - name: Verify deployment
         run: |
           echo "Deployment URL: ${{ steps.deploy.outputs.deployment-url }}"
