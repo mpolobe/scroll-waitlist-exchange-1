@@ -67,7 +67,7 @@ const MarketingNav = () => {
             
             <SmartWalletConnect />
 
-            {user ? (
+            {user && (
               <>
                 {isAdmin && (
                   <Button variant="ghost" size="sm" onClick={() => navigate('/admin')}>
@@ -81,11 +81,6 @@ const MarketingNav = () => {
                   <LogOut className="h-4 w-4" />
                 </Button>
               </>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={handleSignIn}>Sign In</Button>
-                <Button onClick={handleSignUp} size="sm" className="bg-gradient-to-r from-orange-500 to-purple-600">Sign Up</Button>
-              </div>
             )}
           </div>
 
