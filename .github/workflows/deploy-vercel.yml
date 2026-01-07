@@ -49,6 +49,9 @@ jobs:
           npm run seed:db || echo "⚠️  Database seeding failed (non-critical)"
       
       - name: Build project
+        env:
+          VITE_SUPABASE_URL: https://llvprbmrnjvamjzavmhg.supabase.co
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: npm run build
       
       - name: Install Vercel CLI
@@ -58,6 +61,9 @@ jobs:
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       
       - name: Build Project Artifacts
+        env:
+          VITE_SUPABASE_URL: https://llvprbmrnjvamjzavmhg.supabase.co
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       
       - name: Deploy Project Artifacts to Vercel
