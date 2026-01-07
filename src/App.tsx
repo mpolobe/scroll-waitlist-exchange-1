@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AlchemyAccountProvider } from "@account-kit/react";
 import { alchemyConfig } from "@/lib/alchemyConfig";
 import { SmartWalletProvider } from "@/contexts/SmartWalletContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { GeminiChatbot } from "@/components/ai/GeminiChatbot";
 import Index from "./pages/Index";
 import MerchantPortal from "./pages/MerchantPortal";
@@ -37,12 +38,13 @@ const queryClient = new QueryClient();
 const App = () => (
   <ThemeProvider defaultTheme="light">
     <QueryClientProvider client={queryClient}>
-      <AlchemyAccountProvider config={alchemyConfig} queryClient={queryClient}>
-        <SmartWalletProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <HashRouter>
+      <AuthProvider>
+        <AlchemyAccountProvider config={alchemyConfig} queryClient={queryClient}>
+          <SmartWalletProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <HashRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/signup" element={<Signup />} />
@@ -73,6 +75,7 @@ const App = () => (
           </TooltipProvider>
         </SmartWalletProvider>
       </AlchemyAccountProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </ThemeProvider>
 );
