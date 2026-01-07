@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import MarketingNav from '@/components/MarketingNav';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -17,8 +18,10 @@ const MerchantAuth = ({ onAuthenticate }: MerchantAuthProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-purple-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-8">
+    <>
+      <MarketingNav />
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-purple-50 flex items-center justify-center p-4 pt-20">
+        <Card className="w-full max-w-md p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-purple-600 bg-clip-text text-transparent mb-2">
             Africoin Merchant Portal
@@ -41,6 +44,7 @@ const MerchantAuth = ({ onAuthenticate }: MerchantAuthProps) => {
         </p>
       </Card>
     </div>
+    </>
   );
 };
 
