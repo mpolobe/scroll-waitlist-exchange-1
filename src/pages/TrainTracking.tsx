@@ -93,6 +93,7 @@ export default function TrainTracking() {
           </div>
         </div>
       </div>
+      </div>
     </>
   );
 }
