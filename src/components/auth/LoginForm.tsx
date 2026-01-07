@@ -118,7 +118,7 @@ export default function LoginForm() {
         <Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" className="mt-1" />
       </div>
       <div className="text-right">
-        <button type="button" onClick={() => navigate('/reset-password')} className="text-sm text-orange-600 hover:underline">Forgot password?</button>
+        <button type="button" onClick={() => navigate('/forgot-password')} className="text-sm text-orange-600 hover:underline">Forgot password?</button>
       </div>
       {error && <p className="text-red-500 text-sm">{error}</p>}
       <Button type="submit" disabled={isLoading} className="w-full bg-gradient-to-r from-purple-500 to-orange-600">
