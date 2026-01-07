@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import MarketingNav from '@/components/MarketingNav';
 import TrainTracker from '@/components/tracking/TrainTracker';
 import LiveTrainStatus from '@/components/tracking/LiveTrainStatus';
 import { Card } from '@/components/ui/card';
@@ -42,12 +43,14 @@ export default function TrainTracking() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-12">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Live Train Tracking</h1>
-          <p className="text-gray-600">Track your train in real-time with GPS updates every 30 seconds</p>
-        </div>
+    <>
+      <MarketingNav />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-12 pt-24">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold mb-2">Live Train Tracking</h1>
+            <p className="text-gray-600">Track your train in real-time with GPS updates every 30 seconds</p>
+          </div>
 
         <Card className="p-6 mb-6">
           <form onSubmit={handleSearch} className="flex gap-4">
@@ -90,6 +93,6 @@ export default function TrainTracking() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
