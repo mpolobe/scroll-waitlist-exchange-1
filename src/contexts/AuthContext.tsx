@@ -1,32 +1,51 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { User } from '@supabase/supabase-js';
+import type { User, AuthResponse } from '@supabase/supabase-js';
 import { setupZkLogin } from '@/lib/zkLogin';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 
+interface UserProfile {
+  id: string;
+  email: string;
+  full_name?: string;
+  avatar_url?: string;
+  country?: string;
+  phone?: string;
+}
+
+interface UserRecord {
+  id: string;
+  email: string;
+  full_name?: string;
+  country?: string;
+  email_verified: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 interface AuthContextType {
   user: User | null;
-  profile: any;
-  userRecord: any;
+  profile: UserProfile | null;
+  userRecord: UserRecord | null;
   loading: boolean;
   isAdmin: boolean;
   adminRole: string | null;
   walletAddress: string | null;
-  signUp: (email: string, password: string, fullName: string, country: string, phone?: string) => Promise<any>;
-  signUpWithPhone: (phone: string, fullName: string, country: string) => Promise<any>;
-  signIn: (email: string, password: string) => Promise<any>;
-  signInWithPhone: (phone: string) => Promise<any>;
-  signInWithOTP: (email: string) => Promise<any>;
-  verifyOTP: (email: string, token: string) => Promise<any>;
-  verifyPhoneOTP: (phone: string, token: string) => Promise<any>;
-  signInWithMagicLink: (email: string) => Promise<any>;
-  signInWithGoogle: () => Promise<any>;
-  signInWithGitHub: () => Promise<any>;
-  signInWithFacebook: () => Promise<any>;
-  signInWithApple: () => Promise<any>;
+  signUp: (email: string, password: string, fullName: string, country: string, phone?: string) => Promise<AuthResponse>;
+  signUpWithPhone: (phone: string, fullName: string, country: string) => Promise<AuthResponse>;
+  signIn: (email: string, password: string) => Promise<AuthResponse>;
+  signInWithPhone: (phone: string) => Promise<AuthResponse>;
+  signInWithOTP: (email: string) => Promise<AuthResponse>;
+  verifyOTP: (email: string, token: string) => Promise<AuthResponse>;
+  verifyPhoneOTP: (phone: string, token: string) => Promise<AuthResponse>;
+  signInWithMagicLink: (email: string) => Promise<AuthResponse>;
+  signInWithGoogle: () => Promise<AuthResponse>;
+  signInWithGitHub: () => Promise<AuthResponse>;
+  signInWithFacebook: () => Promise<AuthResponse>;
+  signInWithApple: () => Promise<AuthResponse>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<any>;
-  updateProfile: (data: any) => Promise<any>;
+  resetPassword: (email: string) => Promise<AuthResponse>;
+  updateProfile: (data: Partial<UserProfile>) => Promise<{ data: UserProfile | null; error: Error | null }>;
   refreshUserRecord: () => Promise<void>;
 }
 
@@ -34,8 +53,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [userRecord, setUserRecord] = useState<any>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [userRecord, setUserRecord] = useState<UserRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminRole, setAdminRole] = useState<string | null>(null);
