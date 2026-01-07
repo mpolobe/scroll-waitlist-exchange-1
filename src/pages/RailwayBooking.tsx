@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import MarketingNav from '@/components/MarketingNav';
 import { RouteSearchForm } from '@/components/booking/RouteSearchForm';
 import { MultiCitySearchForm } from '@/components/booking/MultiCitySearchForm';
 import { MultiCityRouteMap } from '@/components/booking/MultiCityRouteMap';
@@ -172,7 +173,8 @@ export default function RailwayBooking() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-orange-50">
-      <div className="bg-gradient-to-r from-blue-600 to-orange-500 text-white py-16">
+      <MarketingNav />
+      <div className="bg-gradient-to-r from-blue-600 to-orange-500 text-white py-16 pt-24">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Book Railway Tickets</h1>
           <p className="text-xl">Fast, secure, and easy booking with Africoin</p>
