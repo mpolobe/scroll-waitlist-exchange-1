@@ -245,6 +245,63 @@ async function seedBlogPosts() {
   
   const blogPosts = [
     {
+      id: 'africa-railways-community-launch',
+      title: 'Welcome to Africa Railways: Building the Digital Backbone of Our Continent',
+      excerpt: 'Join us in building the world\'s first integrated infrastructure project combining heavy rail logistics with blockchain technology. AFC is now live on Sui mainnet!',
+      content: `Welcome to the official community of Africa Railways—the digital backbone connecting our continent's future! 🚂✨
+
+We're thrilled to have you on board. Every new member brings us one step closer to a unified, modern, and prosperous Africa.
+
+## 🗺️ What We're Building
+
+Africa Railways is building the world's first integrated infrastructure project that combines heavy rail logistics with the Sui blockchain. Our mission is simple yet profound: **Connect all 54 African nations through a transparent, secure, and hyper-efficient digital rail network.**
+
+## 💡 What to Expect Here
+
+- **Exclusive Updates**: Be the first to hear about product launches, partnerships, and milestone announcements.
+- **Deep-Dive Discussions**: Engage with the team and community on technology, rail development, and blockchain innovation.
+- **Community Voice**: Your feedback and ideas will directly shape the project's roadmap.
+
+## 🚀 Get Started & Dive Deeper
+
+1. **Visit Our Website**: Explore our vision in detail at africa-railways.vercel.app
+2. **Read the Whitepaper**: Understand the technical and economic architecture.
+3. **Meet the Sentinel Network**: Learn about the 2,000+ track workers powering our "Proof-of-Safety" system.
+4. **Buy AFC Token**: Now live on Sui mainnet!
+
+## 🎯 Our Immediate Focus: The 2026 Roadmap
+
+- **Q1**: SADC Mesh Deployment (Lusaka ↔ Johannesburg)
+- **Q2**: Mainnet Launch of the AFRC Token
+- **Q4**: Initialization of the Saharan Quartz Corridor
+
+## 💬 Community Guidelines
+
+To keep this a productive space for everyone, we kindly ask you to:
+
+- Be respectful and constructive in all discussions.
+- Keep conversations relevant to Africa Railways and its ecosystem.
+- Refrain from spamming, promotional posts, or financial advice.
+
+This is more than a Website—it's the command center for a continental transformation.
+
+Thank you for joining the movement. Let's build the future, together.
+
+**For Africa, By Africa.**  
+*The Africa Railways Team*
+
+---
+
+📧 Contact: admin@africarailways.com  
+🌐 Website: https://www.africarailways.com`,
+      category: 'Company News',
+      author: 'Africa Railways Team',
+      date: 'Jan 7, 2026',
+      image: 'https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285109834_4d14e31e.webp',
+      read_time: '5 min read',
+      featured: true
+    },
+    {
       id: 'tazara-railway-50-years',
       title: 'The TAZARA Turns 50: Riding the Railway That Bridges Tanzania and Zambia',
       excerpt: 'A journey through 50 years of history on the Tanzania-Zambia Railway Authority line, exploring its challenges, significance, and future prospects with major Chinese investment.',
