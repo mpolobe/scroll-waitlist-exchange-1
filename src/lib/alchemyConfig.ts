@@ -1,12 +1,23 @@
 import { createConfig } from "@account-kit/react";
 import { sepolia, alchemy } from "@account-kit/infra";
 
+// Get API key with fallback - Alchemy provides a public demo key for testing
+const ALCHEMY_API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY || "demo";
+
+// Log warning in development if using demo key
+if (!import.meta.env.VITE_ALCHEMY_API_KEY) {
+  console.warn(
+    "VITE_ALCHEMY_API_KEY not set. Using demo mode with limited functionality. " +
+    "Set VITE_ALCHEMY_API_KEY in environment variables for full features."
+  );
+}
+
 // Create the Alchemy Account Kit config with email authentication
 // Email is the primary authentication method, passkeys can be added later
 export const alchemyConfig = createConfig(
   {
     transport: alchemy({ 
-      apiKey: import.meta.env.VITE_ALCHEMY_API_KEY || "demo-api-key" 
+      apiKey: ALCHEMY_API_KEY
     }),
     chain: sepolia,
     enablePopupOauth: true,
