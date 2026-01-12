@@ -16,10 +16,11 @@ workflows:
     environment:
       groups:
         - browserstack_credentials
-        - app_credentials
       vars:
         PACKAGE_NAME: "com.africoin.wallet"
         APP_NAME: "Africoin Wallet"
+        # VITE_ALCHEMY_API_KEY, VITE_SUPABASE_ANON_KEY, VITE_GEMINI_API_KEY 
+        # are set as application-level variables in Codemagic UI
       node: 20.19.6
       java: 21
     triggering:
