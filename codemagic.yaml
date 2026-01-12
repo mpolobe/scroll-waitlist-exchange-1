@@ -16,14 +16,10 @@ workflows:
     environment:
       groups:
         - browserstack_credentials
+        - app_credentials
       vars:
         PACKAGE_NAME: "com.africoin.wallet"
         APP_NAME: "Africoin Wallet"
-        # Environment variables - set these in Codemagic UI if needed
-        # VITE_ALCHEMY_API_KEY: Set in Codemagic environment variables
-        # VITE_ALCHEMY_GAS_POLICY_ID: Set in Codemagic environment variables
-        # VITE_SUPABASE_ANON_KEY: Set in Codemagic environment variables
-        # VITE_GEMINI_API_KEY: Set in Codemagic environment variables
       node: 20.19.6
       java: 21
     triggering:
@@ -62,6 +58,15 @@ workflows:
  
       - name: Build web app
         script: |
+          echo "🔧 Checking environment variables..."
+          if [ -n "$VITE_ALCHEMY_API_KEY" ]; then echo "✅ VITE_ALCHEMY_API_KEY is set"; else echo "❌ VITE_ALCHEMY_API_KEY is NOT set"; fi
+          if [ -n "$VITE_SUPABASE_URL" ]; then echo "✅ VITE_SUPABASE_URL is set"; else echo "❌ VITE_SUPABASE_URL is NOT set"; fi
+          if [ -n "$VITE_SUPABASE_ANON_KEY" ]; then echo "✅ VITE_SUPABASE_ANON_KEY is set"; else echo "❌ VITE_SUPABASE_ANON_KEY is NOT set"; fi
+          if [ -n "$VITE_GEMINI_API_KEY" ]; then echo "✅ VITE_GEMINI_API_KEY is set"; else echo "❌ VITE_GEMINI_API_KEY is NOT set"; fi
+          echo ""
+          echo "🏗️ Building web app..."
+          # Set default Supabase URL if not provided
+          export VITE_SUPABASE_URL="${VITE_SUPABASE_URL:-https://llvprbmrnjvamjzavmhg.supabase.co}"
           npm run build
  
       - name: Setup Capacitor
