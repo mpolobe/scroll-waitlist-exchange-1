@@ -49,10 +49,16 @@ workflows:
           # Use npm ci for faster, more reliable installs in CI/CD
           npm ci
       
-      - name: Seed database
+      - name: Seed database (optional)
+        ignore_failure: true
         script: |
           echo "🌱 Seeding database with initial data..."
-          npm run seed:db
+          if [ -z "$NEXT_PUBLIC_SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "⚠️  Skipping database seeding - Supabase credentials not configured"
+            echo "To enable, add NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Codemagic"
+            exit 0
+          fi
+          npm run seed:db || echo "⚠️  Database seeding failed (non-critical)"
  
       - name: Build web app
         script: |
