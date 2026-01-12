@@ -9,6 +9,44 @@ import { alchemyConfig } from "@/lib/alchemyConfig";
 import { SmartWalletProvider } from "@/contexts/SmartWalletContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { GeminiChatbot } from "@/components/ai/GeminiChatbot";
+import React from "react";
+
+// Error boundary to catch initialization errors
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("App Error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: 20, fontFamily: 'system-ui' }}>
+          <h1>Something went wrong</h1>
+          <p style={{ color: '#666' }}>{this.state.error?.message}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            style={{ marginTop: 10, padding: '8px 16px', cursor: 'pointer' }}
+          >
+            Reload App
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 import Index from "./pages/Index";
 import MerchantPortal from "./pages/MerchantPortal";
 import Blog from "./pages/Blog";
@@ -38,16 +76,17 @@ import Compliance from "./pages/Compliance";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <ThemeProvider defaultTheme="light">
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AlchemyAccountProvider config={alchemyConfig} queryClient={queryClient}>
-          <SmartWalletProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <HashRouter>
-              <Routes>
+  <ErrorBoundary>
+    <ThemeProvider defaultTheme="light">
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <AlchemyAccountProvider config={alchemyConfig} queryClient={queryClient}>
+            <SmartWalletProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <HashRouter>
+                <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/verify-email-sent" element={<VerifyEmailSent />} />
@@ -72,16 +111,17 @@ const App = () => (
                 <Route path="/terms-of-service" element={<TermsOfService />} />
                 <Route path="/cookie-policy" element={<CookiePolicy />} />
                 <Route path="/compliance" element={<Compliance />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <GeminiChatbot />
-            </HashRouter>
-          </TooltipProvider>
-        </SmartWalletProvider>
-      </AlchemyAccountProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  </ThemeProvider>
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <GeminiChatbot />
+              </HashRouter>
+            </TooltipProvider>
+          </SmartWalletProvider>
+        </AlchemyAccountProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
+  </ErrorBoundary>
 );
 
 export default App;
