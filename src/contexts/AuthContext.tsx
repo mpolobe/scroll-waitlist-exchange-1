@@ -62,21 +62,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadProfile(session.user.id);
-        // Sync OAuth profile if user signed in with OAuth
-        syncOAuthProfile(session.user);
-      }
+    // Add timeout to prevent infinite loading if Supabase is unreachable
+    const timeoutId = setTimeout(() => {
+      console.warn('Auth session check timed out');
       setLoading(false);
-    });
+    }, 5000);
+
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        clearTimeout(timeoutId);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          loadProfile(session.user.id);
+          syncOAuthProfile(session.user);
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        clearTimeout(timeoutId);
+        console.error('Auth session error:', error);
+        setLoading(false);
+      });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         loadProfile(session.user.id);
-        // Sync OAuth profile on auth state change
         if (_event === 'SIGNED_IN') {
           await syncOAuthProfile(session.user);
         }
