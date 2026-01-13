@@ -75,19 +75,37 @@ import Compliance from "./pages/Compliance";
 
 const queryClient = new QueryClient();
 
+// Wrapper that only loads Alchemy for wallet pages
+const AlchemyWrapper = ({ children }: { children: React.ReactNode }) => {
+  // Check if Alchemy API key is properly configured
+  const hasAlchemyKey = !!import.meta.env.VITE_ALCHEMY_API_KEY;
+  
+  if (!hasAlchemyKey) {
+    console.warn('Alchemy API key not configured, wallet features disabled');
+    return <>{children}</>;
+  }
+  
+  return (
+    <AlchemyAccountProvider config={alchemyConfig} queryClient={queryClient}>
+      <SmartWalletProvider>
+        {children}
+      </SmartWalletProvider>
+    </AlchemyAccountProvider>
+  );
+};
+
 const App = () => (
   <ErrorBoundary>
     <ThemeProvider defaultTheme="light">
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <AlchemyAccountProvider config={alchemyConfig} queryClient={queryClient}>
-            <SmartWalletProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <HashRouter>
-                <Routes>
-                <Route path="/" element={<Index />} />
+          <AlchemyWrapper>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <HashRouter>
+              <Routes>
+              <Route path="/" element={<Index />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/verify-email-sent" element={<VerifyEmailSent />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
@@ -116,8 +134,7 @@ const App = () => (
                 <GeminiChatbot />
               </HashRouter>
             </TooltipProvider>
-          </SmartWalletProvider>
-        </AlchemyAccountProvider>
+          </AlchemyWrapper>
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
