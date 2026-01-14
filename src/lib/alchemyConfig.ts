@@ -1,8 +1,9 @@
 import { createConfig } from "@account-kit/react";
 import { polygon, alchemy } from "@account-kit/infra";
 
-// Get API key - REQUIRED for production
+// Get API key and App ID - REQUIRED for production
 const ALCHEMY_API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY || "";
+const ALCHEMY_APP_ID = import.meta.env.VITE_ALCHEMY_APP_ID || "6q0y1xpzxlz05jc0";
 
 // Check if Alchemy is configured
 export const isAlchemyConfigured = !!ALCHEMY_API_KEY;
