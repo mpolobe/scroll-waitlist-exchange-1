@@ -72,6 +72,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
 import Compliance from "./pages/Compliance";
+import Staking from "./pages/Staking";
 
 const queryClient = new QueryClient();
 
@@ -129,6 +130,7 @@ const App = () => (
                 <Route path="/terms-of-service" element={<TermsOfService />} />
                 <Route path="/cookie-policy" element={<CookiePolicy />} />
                 <Route path="/compliance" element={<Compliance />} />
+                <Route path="/staking" element={<Staking />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <GeminiChatbot />
