@@ -4,18 +4,32 @@
  * Supports two wallet systems:
  * 1. Alchemy Account Kit (EVM) - For Polygon/Ethereum with gas sponsorship
  * 2. Phone-based Wallet (SUI) - For SUI blockchain via SMS OTP
- * 
- * Use Cases:
- * - Alchemy: Railway ticketing, staff operations (gas-free), social login
- * - Phone: African mobile users, SUI staking, USSD integration
  */
 
 import { createContext, useContext, ReactNode, useMemo, useCallback, useState, useEffect } from 'react';
-import { QueryClient } from '@tanstack/react-query';
-import { AlchemyAccountProvider, useUser, useSmartAccountClient, useLogout, useAccount, useAuthModal } from '@account-kit/react';
-import { alchemyConfig, isAlchemyConfigured, networkInfo } from '@/lib/alchemyConfig';
+import { isAlchemyConfigured, networkInfo } from '@/lib/alchemyConfig';
 import { phoneWalletService, WalletSession, WalletBalance } from '@/services/phoneWalletService';
 import { otpService } from '@/services/otpService';
+
+// Conditionally import Alchemy hooks
+let useUser: () => unknown = () => null;
+let useAccount: (opts: unknown) => { account: { address: string } | null; isLoadingAccount: boolean } = () => ({ account: null, isLoadingAccount: false });
+let useSmartAccountClient: (opts: unknown) => { client: unknown } = () => ({ client: null });
+let useAuthModal: () => { openAuthModal: () => void } = () => ({ openAuthModal: () => {} });
+let useLogout: () => { logout: () => void } = () => ({ logout: () => {} });
+
+if (isAlchemyConfigured) {
+  try {
+    const accountKit = require('@account-kit/react');
+    useUser = accountKit.useUser;
+    useAccount = accountKit.useAccount;
+    useSmartAccountClient = accountKit.useSmartAccountClient;
+    useAuthModal = accountKit.useAuthModal;
+    useLogout = accountKit.useLogout;
+  } catch (e) {
+    console.warn('Alchemy Account Kit not available');
+  }
+}
 
 export interface Transaction {
   id: string;
@@ -43,9 +57,9 @@ interface SmartWalletContextType {
   // Connection state
   walletType: WalletType;
   address: string | null;
-  evmAddress: string | null;  // Alchemy/Polygon address
-  suiAddress: string | null;  // SUI address from phone wallet
-  afcAddress: string | null;  // AFC EVM address from phone wallet
+  evmAddress: string | null;
+  suiAddress: string | null;
+  afcAddress: string | null;
   phoneNumber: string | null;
   isConnected: boolean;
   isConnecting: boolean;
@@ -70,22 +84,16 @@ interface SmartWalletContextType {
   // Network info
   network: typeof networkInfo;
   
-  // Alchemy client (for EVM transactions)
-  alchemyClient: ReturnType<typeof useSmartAccountClient>['client'] | null;
+  // Alchemy client
+  alchemyClient: unknown;
   
-  // Actions - Phone wallet
+  // Actions
+  openAlchemyAuth: (() => void) | null;
   sendOTP: (phoneNumber: string) => Promise<boolean>;
   verifyOTP: (phoneNumber: string, code: string) => Promise<boolean>;
-  
-  // Actions - Alchemy
-  openAlchemyAuth: (() => void) | null;
-  
-  // Actions - General
   disconnect: () => void;
   refreshBalances: () => Promise<void>;
   switchWalletType: (type: WalletType) => void;
-  
-  // Transaction helpers
   addTransaction: (tx: Omit<Transaction, 'id' | 'timestamp'>) => void;
   updateTransaction: (id: string, updates: Partial<Transaction>) => void;
 }
@@ -94,55 +102,9 @@ const SmartWalletContext = createContext<SmartWalletContextType | undefined>(und
 
 const STORAGE_KEY = 'africoin_transactions';
 
-// Inner provider that uses Alchemy hooks (only rendered when Alchemy is available)
-function AlchemyWalletProvider({ 
-  children, 
-  onAlchemyState 
-}: { 
-  children: ReactNode;
-  onAlchemyState: (state: { 
-    address: string | null; 
-    isConnected: boolean; 
-    isLoading: boolean; 
-    client: unknown;
-    openAuthModal: (() => void) | null;
-  }) => void;
-}) {
-  const user = useUser();
-  const { account, isLoadingAccount } = useAccount({ type: "ModularAccountV2" });
-  const { client } = useSmartAccountClient({ type: "ModularAccountV2" });
-  const { logout } = useLogout();
-  const { openAuthModal } = useAuthModal();
-
-  const address = account?.address || null;
-  const isConnected = !!user && !!address;
-
-  useEffect(() => {
-    onAlchemyState({
-      address,
-      isConnected,
-      isLoading: isLoadingAccount,
-      client,
-      openAuthModal,
-    });
-  }, [address, isConnected, isLoadingAccount, client, openAuthModal, onAlchemyState]);
-
-  return <>{children}</>;
-}
-
-// Main provider component
-function SmartWalletProviderInner({ children }: { children: ReactNode }) {
+export function SmartWalletProvider({ children }: { children: ReactNode }) {
   // Wallet type selection
   const [walletType, setWalletType] = useState<WalletType>(null);
-  
-  // Alchemy state (from inner provider)
-  const [alchemyState, setAlchemyState] = useState<{
-    address: string | null;
-    isConnected: boolean;
-    isLoading: boolean;
-    client: unknown;
-    openAuthModal: (() => void) | null;
-  }>({ address: null, isConnected: false, isLoading: false, client: null, openAuthModal: null });
   
   // Phone wallet state
   const [phoneSession, setPhoneSession] = useState<WalletSession | null>(null);
@@ -156,6 +118,24 @@ function SmartWalletProviderInner({ children }: { children: ReactNode }) {
   const [tokens, setTokens] = useState<TokenBalance[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
+  // Alchemy hooks - only call if configured
+  const alchemyUser = isAlchemyConfigured ? useUser() : null;
+  const { account, isLoadingAccount } = isAlchemyConfigured 
+    ? useAccount({ type: "ModularAccountV2" }) 
+    : { account: null, isLoadingAccount: false };
+  const { client: alchemyClient } = isAlchemyConfigured 
+    ? useSmartAccountClient({ type: "ModularAccountV2" }) 
+    : { client: null };
+  const { openAuthModal } = isAlchemyConfigured 
+    ? useAuthModal() 
+    : { openAuthModal: () => {} };
+  const { logout: alchemyLogout } = isAlchemyConfigured 
+    ? useLogout() 
+    : { logout: () => {} };
+
+  const alchemyAddress = account?.address || null;
+  const alchemyConnected = !!alchemyUser && !!alchemyAddress;
+
   // Load existing phone session on mount
   useEffect(() => {
     const existingSession = phoneWalletService.getSession();
@@ -168,18 +148,18 @@ function SmartWalletProviderInner({ children }: { children: ReactNode }) {
 
   // Auto-detect Alchemy connection
   useEffect(() => {
-    if (alchemyState.isConnected && !walletType) {
+    if (alchemyConnected && !walletType) {
       setWalletType('alchemy');
     }
-  }, [alchemyState.isConnected, walletType]);
+  }, [alchemyConnected, walletType]);
 
   // Determine current connection state
   const isConnected = walletType === 'alchemy' 
-    ? alchemyState.isConnected 
+    ? alchemyConnected 
     : (walletType === 'phone' && authStep === 'authenticated' && !!phoneSession);
 
   const address = walletType === 'alchemy' 
-    ? alchemyState.address 
+    ? alchemyAddress 
     : phoneSession?.suiAddress || null;
 
   // Load transactions from localStorage
@@ -187,11 +167,15 @@ function SmartWalletProviderInner({ children }: { children: ReactNode }) {
     if (address) {
       const stored = localStorage.getItem(`${STORAGE_KEY}_${address}`);
       if (stored) {
-        const parsed = JSON.parse(stored).map((tx: Transaction & { timestamp: string }) => ({
-          ...tx,
-          timestamp: new Date(tx.timestamp)
-        }));
-        setTransactions(parsed);
+        try {
+          const parsed = JSON.parse(stored).map((tx: Transaction & { timestamp: string }) => ({
+            ...tx,
+            timestamp: new Date(tx.timestamp)
+          }));
+          setTransactions(parsed);
+        } catch (e) {
+          console.error('Failed to parse transactions:', e);
+        }
       }
     }
   }, [address]);
@@ -219,7 +203,6 @@ function SmartWalletProviderInner({ children }: { children: ReactNode }) {
           ]);
         }
       }
-      // Alchemy balances would be fetched differently via their SDK
     } catch (error) {
       console.error('Failed to fetch balances:', error);
     } finally {
@@ -314,14 +297,15 @@ function SmartWalletProviderInner({ children }: { children: ReactNode }) {
       otpService.clearOTP(phoneSession?.phoneNumber || '');
       setPhoneSession(null);
       setAuthStep('idle');
+    } else if (walletType === 'alchemy') {
+      alchemyLogout();
     }
-    // Alchemy logout is handled by their SDK
     setWalletType(null);
     setWalletBalance(null);
     setTokens([]);
     setTransactions([]);
     setAuthError(null);
-  }, [walletType, phoneSession?.phoneNumber]);
+  }, [walletType, phoneSession?.phoneNumber, alchemyLogout]);
 
   // Switch wallet type
   const switchWalletType = useCallback((type: WalletType) => {
@@ -354,12 +338,12 @@ function SmartWalletProviderInner({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({
     walletType,
     address,
-    evmAddress: alchemyState.address,
+    evmAddress: alchemyAddress,
     suiAddress: phoneSession?.suiAddress || null,
     afcAddress: phoneSession?.afcAddress || null,
     phoneNumber: phoneSession?.phoneNumber || null,
     isConnected,
-    isConnecting: isConnecting || alchemyState.isLoading,
+    isConnecting: isConnecting || isLoadingAccount,
     isLoadingBalances,
     isAlchemyAvailable: isAlchemyConfigured,
     isPhoneWalletAvailable: true,
@@ -370,8 +354,8 @@ function SmartWalletProviderInner({ children }: { children: ReactNode }) {
     authStep,
     authError,
     network: networkInfo,
-    alchemyClient: alchemyState.client as ReturnType<typeof useSmartAccountClient>['client'] | null,
-    openAlchemyAuth: alchemyState.openAuthModal,
+    alchemyClient,
+    openAlchemyAuth: isAlchemyConfigured ? openAuthModal : null,
     sendOTP,
     verifyOTP,
     disconnect,
@@ -380,38 +364,19 @@ function SmartWalletProviderInner({ children }: { children: ReactNode }) {
     addTransaction,
     updateTransaction,
   }), [
-    walletType, address, alchemyState, phoneSession, isConnected, isConnecting,
-    isLoadingBalances, balance, tokens, walletBalance, transactions, authStep,
-    authError, sendOTP, verifyOTP, disconnect, fetchBalances, switchWalletType,
-    addTransaction, updateTransaction,
+    walletType, address, alchemyAddress, phoneSession, isConnected, isConnecting,
+    isLoadingAccount, isLoadingBalances, balance, tokens, walletBalance, transactions,
+    authStep, authError, alchemyClient, openAuthModal, sendOTP, verifyOTP, disconnect,
+    fetchBalances, switchWalletType, addTransaction, updateTransaction,
   ]);
 
-  // Wrap with Alchemy provider if configured
-  const content = (
+  return (
     <SmartWalletContext.Provider value={value}>
       {children}
     </SmartWalletContext.Provider>
   );
-
-  if (isAlchemyConfigured && alchemyConfig) {
-    return (
-      <AlchemyAccountProvider config={alchemyConfig} queryClient={new QueryClient()}>
-        <AlchemyWalletProvider onAlchemyState={setAlchemyState}>
-          {content}
-        </AlchemyWalletProvider>
-      </AlchemyAccountProvider>
-    );
-  }
-
-  return content;
 }
 
-// Export the provider
-export function SmartWalletProvider({ children }: { children: ReactNode }) {
-  return <SmartWalletProviderInner>{children}</SmartWalletProviderInner>;
-}
-
-// Hook to use the wallet context
 export const useSmartWallet = () => {
   const context = useContext(SmartWalletContext);
   if (!context) {
