@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AlchemyAccountProvider } from "@account-kit/react";
+import { alchemyConfig, isAlchemyConfigured } from "@/lib/alchemyConfig";
 import { SmartWalletProvider } from "@/contexts/SmartWalletContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { GeminiChatbot } from "@/components/ai/GeminiChatbot";
@@ -74,13 +76,26 @@ import Staking from "./pages/Staking";
 
 const queryClient = new QueryClient();
 
+// Wrapper for Alchemy provider - only renders if configured
+const AlchemyWrapper = ({ children }: { children: React.ReactNode }) => {
+  if (isAlchemyConfigured && alchemyConfig) {
+    return (
+      <AlchemyAccountProvider config={alchemyConfig} queryClient={queryClient}>
+        {children}
+      </AlchemyAccountProvider>
+    );
+  }
+  return <>{children}</>;
+};
+
 const App = () => (
   <ErrorBoundary>
     <ThemeProvider defaultTheme="light">
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <SmartWalletProvider>
-            <TooltipProvider>
+        <AlchemyWrapper>
+          <AuthProvider>
+            <SmartWalletProvider>
+              <TooltipProvider>
               <Toaster />
               <Sonner />
               <HashRouter>
@@ -114,9 +129,10 @@ const App = () => (
                 </Routes>
                 <GeminiChatbot />
               </HashRouter>
-            </TooltipProvider>
-          </SmartWalletProvider>
-        </AuthProvider>
+              </TooltipProvider>
+            </SmartWalletProvider>
+          </AuthProvider>
+        </AlchemyWrapper>
       </QueryClientProvider>
     </ThemeProvider>
   </ErrorBoundary>
