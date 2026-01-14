@@ -54,3 +54,8 @@ ios/App/build/
 *.tmp
 *.temp
 dummy*.txt
+
+# Hardhat/Blockchain
+blockchain/artifacts/
+blockchain/cache/
+blockchain/typechain-types/
