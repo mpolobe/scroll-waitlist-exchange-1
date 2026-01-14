@@ -4,8 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
-import { AlchemyAccountProvider } from "@account-kit/react";
-import { alchemyConfig } from "@/lib/alchemyConfig";
 import { SmartWalletProvider } from "@/contexts/SmartWalletContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { GeminiChatbot } from "@/components/ai/GeminiChatbot";
@@ -76,31 +74,12 @@ import Staking from "./pages/Staking";
 
 const queryClient = new QueryClient();
 
-// Wrapper that only loads Alchemy for wallet pages
-const AlchemyWrapper = ({ children }: { children: React.ReactNode }) => {
-  // Check if Alchemy API key is properly configured
-  const hasAlchemyKey = !!import.meta.env.VITE_ALCHEMY_API_KEY;
-  
-  if (!hasAlchemyKey) {
-    console.warn('Alchemy API key not configured, wallet features disabled');
-    return <>{children}</>;
-  }
-  
-  return (
-    <AlchemyAccountProvider config={alchemyConfig} queryClient={queryClient}>
-      <SmartWalletProvider>
-        {children}
-      </SmartWalletProvider>
-    </AlchemyAccountProvider>
-  );
-};
-
 const App = () => (
   <ErrorBoundary>
     <ThemeProvider defaultTheme="light">
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <AlchemyWrapper>
+          <SmartWalletProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
@@ -136,7 +115,7 @@ const App = () => (
                 <GeminiChatbot />
               </HashRouter>
             </TooltipProvider>
-          </AlchemyWrapper>
+          </SmartWalletProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
