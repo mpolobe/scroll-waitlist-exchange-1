@@ -59,3 +59,4 @@ dummy*.txt
 blockchain/artifacts/
 blockchain/cache/
 blockchain/typechain-types/
+.env.local
