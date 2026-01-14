@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useSmartWallet } from '@/contexts/SmartWalletContext';
-import { useAuthModal } from '@account-kit/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,17 +31,8 @@ export function PhoneWalletAuth({ onSuccess, compact = false, showAlchemy = true
     sendOTP,
     verifyOTP,
     disconnect,
-    switchWalletType,
+    openAlchemyAuth,
   } = useSmartWallet();
-
-  // Alchemy auth modal - only use if available
-  let openAuthModal: (() => void) | null = null;
-  try {
-    const authModal = useAuthModal();
-    openAuthModal = authModal?.openAuthModal || null;
-  } catch {
-    // Alchemy not configured
-  }
 
   const [phone, setPhone] = useState('');
   const [otpCode, setOtpCode] = useState('');
@@ -328,8 +318,8 @@ export function PhoneWalletAuth({ onSuccess, compact = false, showAlchemy = true
                 </p>
                 <Button
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                  onClick={() => openAuthModal?.()}
-                  disabled={!openAuthModal}
+                  onClick={() => openAlchemyAuth?.()}
+                  disabled={!openAlchemyAuth}
                 >
                   <Mail className="w-4 h-4 mr-2" />
                   Connect with Email

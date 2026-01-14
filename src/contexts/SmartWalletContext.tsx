@@ -11,8 +11,8 @@
  */
 
 import { createContext, useContext, ReactNode, useMemo, useCallback, useState, useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AlchemyAccountProvider, useUser, useSmartAccountClient, useLogout, useAccount } from '@account-kit/react';
+import { QueryClient } from '@tanstack/react-query';
+import { AlchemyAccountProvider, useUser, useSmartAccountClient, useLogout, useAccount, useAuthModal } from '@account-kit/react';
 import { alchemyConfig, isAlchemyConfigured, networkInfo } from '@/lib/alchemyConfig';
 import { phoneWalletService, WalletSession, WalletBalance } from '@/services/phoneWalletService';
 import { otpService } from '@/services/otpService';
@@ -77,6 +77,9 @@ interface SmartWalletContextType {
   sendOTP: (phoneNumber: string) => Promise<boolean>;
   verifyOTP: (phoneNumber: string, code: string) => Promise<boolean>;
   
+  // Actions - Alchemy
+  openAlchemyAuth: (() => void) | null;
+  
   // Actions - General
   disconnect: () => void;
   refreshBalances: () => Promise<void>;
@@ -97,12 +100,19 @@ function AlchemyWalletProvider({
   onAlchemyState 
 }: { 
   children: ReactNode;
-  onAlchemyState: (state: { address: string | null; isConnected: boolean; isLoading: boolean; client: unknown }) => void;
+  onAlchemyState: (state: { 
+    address: string | null; 
+    isConnected: boolean; 
+    isLoading: boolean; 
+    client: unknown;
+    openAuthModal: (() => void) | null;
+  }) => void;
 }) {
   const user = useUser();
   const { account, isLoadingAccount } = useAccount({ type: "ModularAccountV2" });
   const { client } = useSmartAccountClient({ type: "ModularAccountV2" });
   const { logout } = useLogout();
+  const { openAuthModal } = useAuthModal();
 
   const address = account?.address || null;
   const isConnected = !!user && !!address;
@@ -113,8 +123,9 @@ function AlchemyWalletProvider({
       isConnected,
       isLoading: isLoadingAccount,
       client,
+      openAuthModal,
     });
-  }, [address, isConnected, isLoadingAccount, client, onAlchemyState]);
+  }, [address, isConnected, isLoadingAccount, client, openAuthModal, onAlchemyState]);
 
   return <>{children}</>;
 }
@@ -130,7 +141,8 @@ function SmartWalletProviderInner({ children }: { children: ReactNode }) {
     isConnected: boolean;
     isLoading: boolean;
     client: unknown;
-  }>({ address: null, isConnected: false, isLoading: false, client: null });
+    openAuthModal: (() => void) | null;
+  }>({ address: null, isConnected: false, isLoading: false, client: null, openAuthModal: null });
   
   // Phone wallet state
   const [phoneSession, setPhoneSession] = useState<WalletSession | null>(null);
@@ -359,6 +371,7 @@ function SmartWalletProviderInner({ children }: { children: ReactNode }) {
     authError,
     network: networkInfo,
     alchemyClient: alchemyState.client as ReturnType<typeof useSmartAccountClient>['client'] | null,
+    openAlchemyAuth: alchemyState.openAuthModal,
     sendOTP,
     verifyOTP,
     disconnect,
