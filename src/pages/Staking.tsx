@@ -13,6 +13,7 @@ import { StakeModal } from '@/components/staking/StakeModal';
 import { UnstakeModal } from '@/components/staking/UnstakeModal';
 import { RewardsCard } from '@/components/staking/RewardsCard';
 import { RailwayProgress } from '@/components/staking/RailwayProgress';
+import { PhoneWalletAuth } from '@/components/wallet/PhoneWalletAuth';
 import { useStaking } from '@/hooks/useStaking';
 import { Stake } from '@/services/stakingService';
 import { 
@@ -23,13 +24,14 @@ import {
   RefreshCw,
   Train,
   MapPin,
-  Loader2
+  Loader2,
+  Phone
 } from 'lucide-react';
 
 export default function Staking() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { address, isConnected: walletConnected } = useSmartWallet();
+  const { address, suiAddress, isConnected: walletConnected, phoneNumber } = useSmartWallet();
   
   const [stakeModalOpen, setStakeModalOpen] = useState(false);
   const [unstakeModalOpen, setUnstakeModalOpen] = useState(false);
@@ -103,6 +105,46 @@ export default function Staking() {
   const pendingRewardsFormatted = userData ? formatAmount(userData.pendingRewards) : '0';
   const balanceFormatted = userData ? formatAmount(userData.balance) : '0';
 
+  // Show wallet connection if not connected
+  if (!walletConnected) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-orange-900">
+        <MarketingNav />
+        
+        <div className="max-w-xl mx-auto px-4 py-24">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-white flex items-center justify-center gap-3">
+              <Coins className="w-8 h-8 text-orange-500" />
+              AFC Staking
+            </h1>
+            <p className="text-gray-400 mt-2">
+              Connect your wallet to start staking and earn rewards
+            </p>
+          </div>
+
+          <PhoneWalletAuth />
+
+          <div className="mt-8 grid grid-cols-3 gap-4 text-center">
+            <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+              <p className="text-2xl font-bold text-orange-400">20%</p>
+              <p className="text-sm text-gray-400">Max APY</p>
+            </div>
+            <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+              <p className="text-2xl font-bold text-orange-400">$2.5M</p>
+              <p className="text-sm text-gray-400">Total Staked</p>
+            </div>
+            <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+              <p className="text-2xl font-bold text-orange-400">1,234</p>
+              <p className="text-sm text-gray-400">Stakers</p>
+            </div>
+          </div>
+        </div>
+
+        <MarketingFooter />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-orange-900">
       <MarketingNav />
@@ -118,6 +160,12 @@ export default function Staking() {
             <p className="text-gray-400 mt-1">
               Stake wAFC to earn rewards and fund African railway infrastructure
             </p>
+            {phoneNumber && (
+              <p className="text-sm text-orange-400 mt-1 flex items-center gap-1">
+                <Phone className="w-3 h-3" />
+                Connected: {phoneNumber}
+              </p>
+            )}
           </div>
           <Button 
             variant="outline" 
