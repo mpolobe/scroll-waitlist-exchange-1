@@ -5,8 +5,11 @@ import { polygon, alchemy } from "@account-kit/infra";
 const ALCHEMY_API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY || "";
 const ALCHEMY_APP_ID = import.meta.env.VITE_ALCHEMY_APP_ID || "6q0y1xpzxlz05jc0";
 
-// Check if Alchemy is configured
-export const isAlchemyConfigured = !!ALCHEMY_API_KEY;
+// Check if Alchemy is configured with a real API key (not placeholder)
+const isPlaceholder = !ALCHEMY_API_KEY || 
+  ALCHEMY_API_KEY === "your_alchemy_api_key_here" || 
+  ALCHEMY_API_KEY.startsWith("your_");
+export const isAlchemyConfigured = !isPlaceholder;
 
 if (!ALCHEMY_API_KEY) {
   console.warn(
