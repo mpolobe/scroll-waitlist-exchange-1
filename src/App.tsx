@@ -1,17 +1,2 @@
-import React from 'react';
-import { AlchemyAccountProvider } from 'your-alchemy-package';
-import YourAppComponent from './YourAppComponent';
-
-const App = () => {
-  const isAlchemyConfigured = true; // This should be dynamically determined 
-
-  return (
-    <AlchemyAccountProvider>
-      <Layout>
-        <YourAppComponent />
-      </Layout>
-    </AlchemyAccountProvider>
-  );
-};
-
-export default App;
+import { AlchemyAccountProvider } from '@account-kit/react';
+// ...rest of your App implementation...
