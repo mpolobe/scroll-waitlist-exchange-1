@@ -3,7 +3,6 @@ import { isAlchemyConfigured } from '@/lib/alchemyConfig';
 import { phoneWalletService, WalletSession, WalletBalance } from '@/services/phoneWalletService';
 import { otpService } from '@/services/otpService';
 
-// Dynamic placeholders for account kit exports
 let AlchemyAccountProvider: React.ComponentType<any> | null = null;
 let useUser: () => unknown = () => null;
 let useAccount: (opts: unknown) => { account: { address: string } | null; isLoadingAccount: boolean } = () => ({ account: null, isLoadingAccount: false });
@@ -21,11 +20,10 @@ if (isAlchemyConfigured) {
     useAuthModal = accountKit.useAuthModal;
     useLogout = accountKit.useLogout;
   } catch (e) {
-    console.warn('Alchemy Account Kit not available');
+    console.warn("Alchemy Account Kit not available");
   }
 }
 
-// Dummy hooks for fallback, export actual/dummy as needed based on config:
 const useUserDummy = () => null;
 const useAccountDummy = () => ({ account: null, isLoadingAccount: false });
 const useSmartAccountClientDummy = () => ({ client: null });
@@ -36,11 +34,14 @@ export const SmartWalletProvider: React.FC<{ children: React.ReactNode }> = ({ c
   if (isAlchemyConfigured && AlchemyAccountProvider) {
     return <AlchemyAccountProvider>{children}</AlchemyAccountProvider>;
   }
+  if (isAlchemyConfigured && !AlchemyAccountProvider) {
+    throw new Error("AlchemyAccountProvider required when isAlchemyConfigured is true");
+  }
   return <>{children}</>;
 };
 
-export const useSmartWalletUser = isAlchemyConfigured ? useUser : useUserDummy;
-export const useSmartWalletAccount = isAlchemyConfigured ? useAccount : useAccountDummy;
-export const useSmartWalletClient = isAlchemyConfigured ? useSmartAccountClient : useSmartAccountClientDummy;
-export const useSmartWalletAuthModal = isAlchemyConfigured ? useAuthModal : useAuthModalDummy;
-export const useSmartWalletLogout = isAlchemyConfigured ? useLogout : useLogoutDummy;
+export const useSmartWalletUser = (isAlchemyConfigured && AlchemyAccountProvider) ? useUser : useUserDummy;
+export const useSmartWalletAccount = (isAlchemyConfigured && AlchemyAccountProvider) ? useAccount : useAccountDummy;
+export const useSmartWalletClient = (isAlchemyConfigured && AlchemyAccountProvider) ? useSmartAccountClient : useSmartAccountClientDummy;
+export const useSmartWalletAuthModal = (isAlchemyConfigured && AlchemyAccountProvider) ? useAuthModal : useAuthModalDummy;
+export const useSmartWalletLogout = (isAlchemyConfigured && AlchemyAccountProvider) ? useLogout : useLogoutDummy;
