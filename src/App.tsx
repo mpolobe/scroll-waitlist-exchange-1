@@ -1,22 +1,35 @@
-const App = () => {
-  const { isAlchemyConfigured, alchemyConfig } = useContext(SomeContext); // assuming context provides isAlchemyConfigured and alchemyConfig
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { isAlchemyConfigured } from "@/lib/alchemyConfig";
+import { SmartWalletProvider } from "@/contexts/SmartWalletContext";
+import HomePage from "@/pages/HomePage";
+import WalletDashboard from "@/pages/WalletDashboard";
 
-  const AlchemyAccountProvider = isAlchemyConfigured && alchemyConfig
-    ? require('@account-kit/react').AlchemyAccountProvider
-    : null;
+// Conditionally resolve AlchemyAccountProvider at runtime (if configured/package present)
+let AlchemyAccountProvider: React.FC<{children: React.ReactNode}> = ({ children }) => <>{children}</>;
+if (isAlchemyConfigured) {
+  try {
+    // Only require if you are sure @account-kit/react is installed.
+    AlchemyAccountProvider = require("@account-kit/react").AlchemyAccountProvider;
+  } catch (err) {
+    // Package not installed, fall back to passthrough
+    console.warn("AlchemyAccountProvider unavailable:", err);
+  }
+}
 
+export default function App() {
   return (
-    <appTree>
-      {/* other components */}
-      {AlchemyAccountProvider ? (
-        <AlchemyAccountProvider config={alchemyConfig}>
-          {/* children wrapped with AlchemyAccountProvider */}
-        </AlchemyAccountProvider>
-      ) : (
-        {/* children without provider */}
-      )}
-    </appTree>
+    <Router>
+      <AlchemyAccountProvider>
+        <SmartWalletProvider>
+          {/* Your app routes and structure */}
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/wallet" element={<WalletDashboard />} />
+            {/* ...additional routes as needed... */}
+          </Routes>
+        </SmartWalletProvider>
+      </AlchemyAccountProvider>
+    </Router>
   );
-};
-
-export default App;
+}
