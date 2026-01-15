@@ -1,25 +1,42 @@
-import React, { createContext, useContext } from "react";
-import { useUser, useAccount, useSmartAccountClient, useAuthModal, useLogout } from "@account-kit/react";
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-const SmartWalletContext = createContext<any>(null);
+interface SmartWalletContextType {
+  address: string | null;
+  isConnected: boolean;
+  connect: () => Promise<void>;
+  disconnect: () => void;
+}
 
-export const SmartWalletProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  // Alchemy hooks - always call unconditionally (they return defaults when not configured)
-  const alchemyUser = useUser();
-  const { account, isLoadingAccount } = useAccount({ type: "ModularAccountV2" });
-  const { client: alchemyClient } = useSmartAccountClient({ type: "ModularAccountV2" });
-  const { openAuthModal } = useAuthModal();
-  const { logout: alchemyLogout } = useLogout();
+const SmartWalletContext = createContext<SmartWalletContextType | undefined>(undefined);
 
-  const value = {
-    alchemyUser,
-    account,
-    isLoadingAccount,
-    alchemyClient,
-    openAuthModal,
-    alchemyLogout
-    // Add additional wallet state and methods here as needed
+interface SmartWalletProviderProps {
+  children: ReactNode;
+}
+
+export const SmartWalletProvider: React.FC<SmartWalletProviderProps> = ({ children }) => {
+  const [address, setAddress] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+
+  const connect = async () => {
+    try {
+      if (window.ethereum) {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        if (accounts.length > 0) {
+          setAddress(accounts[0]);
+          setIsConnected(true);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to connect:', err);
+    }
   };
+
+  const disconnect = () => {
+    setAddress(null);
+    setIsConnected(false);
+  };
+
+  const value = { address, isConnected, connect, disconnect };
 
   return (
     <SmartWalletContext.Provider value={value}>
@@ -28,4 +45,16 @@ export const SmartWalletProvider: React.FC<{children: React.ReactNode}> = ({ chi
   );
 };
 
-export const useSmartWallet = () => useContext(SmartWalletContext);
+export const useSmartWallet = () => {
+  const context = useContext(SmartWalletContext);
+  if (!context) {
+    throw new Error('useSmartWallet must be used within SmartWalletProvider');
+  }
+  return context;
+};
+
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
