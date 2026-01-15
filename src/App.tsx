@@ -1,14 +1,22 @@
-import { AlchemyAccountProvider } from '@account-kit/react';
+const App = () => {
+  const { isAlchemyConfigured, alchemyConfig } = useContext(SomeContext); // assuming context provides isAlchemyConfigured and alchemyConfig
 
-// Retaining all previous routes/providers/context logic here
+  const AlchemyAccountProvider = isAlchemyConfigured && alchemyConfig
+    ? require('@account-kit/react').AlchemyAccountProvider
+    : null;
 
-function App() {
-    return (
-        <AlchemyAccountProvider>
-            {/* All previous routes/providers/context logic goes here */}
-            {/* Rest of App implementation below import */}
+  return (
+    <appTree>
+      {/* other components */}
+      {AlchemyAccountProvider ? (
+        <AlchemyAccountProvider config={alchemyConfig}>
+          {/* children wrapped with AlchemyAccountProvider */}
         </AlchemyAccountProvider>
-    );
-}
+      ) : (
+        {/* children without provider */}
+      )}
+    </appTree>
+  );
+};
 
 export default App;
