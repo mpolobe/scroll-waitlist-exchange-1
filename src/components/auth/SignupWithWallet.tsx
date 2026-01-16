@@ -1,12 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAuthenticate, useSignerStatus, useUser } from '@account-kit/react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Loader2, UserPlus, CheckCircle, Wallet, Mail, Link2 } from 'lucide-react';
-import { AuthMethodSelector, AuthMethod } from '../wallet/AuthMethodSelector';
 import { OTPVerification } from './OTPVerification';
 import { MagicLinkSent } from './MagicLinkSent';
 import { SocialLoginButtons } from './SocialLoginButtons';
@@ -22,20 +20,8 @@ export default function SignupWithWallet() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [signupView, setSignupView] = useState<SignupView>('form');
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [walletError, setWalletError] = useState('');
-  const { signUp, signInWithOTP, signInWithMagicLink, signInWithGoogle, signInWithApple, signInWithFacebook } = useAuth();
+  const { signUp, signInWithOTP, signInWithMagicLink } = useAuth();
   const navigate = useNavigate();
-  
-  const { authenticate, isPending: isAuthenticating } = useAuthenticate();
-  const { isConnected: signerConnected } = useSignerStatus();
-  const alchemyUser = useUser();
-
-  useEffect(() => {
-    if (signupView === 'wallet' && signerConnected && alchemyUser) {
-      navigate('/wallet');
-    }
-  }, [signupView, signerConnected, alchemyUser, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,13 +29,11 @@ export default function SignupWithWallet() {
     if (!email || !password || !fullName) { setError('Please fill in all required fields'); return; }
     if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
     setIsLoading(true);
-    // Pass phone number if provided
     const { error: signUpError } = await signUp(email, password, fullName, referralCode, phone);
     
     if (signUpError) { setError(signUpError.message); setIsLoading(false); return; }
     setIsLoading(false);
     setSignupView('wallet');
-    setShowAuthModal(true);
   };
 
   const handleOTPSignup = async () => {
@@ -70,22 +54,8 @@ export default function SignupWithWallet() {
     setSignupView('magiclink');
   };
 
-  const handleAuthMethodSelect = async (method: AuthMethod) => {
-    setWalletError('');
-    if (['faceid', 'touchid', 'passcode'].includes(method)) {
-      authenticate({ type: "passkey", email, createNew: true }, {
-        onSuccess: () => { setShowAuthModal(false); navigate('/wallet'); },
-        onError: (err) => setWalletError(err.message || 'Failed to create wallet.'),
-      });
-    } else if (method === 'otp') { setShowAuthModal(false); handleOTPSignup(); }
-    else if (method === 'magiclink') { setShowAuthModal(false); handleMagicLink(); }
-    else if (method === 'google') await signInWithGoogle();
-    else if (method === 'apple') await signInWithApple();
-    else if (method === 'facebook') await signInWithFacebook();
-  };
-
   if (signupView === 'otp') {
-    return <OTPVerification email={email} onSuccess={() => { setSignupView('wallet'); setShowAuthModal(true); }} onBack={() => setSignupView('form')} />;
+    return <OTPVerification email={email} onSuccess={() => { setSignupView('wallet'); }} onBack={() => setSignupView('form')} />;
   }
 
   if (signupView === 'magiclink') {
@@ -97,14 +67,10 @@ export default function SignupWithWallet() {
       <div className="text-center py-8">
         <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
         <h3 className="text-xl font-bold text-gray-900 mb-2">Account Created!</h3>
-        <p className="text-gray-600 mb-4">Now let's set up your Smart Wallet</p>
-        <Button onClick={() => setShowAuthModal(true)} className="w-full bg-gradient-to-r from-orange-500 to-amber-500">
-          <Wallet className="w-4 h-4 mr-2" />Create Wallet
+        <p className="text-gray-600 mb-4">Your account is ready. Go to your wallet to get started.</p>
+        <Button onClick={() => navigate('/wallet')} className="w-full bg-gradient-to-r from-orange-500 to-amber-500">
+          <Wallet className="w-4 h-4 mr-2" />Go to Wallet
         </Button>
-        <button onClick={() => navigate('/wallet')} className="mt-3 text-sm text-orange-600 hover:underline font-medium">Skip to connect</button>
-
-        <AuthMethodSelector open={showAuthModal} onOpenChange={setShowAuthModal} onSelectMethod={handleAuthMethodSelect}
-          isAuthenticating={isAuthenticating} error={walletError} title="Create Your Wallet" description="Choose your authentication method" showPasskeyOnly />
       </div>
     );
   }
