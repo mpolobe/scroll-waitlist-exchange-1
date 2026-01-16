@@ -1,10 +1,17 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useSuiWallet } from './SuiWalletContext';
 
+// Re-export SUI wallet functionality through SmartWallet interface for backward compatibility
 interface SmartWalletContextType {
   address: string | null;
   isConnected: boolean;
+  isLoading: boolean;
+  suiBalance: string;
+  afcBalance: string;
+  afcBalanceRaw: bigint;
   connect: () => Promise<void>;
   disconnect: () => void;
+  refreshBalance: () => Promise<void>;
 }
 
 const SmartWalletContext = createContext<SmartWalletContextType | undefined>(undefined);
@@ -14,43 +21,25 @@ interface SmartWalletProviderProps {
 }
 
 export const SmartWalletProvider: React.FC<SmartWalletProviderProps> = ({ children }) => {
-  const [address, setAddress] = useState<string | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-
-  const connect = async () => {
-    try {
-      if (window.ethereum) {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        if (accounts.length > 0) {
-          setAddress(accounts[0]);
-          setIsConnected(true);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to connect:', err);
-    }
-  };
-
-  const disconnect = () => {
-    setAddress(null);
-    setIsConnected(false);
-  };
-
-  const value = { address, isConnected, connect, disconnect };
-
-  return (
-    <SmartWalletContext.Provider value={value}>
-      {children}
-    </SmartWalletContext.Provider>
-  );
+  // This is now a pass-through - actual wallet logic is in SuiWalletContext
+  return <>{children}</>;
 };
 
-export const useSmartWallet = () => {
-  const context = useContext(SmartWalletContext);
-  if (!context) {
-    throw new Error('useSmartWallet must be used within SmartWalletProvider');
-  }
-  return context;
+export const useSmartWallet = (): SmartWalletContextType => {
+  // Use SUI wallet under the hood
+  const suiWallet = useSuiWallet();
+  
+  return {
+    address: suiWallet.address,
+    isConnected: suiWallet.isConnected,
+    isLoading: suiWallet.isLoading,
+    suiBalance: suiWallet.suiBalance,
+    afcBalance: suiWallet.afcBalance,
+    afcBalanceRaw: suiWallet.afcBalanceRaw,
+    connect: suiWallet.connect,
+    disconnect: suiWallet.disconnect,
+    refreshBalance: suiWallet.refreshBalance,
+  };
 };
 
 declare global {
