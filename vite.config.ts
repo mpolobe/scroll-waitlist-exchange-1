@@ -13,13 +13,13 @@ try {
 }
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   define: {
     'import.meta.env.VITE_GIT_COMMIT_HASH': JSON.stringify(commitHash),
     'import.meta.env.VITE_BUILD_DATE': JSON.stringify(buildDate),
   },
-  // Use relative base path for Capacitor compatibility (file:// protocol)
-  base: './',
+  // Use absolute path for web deployment, relative for Capacitor builds
+  base: process.env.CAPACITOR_BUILD ? './' : '/',
   
   server: {
     host: "::",
@@ -41,4 +41,4 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
   },
-});
+}));
