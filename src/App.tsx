@@ -7,7 +7,7 @@ import WalletDashboard from "@/pages/WalletDashboard";
 
 // Conditionally resolve AlchemyAccountProvider at runtime (if configured/package present)
 let AlchemyAccountProvider: React.FC<{children: React.ReactNode}> = ({ children }) => <>{children}</>;
-if (isAlchemyConfigured) {
+if (isAlchemyConfigured()) {
   try {
     // Only require if you are sure @account-kit/react is installed.
     AlchemyAccountProvider = require("@account-kit/react").AlchemyAccountProvider;
