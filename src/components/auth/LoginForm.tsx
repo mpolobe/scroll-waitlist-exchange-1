@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Loader2, LogIn, Mail, Link2 } from 'lucide-react';
+import { Loader2, LogIn, Mail, Link2, RefreshCw } from 'lucide-react';
 import { OTPVerification } from './OTPVerification';
 import { MagicLinkSent } from './MagicLinkSent';
 import { SocialLoginButtons } from './SocialLoginButtons';
@@ -17,18 +18,56 @@ export default function LoginForm() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loginView, setLoginView] = useState<LoginView>('form');
+  const [showResendVerification, setShowResendVerification] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
   const { signIn, signInWithOTP, signInWithMagicLink } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setShowResendVerification(false);
     if (!email || !password) { setError('Please fill in all fields'); return; }
     setIsLoading(true);
     const { error: signInError } = await signIn(email, password);
     setIsLoading(false);
-    if (signInError) { setError(signInError.message); return; }
+    if (signInError) { 
+      setError(signInError.message);
+      // Check if error is about email not being verified
+      if (signInError.message.toLowerCase().includes('email not confirmed') || 
+          signInError.message.toLowerCase().includes('not verified') ||
+          signInError.message.toLowerCase().includes('confirm your email')) {
+        setShowResendVerification(true);
+      }
+      return; 
+    }
     navigate('/wallet');
+  };
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      setError('Please enter your email address first');
+      return;
+    }
+    setResendingVerification(true);
+    try {
+      // Use Supabase's resend confirmation email
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/verify-email`
+        }
+      });
+      if (error) throw error;
+      setError('');
+      setShowResendVerification(false);
+      alert('Verification email sent! Please check your inbox.');
+    } catch (err: any) {
+      setError(err.message || 'Failed to resend verification email');
+    } finally {
+      setResendingVerification(false);
+    }
   };
 
   const handleOTPLogin = async () => {
@@ -71,7 +110,27 @@ export default function LoginForm() {
         <Label htmlFor="login-password">Password</Label>
         <Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" className="mt-1" />
       </div>
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && (
+        <div className="space-y-2">
+          <p className="text-red-500 text-sm">{error}</p>
+          {showResendVerification && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm"
+              onClick={handleResendVerification}
+              disabled={resendingVerification}
+              className="w-full text-orange-600 border-orange-300 hover:bg-orange-50"
+            >
+              {resendingVerification ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sending...</>
+              ) : (
+                <><RefreshCw className="w-4 h-4 mr-2" />Resend Verification Email</>
+              )}
+            </Button>
+          )}
+        </div>
+      )}
       <Button type="submit" disabled={isLoading} className="w-full bg-gradient-to-r from-purple-500 to-pink-600">
         {isLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Signing In...</> : 'Sign In'}
       </Button>

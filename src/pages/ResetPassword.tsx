@@ -17,19 +17,37 @@ export default function ResetPassword() {
   const [validToken, setValidToken] = useState(false);
 
   useEffect(() => {
-    // Check if we have a valid token
-    const token = searchParams.get('token');
-    const type = searchParams.get('type');
+    // Supabase sends recovery tokens in the URL hash fragment
+    // Format: #access_token=...&type=recovery&...
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const type = hashParams.get('type');
     
-    if (type === 'recovery' && token) {
+    // Also check query params as fallback
+    const queryToken = searchParams.get('token');
+    const queryType = searchParams.get('type');
+    
+    if ((type === 'recovery' && accessToken) || (queryType === 'recovery' && queryToken)) {
       setValidToken(true);
+      // Supabase automatically sets the session from the hash fragment
     } else {
-      toast({
-        title: 'Invalid Link',
-        description: 'This password reset link is invalid or has expired.',
-        variant: 'destructive'
-      });
-      setTimeout(() => navigate('/'), 3000);
+      // Give Supabase a moment to process the hash and set the session
+      const checkSession = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setValidToken(true);
+        } else {
+          toast({
+            title: 'Invalid Link',
+            description: 'This password reset link is invalid or has expired.',
+            variant: 'destructive'
+          });
+          setTimeout(() => navigate('/forgot-password'), 3000);
+        }
+      };
+      
+      // Wait a bit for Supabase to process the URL
+      setTimeout(checkSession, 500);
     }
   }, [searchParams, navigate, toast]);
 
