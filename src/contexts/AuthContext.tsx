@@ -321,14 +321,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    // Prepare zkLogin (generate ephemeral key and nonce)
-    const { nonce } = await setupZkLogin();
+    let nonce: string | undefined;
+    
+    // Try to prepare zkLogin (generate ephemeral key and nonce)
+    // If it fails, continue with standard OAuth without zkLogin
+    try {
+      const zkResult = await setupZkLogin();
+      nonce = zkResult.nonce;
+    } catch (err) {
+      console.warn('zkLogin setup failed, continuing with standard OAuth:', err);
+    }
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { 
         redirectTo: `${window.location.origin}/`,
-        queryParams: { nonce }
+        ...(nonce && { queryParams: { nonce } })
       },
     });
     return { data, error };
