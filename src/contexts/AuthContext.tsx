@@ -154,34 +154,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
   const signUp = async (email: string, password: string, fullName: string, country: string, phone?: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    // Use Supabase's built-in email confirmation
+    const { data, error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+        data: {
+          full_name: fullName,
+          country: country
+        }
+      }
+    });
+    
     if (!error && data.user) {
-      // Generate verification token
-      const verificationToken = crypto.randomUUID();
-      const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + 24);
-
-      // Create user record with verification token
+      // Create user record in our users table
       await supabase.from('users').insert({ 
         id: data.user.id, 
         email, 
         phone: phone || null,
         full_name: fullName,
         country,
-        email_verified: false,
-        verification_token: verificationToken,
-        verification_token_expires: expiresAt.toISOString()
+        email_verified: false
       });
-
-      // Send verification email (wrapped in try-catch as edge function may not be deployed)
-      try {
-        await supabase.functions.invoke('send-verification-email', {
-          body: { email, fullName, verificationToken }
-        });
-      } catch (err) {
-        // Email sending failed - edge function may not be deployed
-      }
-
     }
     return { data, error };
   };
