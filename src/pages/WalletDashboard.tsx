@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSmartWallet } from "@/contexts/SmartWalletContext";
@@ -6,12 +6,21 @@ import MarketingNav from "@/components/MarketingNav";
 import MarketingFooter from "@/components/MarketingFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, Send, ArrowDownLeft, History, Coins } from "lucide-react";
+import { Wallet, Send, ArrowDownLeft, History, Coins, Copy, CheckCircle, ExternalLink, RefreshCw, Loader2 } from "lucide-react";
 
 const WalletDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { address, isConnected, connect } = useSmartWallet();
+  const { address, isConnected, isLoading, suiBalance, afcBalance, refreshBalance } = useSmartWallet();
+  const [copied, setCopied] = useState(false);
+
+  const copyAddress = () => {
+    if (address) {
+      navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   if (!user) {
     return (
@@ -45,16 +54,65 @@ const WalletDashboard: React.FC = () => {
         {/* Balance Card */}
         <Card className="mb-6 bg-gradient-to-r from-orange-500 to-amber-500 text-white">
           <CardContent className="p-6">
-            <p className="text-sm opacity-80">Total Balance</p>
-            <p className="text-4xl font-bold mt-1">0.00 AFC</p>
-            <p className="text-sm opacity-80 mt-2">≈ $0.00 USD</p>
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm opacity-80">AFC Balance</p>
+                <p className="text-4xl font-bold mt-1">{afcBalance} AFC</p>
+                <p className="text-sm opacity-80 mt-2">SUI: {suiBalance}</p>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={refreshBalance}
+                disabled={isLoading}
+                className="text-white hover:bg-white/20"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
             {address && (
-              <p className="text-xs mt-4 opacity-70 font-mono">
-                {address.slice(0, 10)}...{address.slice(-8)}
-              </p>
+              <div className="mt-4 flex items-center gap-2">
+                <p className="text-xs opacity-70 font-mono">
+                  {address.slice(0, 10)}...{address.slice(-8)}
+                </p>
+                <button onClick={copyAddress} className="opacity-70 hover:opacity-100">
+                  {copied ? <CheckCircle className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                </button>
+                <a 
+                  href={`https://suiscan.xyz/mainnet/account/${address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="opacity-70 hover:opacity-100"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
             )}
           </CardContent>
         </Card>
+
+        {/* Get AFC Banner */}
+        {parseFloat(afcBalance) === 0 && (
+          <Card className="mb-6 bg-blue-50 border-blue-200">
+            <CardContent className="p-4">
+              <p className="text-blue-800 text-sm">
+                <strong>Get AFC tokens</strong> to start using the Africoin ecosystem.{' '}
+                <a 
+                  href="https://movepump.com/token/0xc68c4cfb63d702227db09c28837e75abd23bbb3adc192e3bc45fecca4dd5b7e8::afc::AFC"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline font-medium"
+                >
+                  Buy AFC on MovePump →
+                </a>
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
