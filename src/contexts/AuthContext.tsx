@@ -154,31 +154,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
   const signUp = async (email: string, password: string, fullName: string, country: string, phone?: string) => {
-    // Use Supabase's built-in email confirmation
-    const { data, error } = await supabase.auth.signUp({ 
-      email, 
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-        data: {
-          full_name: fullName,
-          country: country
-        }
-      }
-    });
-    
-    if (!error && data.user) {
-      // Create user record in our users table
-      await supabase.from('users').insert({ 
-        id: data.user.id, 
+    try {
+      // Use Supabase's built-in email confirmation
+      const { data, error } = await supabase.auth.signUp({ 
         email, 
-        phone: phone || null,
-        full_name: fullName,
-        country,
-        email_verified: false
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            full_name: fullName,
+            country: country
+          }
+        }
       });
+      
+      if (error) {
+        // Provide more helpful error messages
+        if (error.message.includes('email') && error.message.includes('confirmation')) {
+          return { 
+            data, 
+            error: { 
+              ...error, 
+              message: 'Account created but email confirmation could not be sent. Please try signing in or use OTP/Magic Link instead.' 
+            } 
+          };
+        }
+        return { data, error };
+      }
+      
+      if (data.user) {
+        // Create user record in our users table
+        await supabase.from('users').insert({ 
+          id: data.user.id, 
+          email, 
+          phone: phone || null,
+          full_name: fullName,
+          country,
+          email_verified: false
+        }).catch(err => {
+          console.warn('Failed to create user record:', err);
+        });
+      }
+      return { data, error };
+    } catch (err: any) {
+      return { 
+        data: { user: null, session: null }, 
+        error: { message: err.message || 'Signup failed. Please try again.' } 
+      };
     }
-    return { data, error };
   };
 
 
