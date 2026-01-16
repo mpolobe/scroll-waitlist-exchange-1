@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { isAlchemyConfigured } from "@/lib/alchemyConfig";
 import { SmartWalletProvider } from "@/contexts/SmartWalletContext";
-import HomePage from "@/pages/HomePage";
+import Index from "@/pages/Index";
 import WalletDashboard from "@/pages/WalletDashboard";
 
 // Conditionally resolve AlchemyAccountProvider at runtime (if configured/package present)
@@ -24,7 +24,7 @@ export default function App() {
         <SmartWalletProvider>
           {/* Your app routes and structure */}
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<Index />} />
             <Route path="/wallet" element={<WalletDashboard />} />
             {/* ...additional routes as needed... */}
           </Routes>

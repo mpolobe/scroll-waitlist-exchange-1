@@ -5,10 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAuthenticate } from '@account-kit/react';
 import { useToast } from '@/hooks/use-toast';
 import { Coins, Loader2, Wallet, Mail, Link2 } from 'lucide-react';
-import { AuthMethodSelector, AuthMethod } from '@/components/wallet/AuthMethodSelector';
 import { SocialLoginButtons } from './SocialLoginButtons';
 
 interface AuthModalProps {
@@ -25,24 +23,9 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [showWalletConnect, setShowWalletConnect] = useState(false);
-  const [showAuthSelector, setShowAuthSelector] = useState(false);
-  const [walletError, setWalletError] = useState('');
   const { signIn, signUp, resetPassword, signInWithOTP, verifyOTP, signInWithMagicLink, signInWithGoogle, signInWithApple, signInWithFacebook } = useAuth();
-  const { authenticate, isPending: isAuthenticating } = useAuthenticate();
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  const handleAuthMethodSelect = async (method: AuthMethod) => {
-    setWalletError('');
-    if (['faceid', 'touchid', 'passcode'].includes(method)) {
-      authenticate({ type: "passkey", email }, {
-        onSuccess: () => { setShowAuthSelector(false); onClose(); navigate('/wallet'); },
-        onError: (err) => setWalletError(err.message || 'Failed to connect.'),
-      });
-    } else if (method === 'google') await signInWithGoogle();
-    else if (method === 'apple') await signInWithApple();
-    else if (method === 'facebook') await signInWithFacebook();
-  };
 
   const handleOTPRequest = async () => {
     if (!email) { toast({ title: 'Error', description: 'Please enter your email', variant: 'destructive' }); return; }
@@ -103,13 +86,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
             <Wallet className="w-16 h-16 text-orange-500 mb-4" />
             <h3 className="text-xl font-bold mb-2">Connect Your Wallet</h3>
             <p className="text-gray-600 text-center mb-4">Choose your authentication method</p>
-            <Button onClick={() => setShowAuthSelector(true)} className="w-full bg-gradient-to-r from-orange-500 to-amber-500 mb-3">
-              <Wallet className="w-4 h-4 mr-2" />Connect Wallet
+            <Button onClick={() => { onClose(); navigate('/wallet'); }} className="w-full bg-gradient-to-r from-orange-500 to-amber-500 mb-3">
+              <Wallet className="w-4 h-4 mr-2" />Go to Wallet
             </Button>
-            <button onClick={() => { onClose(); navigate('/wallet'); }} className="text-sm text-orange-600 hover:underline font-medium">Skip to connect</button>
-
           </div>
-          <AuthMethodSelector open={showAuthSelector} onOpenChange={setShowAuthSelector} onSelectMethod={handleAuthMethodSelect} isAuthenticating={isAuthenticating} error={walletError} showPasskeyOnly />
         </DialogContent>
       </Dialog>
     );

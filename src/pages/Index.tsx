@@ -1,15 +1,15 @@
 import React from 'react';
 import AppLayout from '@/components/AppLayout';
 import { AppProvider } from '@/contexts/AppContext';
-import { SmartWalletProvider } from '@/contexts/SmartWalletContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 const Index: React.FC = () => {
   return (
-    <SmartWalletProvider>
+    <AuthProvider>
       <AppProvider>
         <AppLayout />
       </AppProvider>
-    </SmartWalletProvider>
+    </AuthProvider>
   );
 };
 
