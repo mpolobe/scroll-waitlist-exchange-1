@@ -31,7 +31,7 @@ import {
 export default function Staking() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { address, suiAddress, isConnected: walletConnected, phoneNumber } = useSmartWallet();
+  const { address, isConnected: walletConnected } = useSmartWallet();
   
   const [stakeModalOpen, setStakeModalOpen] = useState(false);
   const [unstakeModalOpen, setUnstakeModalOpen] = useState(false);
@@ -160,12 +160,6 @@ export default function Staking() {
             <p className="text-gray-400 mt-1">
               Stake wAFC to earn rewards and fund African railway infrastructure
             </p>
-            {phoneNumber && (
-              <p className="text-sm text-orange-400 mt-1 flex items-center gap-1">
-                <Phone className="w-3 h-3" />
-                Connected: {phoneNumber}
-              </p>
-            )}
           </div>
           <Button 
             variant="outline" 
