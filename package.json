@@ -8,7 +8,9 @@
     "preview": "vite preview",
     "seed:db": "node scripts/seed-database.js",
     "test:database": "node --input-type=module scripts/test-database-connection.js",
-    "verify:migration": "node --input-type=module scripts/verify-migration.js"
+    "verify:migration": "node --input-type=module scripts/verify-migration.js",
+    "setup:vercel-env": "bash scripts/setup-vercel-env.sh",
+    "deploy": "bash scripts/setup-vercel-env.sh"
   },
   "dependencies": {
     "@account-kit/infra": "^4.4.2",
