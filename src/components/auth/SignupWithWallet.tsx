@@ -65,11 +65,13 @@ export default function SignupWithWallet() {
   if (signupView === 'wallet') {
     return (
       <div className="text-center py-8">
-        <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-gray-900 mb-2">Account Created!</h3>
-        <p className="text-gray-600 mb-4">Your account is ready. Go to your wallet to get started.</p>
-        <Button onClick={() => navigate('/wallet')} className="w-full bg-gradient-to-r from-orange-500 to-amber-500">
-          <Wallet className="w-4 h-4 mr-2" />Go to Wallet
+        <Mail className="w-16 h-16 text-orange-500 mx-auto mb-4" />
+        <h3 className="text-xl font-bold text-gray-900 mb-2">Check Your Email!</h3>
+        <p className="text-gray-600 mb-2">We've sent a confirmation link to:</p>
+        <p className="font-semibold text-gray-900 mb-4">{email}</p>
+        <p className="text-sm text-gray-500 mb-6">Click the link in the email to verify your account and get started.</p>
+        <Button onClick={() => navigate('/signup?tab=login')} variant="outline" className="w-full">
+          Back to Sign In
         </Button>
       </div>
     );
