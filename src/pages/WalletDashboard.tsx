@@ -6,13 +6,48 @@ import MarketingNav from "@/components/MarketingNav";
 import MarketingFooter from "@/components/MarketingFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, Send, ArrowDownLeft, History, Coins, Copy, CheckCircle, ExternalLink, RefreshCw, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Wallet, Send, ArrowDownLeft, History, Coins, Copy, CheckCircle, ExternalLink, RefreshCw, Loader2, QrCode } from "lucide-react";
+import { SendTokenModal } from "@/components/wallet/SendTokenModal";
+
+// Simple QR Code component for receive dialog
+function QRCodeSVG({ value, size }: { value: string; size: number }) {
+  const cells = 21;
+  const cellSize = size / cells;
+  const hash = value.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  
+  const pattern: boolean[][] = [];
+  for (let i = 0; i < cells; i++) {
+    pattern[i] = [];
+    for (let j = 0; j < cells; j++) {
+      const isFinderArea = (i < 7 && j < 7) || (i < 7 && j >= cells - 7) || (i >= cells - 7 && j < 7);
+      if (isFinderArea) {
+        const fi = i < 7 ? i : i - (cells - 7);
+        const fj = j < 7 ? j : j - (cells - 7);
+        pattern[i][j] = fi === 0 || fi === 6 || fj === 0 || fj === 6 || (fi >= 2 && fi <= 4 && fj >= 2 && fj <= 4);
+      } else {
+        pattern[i][j] = ((hash + i * 31 + j * 17) % 3) === 0;
+      }
+    }
+  }
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <rect width={size} height={size} fill="white" />
+      {pattern.map((row, i) => row.map((cell, j) => cell && (
+        <rect key={`${i}-${j}`} x={j * cellSize} y={i * cellSize} width={cellSize} height={cellSize} fill="#1a1a1a" />
+      )))}
+    </svg>
+  );
+}
 
 const WalletDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { address, isConnected, isLoading, suiBalance, afcBalance, refreshBalance } = useSmartWallet();
   const [copied, setCopied] = useState(false);
+  const [sendModalOpen, setSendModalOpen] = useState(false);
+  const [receiveDialogOpen, setReceiveDialogOpen] = useState(false);
 
   const copyAddress = () => {
     if (address) {
@@ -116,11 +151,11 @@ const WalletDashboard: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Button variant="outline" className="h-20 flex-col gap-2">
+          <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => setSendModalOpen(true)}>
             <Send className="w-5 h-5" />
             <span>Send</span>
           </Button>
-          <Button variant="outline" className="h-20 flex-col gap-2">
+          <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => setReceiveDialogOpen(true)}>
             <ArrowDownLeft className="w-5 h-5" />
             <span>Receive</span>
           </Button>
@@ -128,14 +163,14 @@ const WalletDashboard: React.FC = () => {
             <Coins className="w-5 h-5" />
             <span>Stake</span>
           </Button>
-          <Button variant="outline" className="h-20 flex-col gap-2">
+          <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => document.getElementById('transactions-section')?.scrollIntoView({ behavior: 'smooth' })}>
             <History className="w-5 h-5" />
             <span>History</span>
           </Button>
         </div>
 
         {/* Recent Transactions */}
-        <Card>
+        <Card id="transactions-section">
           <CardHeader>
             <CardTitle>Recent Transactions</CardTitle>
           </CardHeader>
@@ -145,6 +180,51 @@ const WalletDashboard: React.FC = () => {
         </Card>
       </div>
       <MarketingFooter />
+
+      {/* Send Token Modal */}
+      <SendTokenModal 
+        open={sendModalOpen} 
+        onOpenChange={setSendModalOpen} 
+        tokenSymbol="AFC" 
+        balance={afcBalance} 
+      />
+
+      {/* Receive Dialog */}
+      <Dialog open={receiveDialogOpen} onOpenChange={setReceiveDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-center flex items-center justify-center gap-2">
+              <QrCode className="w-5 h-5" />
+              Receive Tokens
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center py-4">
+            {address ? (
+              <>
+                <div className="bg-white p-4 rounded-xl shadow-lg border mb-4">
+                  <QRCodeSVG value={address} size={180} />
+                </div>
+                <p className="text-sm text-gray-500 mb-2">Scan to send tokens to this wallet</p>
+                <p className="font-mono text-xs bg-gray-100 px-3 py-2 rounded-lg break-all max-w-full">
+                  {address.slice(0, 10)}...{address.slice(-8)}
+                </p>
+                <Button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(address);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }} 
+                  className="mt-4 w-full"
+                >
+                  {copied ? <><CheckCircle className="w-4 h-4 mr-2" />Copied!</> : <><Copy className="w-4 h-4 mr-2" />Copy Address</>}
+                </Button>
+              </>
+            ) : (
+              <p className="text-gray-500 py-4">No wallet address available</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
