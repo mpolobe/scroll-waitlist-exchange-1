@@ -5,7 +5,7 @@ import { otpService } from '@/lib/otpService';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Loader2, Smartphone, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Loader2, Smartphone, ArrowLeft, AlertTriangle } from 'lucide-react';
 
 interface PhoneLoginFormProps {
   mode: 'login' | 'signup';
@@ -28,7 +28,13 @@ export function PhoneLoginForm({ mode, onBack }: PhoneLoginFormProps) {
 
   useEffect(() => {
     // Check if custom OTP service (Africa's Talking / Twilio) is configured
-    setUseCustomOTP(otpService.isConfigured());
+    const isConfigured = otpService.isConfigured();
+    setUseCustomOTP(isConfigured);
+    
+    // Show warning if no SMS provider is configured
+    if (!isConfigured) {
+      console.warn('No SMS provider configured. Phone OTP will use Supabase phone auth.');
+    }
   }, []);
 
   const formatPhoneNumber = (value: string) => {
@@ -89,7 +95,13 @@ export function PhoneLoginForm({ mode, onBack }: PhoneLoginFormProps) {
         }
 
         if (result.error) {
-          setError(result.error.message);
+          // Provide helpful error message for common issues
+          if (result.error.message.includes('Unsupported phone provider') || 
+              result.error.message.includes('Phone auth')) {
+            setError('Phone authentication is not available. Please use Email or Google sign-in instead.');
+          } else {
+            setError(result.error.message);
+          }
         } else {
           setStep('otp');
           setPhone(formattedPhone);
@@ -212,6 +224,39 @@ export function PhoneLoginForm({ mode, onBack }: PhoneLoginFormProps) {
             </button>
           </div>
         </form>
+      </div>
+    );
+  }
+
+  // Show unavailable message if no SMS provider is configured
+  if (!useCustomOTP) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 p-3 bg-amber-50 rounded-lg border border-amber-200">
+          <AlertTriangle className="w-5 h-5 text-amber-600" />
+          <span className="text-sm text-amber-800">
+            Phone OTP is currently unavailable
+          </span>
+        </div>
+        <p className="text-sm text-gray-600">
+          SMS verification is not configured. Please use one of these alternatives:
+        </p>
+        <ul className="text-sm text-gray-600 list-disc list-inside space-y-1">
+          <li>Email sign up/sign in</li>
+          <li>Google authentication</li>
+          <li>Magic link via email</li>
+        </ul>
+        {onBack && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onBack}
+            className="w-full"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to other options
+          </Button>
+        )}
       </div>
     );
   }
