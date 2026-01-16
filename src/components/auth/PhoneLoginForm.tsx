@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { otpService } from '@/lib/otpService';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Loader2, Smartphone, ArrowLeft } from 'lucide-react';
+import { Loader2, Smartphone, ArrowLeft, CheckCircle } from 'lucide-react';
 
 interface PhoneLoginFormProps {
   mode: 'login' | 'signup';
@@ -18,10 +19,17 @@ export function PhoneLoginForm({ mode, onBack }: PhoneLoginFormProps) {
   const [country, setCountry] = useState('');
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [useCustomOTP, setUseCustomOTP] = useState(false);
   
   const { signInWithPhone, signUpWithPhone, verifyPhoneOTP } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if custom OTP service (Africa's Talking / Twilio) is configured
+    setUseCustomOTP(otpService.isConfigured());
+  }, []);
 
   const formatPhoneNumber = (value: string) => {
     // Remove all non-digit characters
@@ -43,11 +51,12 @@ export function PhoneLoginForm({ mode, onBack }: PhoneLoginFormProps) {
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     const formattedPhone = formatPhoneNumber(phone);
     
     if (!validatePhoneNumber(formattedPhone)) {
-      setError('Please enter a valid phone number with country code (e.g., +1234567890)');
+      setError('Please enter a valid phone number with country code (e.g., +254712345678)');
       return;
     }
 
@@ -59,18 +68,32 @@ export function PhoneLoginForm({ mode, onBack }: PhoneLoginFormProps) {
     setIsLoading(true);
 
     try {
-      let result;
-      if (mode === 'signup') {
-        result = await signUpWithPhone(formattedPhone, fullName, country);
+      if (useCustomOTP) {
+        // Use Africa's Talking / Twilio
+        const result = await otpService.sendOTP(formattedPhone);
+        
+        if (result.success) {
+          setStep('otp');
+          setPhone(formattedPhone);
+          setSuccess(`Code sent via ${result.provider === 'africas-talking' ? "Africa's Talking" : 'Twilio'}`);
+        } else {
+          setError(result.error || 'Failed to send OTP');
+        }
       } else {
-        result = await signInWithPhone(formattedPhone);
-      }
+        // Fallback to Supabase phone auth
+        let result;
+        if (mode === 'signup') {
+          result = await signUpWithPhone(formattedPhone, fullName, country);
+        } else {
+          result = await signInWithPhone(formattedPhone);
+        }
 
-      if (result.error) {
-        setError(result.error.message);
-      } else {
-        setStep('otp');
-        setPhone(formattedPhone);
+        if (result.error) {
+          setError(result.error.message);
+        } else {
+          setStep('otp');
+          setPhone(formattedPhone);
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Failed to send OTP');
