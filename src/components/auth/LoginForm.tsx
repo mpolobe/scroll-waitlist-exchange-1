@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Loader2, LogIn, Mail, Link2, RefreshCw } from 'lucide-react';
+import { Loader2, LogIn, Mail, Link2, RefreshCw, Eye, EyeOff } from 'lucide-react';
 import { OTPVerification } from './OTPVerification';
 import { MagicLinkSent } from './MagicLinkSent';
 import { SocialLoginButtons } from './SocialLoginButtons';
@@ -15,6 +15,7 @@ type LoginView = 'form' | 'otp' | 'magiclink';
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loginView, setLoginView] = useState<LoginView>('form');
@@ -108,7 +109,23 @@ export default function LoginForm() {
       </div>
       <div>
         <Label htmlFor="login-password">Password</Label>
-        <Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" className="mt-1" />
+        <div className="relative mt-1">
+          <Input 
+            id="login-password" 
+            type={showPassword ? "text" : "password"} 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            placeholder="Enter your password" 
+            className="pr-10"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+          >
+            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
       {error && (
         <div className="space-y-2">
