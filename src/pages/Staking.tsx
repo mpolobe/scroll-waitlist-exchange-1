@@ -5,15 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSmartWallet } from '@/contexts/SmartWalletContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { MarketingNav } from '@/components/MarketingNav';
-import { MarketingFooter } from '@/components/MarketingFooter';
+import MarketingNav from '@/components/MarketingNav';
+import MarketingFooter from '@/components/MarketingFooter';
 import { StakingStats } from '@/components/staking/StakingStats';
 import { StakeCard } from '@/components/staking/StakeCard';
 import { StakeModal } from '@/components/staking/StakeModal';
 import { UnstakeModal } from '@/components/staking/UnstakeModal';
 import { RewardsCard } from '@/components/staking/RewardsCard';
 import { RailwayProgress } from '@/components/staking/RailwayProgress';
-import { PhoneWalletAuth } from '@/components/wallet/PhoneWalletAuth';
 import { useStaking } from '@/hooks/useStaking';
 import { Stake } from '@/services/stakingService';
 import { 
@@ -25,18 +24,28 @@ import {
   Train,
   MapPin,
   Loader2,
-  Phone
+  ExternalLink,
+  Copy,
+  CheckCircle
 } from 'lucide-react';
 
 export default function Staking() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { address, isConnected: walletConnected } = useSmartWallet();
+  const { 
+    address, 
+    isConnected: walletConnected, 
+    isLoading: walletLoading,
+    suiBalance,
+    afcBalance,
+    refreshBalance 
+  } = useSmartWallet();
   
   const [stakeModalOpen, setStakeModalOpen] = useState(false);
   const [unstakeModalOpen, setUnstakeModalOpen] = useState(false);
   const [selectedStake, setSelectedStake] = useState<Stake | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const [copied, setCopied] = useState(false);
 
   const {
     isConnected,
@@ -105,8 +114,20 @@ export default function Staking() {
   const pendingRewardsFormatted = userData ? formatAmount(userData.pendingRewards) : '0';
   const balanceFormatted = userData ? formatAmount(userData.balance) : '0';
 
-  // Show wallet connection if not connected
-  if (!walletConnected) {
+  const copyAddress = () => {
+    if (address) {
+      navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const truncateAddress = (addr: string) => {
+    return `${addr.slice(0, 8)}...${addr.slice(-6)}`;
+  };
+
+  // Show wallet connection if not connected (user not logged in)
+  if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-orange-900">
         <MarketingNav />
@@ -118,11 +139,25 @@ export default function Staking() {
               AFC Staking
             </h1>
             <p className="text-gray-400 mt-2">
-              Connect your wallet to start staking and earn rewards
+              Sign in to start staking and earn rewards
             </p>
           </div>
 
-          <PhoneWalletAuth />
+          <Card className="bg-slate-800/50 border-slate-700">
+            <CardContent className="p-8 text-center">
+              <Wallet className="w-16 h-16 text-orange-500 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">Connect Your Wallet</h3>
+              <p className="text-gray-400 mb-6">
+                Sign in with Google, Email, or Phone to automatically create your SUI wallet
+              </p>
+              <Button 
+                onClick={() => navigate('/signup')}
+                className="bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                Sign In to Continue
+              </Button>
+            </CardContent>
+          </Card>
 
           <div className="mt-8 grid grid-cols-3 gap-4 text-center">
             <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
@@ -145,6 +180,23 @@ export default function Staking() {
     );
   }
 
+  // Show loading state while wallet is initializing
+  if (walletLoading && !walletConnected) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-orange-900">
+        <MarketingNav />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Loader2 className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
+            <p className="text-white text-lg">Initializing your SUI wallet...</p>
+            <p className="text-gray-400 text-sm mt-2">This only takes a moment</p>
+          </div>
+        </div>
+        <MarketingFooter />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-orange-900">
       <MarketingNav />
@@ -158,19 +210,78 @@ export default function Staking() {
               AFC Staking
             </h1>
             <p className="text-gray-400 mt-1">
-              Stake wAFC to earn rewards and fund African railway infrastructure
+              Stake AFC to earn rewards and fund African railway infrastructure
             </p>
           </div>
           <Button 
             variant="outline" 
-            onClick={refreshData}
-            disabled={isLoading}
+            onClick={() => { refreshData(); refreshBalance(); }}
+            disabled={isLoading || walletLoading}
             className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10"
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading || walletLoading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
         </div>
+
+        {/* Wallet Info Card */}
+        {address && (
+          <Card className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 border-blue-500/30 mb-6">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                    <Wallet className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-blue-300 font-medium">SUI Wallet (Mainnet)</p>
+                    <div className="flex items-center gap-2">
+                      <code className="text-white font-mono text-sm">{truncateAddress(address)}</code>
+                      <button 
+                        onClick={copyAddress}
+                        className="text-blue-400 hover:text-blue-300 transition-colors"
+                      >
+                        {copied ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                      <a 
+                        href={`https://suiscan.xyz/mainnet/account/${address}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 transition-colors"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-6">
+                  <div className="text-right">
+                    <p className="text-sm text-gray-400">SUI Balance</p>
+                    <p className="text-xl font-bold text-white">{suiBalance} SUI</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-400">AFC Balance</p>
+                    <p className="text-xl font-bold text-orange-400">{afcBalance} AFC</p>
+                  </div>
+                </div>
+              </div>
+              {parseFloat(afcBalance) === 0 && (
+                <div className="mt-4 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                  <p className="text-sm text-orange-300">
+                    No AFC tokens yet? <a 
+                      href="https://movepump.com/token/0xc68c4cfb63d702227db09c28837e75abd23bbb3adc192e3bc45fecca4dd5b7e8::afc::AFC" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="underline hover:text-orange-200"
+                    >
+                      Get AFC on MovePump →
+                    </a>
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {error && (
           <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400">

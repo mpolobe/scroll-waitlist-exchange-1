@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SuiWalletProvider } from "@/contexts/SuiWalletContext";
 import { SmartWalletProvider } from "@/contexts/SmartWalletContext";
 import { AppProvider } from "@/contexts/AppContext";
 import { Toaster } from "@/components/ui/toaster";
@@ -34,8 +35,9 @@ export default function App() {
   return (
     <Router>
       <AuthProvider>
-        <SmartWalletProvider>
-          <AppProvider>
+        <SuiWalletProvider>
+          <SmartWalletProvider>
+            <AppProvider>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/blog" element={<Blog />} />
@@ -62,8 +64,9 @@ export default function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
-          </AppProvider>
-        </SmartWalletProvider>
+            </AppProvider>
+          </SmartWalletProvider>
+        </SuiWalletProvider>
       </AuthProvider>
     </Router>
   );
