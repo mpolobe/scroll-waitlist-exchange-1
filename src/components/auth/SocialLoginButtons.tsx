@@ -19,13 +19,19 @@ export function SocialLoginButtons({ onError }: SocialLoginButtonsProps) {
       else if (provider === 'apple') result = await signInWithApple();
       else result = await signInWithFacebook();
       
+      console.log(`${provider} OAuth result:`, result);
+      
       if (result.error) {
+        console.error(`${provider} OAuth error:`, result.error);
         onError?.(result.error.message || `Failed to sign in with ${provider}`);
+        setLoadingProvider(null);
       }
+      // Don't reset loading - redirect should happen automatically
     } catch (err: any) {
+      console.error(`${provider} OAuth exception:`, err);
       onError?.(err.message || 'An error occurred');
+      setLoadingProvider(null);
     }
-    setLoadingProvider(null);
   };
 
   const FacebookIcon = () => (
