@@ -19,28 +19,63 @@ import { toast } from 'sonner';
 
 
 export function UserDashboard() {
-  const { user, profile } = useAuth();
+  const { user, profile, loading } = useAuth();
   const [stats, setStats] = useState({ balance: 0, transactions: 0, favorites: 0 });
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
   const [loyaltyPoints, setLoyaltyPoints] = useState(0);
 
   useEffect(() => {
-    loadUserData();
+    if (user) {
+      loadUserData();
+    }
   }, [user]);
 
   const loadUserData = async () => {
+    if (!user) return;
+    
     setStats({ balance: 1250.50, transactions: 24, favorites: 8 });
     
-    if (user) {
-      const { data } = await supabase
+    try {
+      const { data, error } = await supabase
         .from('loyalty_points')
         .select('points_balance')
         .eq('user_id', user.id)
         .single();
       
+      if (error) {
+        // PGRST116 = no rows found - user hasn't earned points yet
+        if (error.code !== 'PGRST116') {
+          toast.error('Error loading loyalty points');
+        }
+        return;
+      }
       if (data) setLoyaltyPoints(data.points_balance);
+    } catch (err) {
+      toast.error('Unexpected error loading user data');
     }
   };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Please log in</h2>
+          <p className="text-gray-600">You need to be logged in to view the dashboard.</p>
+        </div>
+      </div>
+    );
+  }
 
   const handlePurchaseSuccess = () => {
     setBuyDialogOpen(false);
@@ -51,26 +86,35 @@ export function UserDashboard() {
     if (!user) return;
 
     const afcDiscount = points * 10;
-    
-    const { error } = await supabase
-      .from('points_transactions')
-      .insert({
-        user_id: user.id,
-        transaction_type: 'redeemed',
-        points_amount: points,
-        description: `Redeemed ${points} points for ${afcDiscount} AFC discount`
-      });
+    try {
+      const { error: insertError } = await supabase
+        .from('points_transactions')
+        .insert({
+          user_id: user.id,
+          transaction_type: 'redeemed',
+          points_amount: points,
+          description: `Redeemed ${points} points for ${afcDiscount} AFC discount`
+        });
 
-    if (!error) {
-      await supabase
+      if (insertError) {
+        toast.error('Failed to redeem points');
+        return;
+      }
+
+      const { error: updateError } = await supabase
         .from('loyalty_points')
         .update({ points_balance: loyaltyPoints - points })
         .eq('user_id', user.id);
 
+      if (updateError) {
+        toast.error('Failed to update loyalty points');
+        return;
+      }
+
       setLoyaltyPoints(loyaltyPoints - points);
       toast.success(`Redeemed ${points} points for ${afcDiscount} AFC!`);
-    } else {
-      toast.error('Failed to redeem points');
+    } catch (err) {
+      toast.error('Unexpected error redeeming points');
     }
   };
 
