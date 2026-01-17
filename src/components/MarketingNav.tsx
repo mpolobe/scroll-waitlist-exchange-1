@@ -55,6 +55,7 @@ const MarketingNav = () => {
             <Link to="/railway-booking" className="text-gray-700 hover:text-orange-500 transition text-sm">Book Tickets</Link>
             <Link to="/wallet" className="text-gray-700 hover:text-orange-500 transition text-sm">Wallet</Link>
             <Link to="/staking" className="text-gray-700 hover:text-orange-500 transition text-sm font-medium">Staking</Link>
+            <Link to="/ido" className="text-purple-600 hover:text-purple-700 transition text-sm font-semibold">🛡️ SENT IDO</Link>
             
             <a 
               href="https://movepump.com/token/0xc68c4cfb63d702227db09c28837e75abd23bbb3adc192e3bc45fecca4dd5b7e8::afc::AFC" 
@@ -103,6 +104,7 @@ const MarketingNav = () => {
             <Link to="/railway-booking" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Book Tickets</Link>
             <Link to="/wallet" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Wallet</Link>
             <Link to="/staking" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 font-medium">Staking</Link>
+            <Link to="/ido" className="block px-4 py-2 text-purple-600 hover:bg-purple-50 font-semibold">🛡️ SENT IDO</Link>
             <div className="px-4 py-2">
               <a 
                 href="https://movepump.com/token/0xc68c4cfb63d702227db09c28837e75abd23bbb3adc192e3bc45fecca4dd5b7e8::afc::AFC" 
