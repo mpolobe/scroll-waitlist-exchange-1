@@ -8,6 +8,9 @@
 import { SENT_IDO_CONFIG, SENT_TOKEN, NETWORK_CONFIG } from '@/data/tokenConfig';
 import { supabase } from '@/lib/supabase';
 
+// Re-export SENT_IDO_CONFIG for consumers
+export { SENT_IDO_CONFIG } from '@/data/tokenConfig';
+
 // Polygon Mainnet chain ID
 const POLYGON_CHAIN_ID = '0x89';
 

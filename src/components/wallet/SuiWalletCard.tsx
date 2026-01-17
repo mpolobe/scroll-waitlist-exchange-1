@@ -5,16 +5,15 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function SuiWalletCard() {
-  const { user } = useAuth();
+  const { user, walletAddress } = useAuth();
   const [copied, setCopied] = useState(false);
   
-  // Mock SUI address based on user email (deterministic-ish for demo)
-  const mockSuiAddress = user?.email 
-    ? `0x${Array.from(user.email).reduce((hash, char) => ((hash << 5) - hash) + char.charCodeAt(0), 0).toString(16).padEnd(64, '0').slice(0, 64)}`
-    : '0x7e875ea78ee09f08d72e2676ee842743c00d5d94';
+  // Use actual wallet address from auth context
+  const displayAddress = walletAddress || 'No wallet connected';
 
   const copyAddress = () => {
-    navigator.clipboard.writeText(mockSuiAddress);
+    if (!walletAddress) return;
+    navigator.clipboard.writeText(walletAddress);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -28,7 +27,9 @@ export function SuiWalletCard() {
           </div>
           <div>
             <h3 className="font-bold text-lg text-gray-900">Africa Railways Wallet</h3>
-            <p className="text-sm text-blue-600 font-medium">Sui Network • Connected</p>
+            <p className={`text-sm font-medium ${walletAddress ? 'text-blue-600' : 'text-gray-400'}`}>
+              Sui Network • {walletAddress ? 'Connected' : 'Not Connected'}
+            </p>
           </div>
         </div>
         <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50">
@@ -42,11 +43,13 @@ export function SuiWalletCard() {
           <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Sui Address</label>
           <div className="flex items-center gap-2 mt-1">
             <code className="flex-1 p-3 bg-white rounded-lg border border-blue-100 text-sm font-mono text-gray-600 break-all">
-              {mockSuiAddress}
+              {displayAddress}
             </code>
-            <Button variant="ghost" size="icon" onClick={copyAddress} className="shrink-0">
-              {copied ? <CheckCircle className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-gray-400" />}
-            </Button>
+            {walletAddress && (
+              <Button variant="ghost" size="icon" onClick={copyAddress} className="shrink-0">
+                {copied ? <CheckCircle className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-gray-400" />}
+              </Button>
+            )}
           </div>
         </div>
 
