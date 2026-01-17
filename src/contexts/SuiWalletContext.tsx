@@ -46,8 +46,62 @@ export const SuiWalletProvider: React.FC<SuiWalletProviderProps> = ({ children }
   const [afcBalanceRaw, setAfcBalanceRaw] = useState<bigint>(BigInt(0));
   const [keypair, setKeypair] = useState<Ed25519Keypair | null>(null);
   
-  // Initialize SUI client
-  const suiClient = new SuiClient({ url: getFullnodeUrl(SUI_NETWORK as 'mainnet' | 'testnet' | 'devnet') });
+  // Initialize SUI client - memoized to prevent recreation
+  const suiClient = React.useMemo(
+    () => new SuiClient({ url: getFullnodeUrl(SUI_NETWORK as 'mainnet' | 'testnet' | 'devnet') }),
+    []
+  );
+
+  // Format balance with decimals - pure function, no dependencies
+  const formatBalance = useCallback((amount: bigint, decimals: number): string => {
+    const divisor = BigInt(10 ** decimals);
+    const integerPart = amount / divisor;
+    const fractionalPart = amount % divisor;
+    
+    if (fractionalPart === BigInt(0)) {
+      return integerPart.toString();
+    }
+    
+    const fractionalStr = fractionalPart.toString().padStart(decimals, '0');
+    // Trim trailing zeros
+    const trimmed = fractionalStr.replace(/0+$/, '');
+    
+    if (trimmed === '') {
+      return integerPart.toString();
+    }
+    
+    return `${integerPart}.${trimmed.slice(0, 4)}`; // Max 4 decimal places
+  }, []);
+
+  // Fetch SUI and AFC balances
+  const fetchBalances = useCallback(async (walletAddress: string) => {
+    try {
+      // Fetch SUI balance
+      const suiBalanceResult = await suiClient.getBalance({
+        owner: walletAddress,
+      });
+      const suiAmount = BigInt(suiBalanceResult.totalBalance);
+      setSuiBalance(formatBalance(suiAmount, 9)); // SUI has 9 decimals
+      
+      // Fetch AFC balance
+      try {
+        const afcBalanceResult = await suiClient.getBalance({
+          owner: walletAddress,
+          coinType: AFC_COIN_TYPE,
+        });
+        const afcAmount = BigInt(afcBalanceResult.totalBalance);
+        setAfcBalanceRaw(afcAmount);
+        setAfcBalance(formatBalance(afcAmount, 9)); // AFC has 9 decimals
+      } catch (afcError) {
+        // AFC token might not exist for this address yet
+        console.log('No AFC balance found:', afcError);
+        setAfcBalance('0');
+        setAfcBalanceRaw(BigInt(0));
+      }
+    } catch (error) {
+      console.error('Failed to fetch balances:', error);
+    }
+  }, [suiClient, formatBalance]);
 
   // Generate or retrieve wallet for user
   const initializeWallet = useCallback(async (userId: string) => {
@@ -89,58 +143,7 @@ export const SuiWalletProvider: React.FC<SuiWalletProviderProps> = ({ children }
     } finally {
       setIsLoading(false);
     }
-  }, []);
-
-  // Fetch SUI and AFC balances
-  const fetchBalances = async (walletAddress: string) => {
-    try {
-      // Fetch SUI balance
-      const suiBalanceResult = await suiClient.getBalance({
-        owner: walletAddress,
-      });
-      const suiAmount = BigInt(suiBalanceResult.totalBalance);
-      setSuiBalance(formatBalance(suiAmount, 9)); // SUI has 9 decimals
-      
-      // Fetch AFC balance
-      try {
-        const afcBalanceResult = await suiClient.getBalance({
-          owner: walletAddress,
-          coinType: AFC_COIN_TYPE,
-        });
-        const afcAmount = BigInt(afcBalanceResult.totalBalance);
-        setAfcBalanceRaw(afcAmount);
-        setAfcBalance(formatBalance(afcAmount, 9)); // AFC has 9 decimals
-      } catch (afcError) {
-        // AFC token might not exist for this address yet
-        console.log('No AFC balance found:', afcError);
-        setAfcBalance('0');
-        setAfcBalanceRaw(BigInt(0));
-      }
-    } catch (error) {
-      console.error('Failed to fetch balances:', error);
-    }
-  };
-
-  // Format balance with decimals
-  const formatBalance = (amount: bigint, decimals: number): string => {
-    const divisor = BigInt(10 ** decimals);
-    const integerPart = amount / divisor;
-    const fractionalPart = amount % divisor;
-    
-    if (fractionalPart === BigInt(0)) {
-      return integerPart.toString();
-    }
-    
-    const fractionalStr = fractionalPart.toString().padStart(decimals, '0');
-    // Trim trailing zeros
-    const trimmed = fractionalStr.replace(/0+$/, '');
-    
-    if (trimmed === '') {
-      return integerPart.toString();
-    }
-    
-    return `${integerPart}.${trimmed.slice(0, 4)}`; // Max 4 decimal places
-  };
+  }, [fetchBalances]);
 
   // Auto-connect when user logs in
   useEffect(() => {

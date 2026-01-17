@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Train, MapPin } from 'lucide-react';
@@ -27,33 +27,39 @@ export default function TrainTracker({ trainNumber, onPositionUpdate }: Props) {
     { name: 'Nakuru', lat: -0.303099, lng: 36.080025 },
     { name: 'Kisumu', lat: -0.091702, lng: 34.767956 },
   ]);
+  
+  // Use ref to store callback to avoid re-creating interval on callback changes
+  const onPositionUpdateRef = useRef(onPositionUpdate);
+  useEffect(() => {
+    onPositionUpdateRef.current = onPositionUpdate;
+  }, [onPositionUpdate]);
+
+  const fetchPosition = useCallback(() => {
+    // Simulate real-time position updates
+    const mockPosition: TrainPosition = {
+      train_number: trainNumber,
+      route: 'Nairobi - Kisumu',
+      current_location: {
+        lat: -0.8 + Math.random() * 0.2,
+        lng: 36.2 + Math.random() * 0.3,
+        name: 'En route to Nakuru'
+      },
+      next_station: 'Nakuru',
+      estimated_arrival: new Date(Date.now() + 45 * 60000).toISOString(),
+      delay_minutes: Math.floor(Math.random() * 10),
+      platform: '2A',
+      status: Math.random() > 0.3 ? 'on_time' : 'delayed',
+      speed_kmh: 80 + Math.floor(Math.random() * 40)
+    };
+    setPosition(mockPosition);
+    onPositionUpdateRef.current?.(mockPosition);
+  }, [trainNumber]);
 
   useEffect(() => {
-    const fetchPosition = async () => {
-      // Simulate real-time position updates
-      const mockPosition: TrainPosition = {
-        train_number: trainNumber,
-        route: 'Nairobi - Kisumu',
-        current_location: {
-          lat: -0.8 + Math.random() * 0.2,
-          lng: 36.2 + Math.random() * 0.3,
-          name: 'En route to Nakuru'
-        },
-        next_station: 'Nakuru',
-        estimated_arrival: new Date(Date.now() + 45 * 60000).toISOString(),
-        delay_minutes: Math.floor(Math.random() * 10),
-        platform: '2A',
-        status: Math.random() > 0.3 ? 'on_time' : 'delayed',
-        speed_kmh: 80 + Math.floor(Math.random() * 40)
-      };
-      setPosition(mockPosition);
-      onPositionUpdate?.(mockPosition);
-    };
-
     fetchPosition();
     const interval = setInterval(fetchPosition, 30000);
     return () => clearInterval(interval);
-  }, [trainNumber, onPositionUpdate]);
+  }, [fetchPosition]);
 
   if (!position) return <div>Loading...</div>;
 
