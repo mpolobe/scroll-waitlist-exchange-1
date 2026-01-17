@@ -18,19 +18,30 @@ export function PointsHistory({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadTransactions();
+    if (userId) {
+      loadTransactions();
+    }
   }, [userId]);
 
   const loadTransactions = async () => {
-    const { data } = await supabase
-      .from('points_transactions')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(20);
+    try {
+      const { data, error } = await supabase
+        .from('points_transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(20);
 
-    if (data) setTransactions(data);
-    setLoading(false);
+      if (error) {
+        console.warn('Could not load points transactions:', error);
+      } else if (data) {
+        setTransactions(data);
+      }
+    } catch (err) {
+      console.warn('Points history fetch failed:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getIcon = (type: string) => {
