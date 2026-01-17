@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import MarketingNav from '@/components/MarketingNav';
+import MarketingFooter from '@/components/MarketingFooter';
+import { CapitalCityTicketBooking } from '@/components/booking/CapitalCityTicketBooking';
 import { RouteSearchForm } from '@/components/booking/RouteSearchForm';
 import { MultiCitySearchForm } from '@/components/booking/MultiCitySearchForm';
 import { MultiCityRouteMap } from '@/components/booking/MultiCityRouteMap';
@@ -11,6 +13,7 @@ import { BookingSummary } from '@/components/booking/BookingSummary';
 import { BookingConfirmation } from '@/components/booking/BookingConfirmation';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Train, MapPin, Ticket } from 'lucide-react';
 
 const mockRoutes = [
   { id: '1', from: 'Nairobi', to: 'Mombasa', departure: '08:00', arrival: '14:30', duration: '6h 30m', price: 150, available: 45, trainNumber: 'ARN-101' },
@@ -18,7 +21,7 @@ const mockRoutes = [
   { id: '3', from: 'Nairobi', to: 'Mombasa', departure: '20:00', arrival: '02:30', duration: '6h 30m', price: 120, available: 28, trainNumber: 'ARN-103' },
 ];
 
-const mockMultiCityRoutes = {
+const mockMultiCityRoutes: Record<string, any[][]> = {
   'Nairobi-Nakuru-Kisumu': [
     [
       { id: '1', from: 'Nairobi', to: 'Nakuru', departure: '08:00', arrival: '10:30', duration: '2h 30m', price: 50, trainNumber: 'ARN-201', transferTime: '45 min' },
@@ -37,9 +40,10 @@ const mockMultiCityRoutes = {
   ],
 };
 
-
+type BookingMode = 'capital' | 'legacy-single' | 'legacy-multi';
 
 export default function RailwayBooking() {
+  const [bookingMode, setBookingMode] = useState<BookingMode>('capital');
   const [step, setStep] = useState(1);
   const [searchParams, setSearchParams] = useState<any>(null);
   const [routes, setRoutes] = useState<any[]>([]);
@@ -49,7 +53,6 @@ export default function RailwayBooking() {
   const [isMultiCity, setIsMultiCity] = useState(false);
   const [multiCityStops, setMultiCityStops] = useState<any[]>([]);
   const [multiCityLegs, setMultiCityLegs] = useState<any[]>([]);
-
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = async (from: string, to: string, date: string, adults: number, children: number) => {
@@ -79,7 +82,6 @@ export default function RailwayBooking() {
         }));
         setRoutes(mappedRoutes);
       } else {
-        // Fallback to mock data if no routes found in DB
         setRoutes(mockRoutes);
       }
     } catch (error) {
@@ -92,12 +94,10 @@ export default function RailwayBooking() {
     }
   };
 
-
   const handleMultiCitySearch = (stops: any[], date: string, passengers: number) => {
     setMultiCityStops(stops);
     setSearchParams({ stops, date, passengers });
     
-    // Generate route key from stops
     const routeKey = stops.map(s => s.city).join('-');
     const availableRoutes = mockMultiCityRoutes[routeKey] || [mockMultiCityRoutes['Nairobi-Nakuru-Kisumu'][0]];
     
@@ -106,14 +106,13 @@ export default function RailwayBooking() {
     setStep(2);
   };
 
-
   const handleRouteSelect = (route: any) => {
     setSelectedRoute(route);
     setStep(3);
   };
 
   const handleMultiCitySelect = () => {
-    setSelectedRoute({ legs: multiCityLegs, price: multiCityLegs.reduce((sum, leg) => sum + leg.price, 0) });
+    setSelectedRoute({ legs: multiCityLegs, price: multiCityLegs.reduce((sum: number, leg: any) => sum + leg.price, 0) });
     setStep(3);
   };
 
@@ -149,7 +148,6 @@ export default function RailwayBooking() {
     setStep(5);
   };
 
-  // Calculate total price with child discount
   const calculateTotalPrice = () => {
     if (!selectedRoute) return 0;
     
@@ -157,61 +155,170 @@ export default function RailwayBooking() {
     const adults = searchParams?.adults || 0;
     const children = searchParams?.children || 0;
     
-    // If we have adult/children counts, calculate accordingly
     if (adults > 0 || children > 0) {
       const adultPrice = basePrice * adults;
-      const childPrice = basePrice * 0.5 * children; // 50% discount for children
-      return adultPrice + childPrice + 5; // +5 for service fee
+      const childPrice = basePrice * 0.5 * children;
+      return adultPrice + childPrice + 5;
     }
     
-    // Fallback to seat count if no passenger breakdown
     return (basePrice * selectedSeats.length) + 5;
   };
 
   const totalPrice = calculateTotalPrice();
 
+  const resetLegacyBooking = () => {
+    setStep(1);
+    setSearchParams(null);
+    setRoutes([]);
+    setSelectedRoute(null);
+    setSelectedSeats([]);
+    setBookingId('');
+    setIsMultiCity(false);
+    setMultiCityStops([]);
+    setMultiCityLegs([]);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-orange-50">
       <MarketingNav />
+      
+      {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-orange-500 text-white py-16 pt-24">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Book Railway Tickets</h1>
-          <p className="text-xl">Fast, secure, and easy booking with Africoin</p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
+            <Train className="w-12 h-12" />
+            Book Railway Tickets
+          </h1>
+          <p className="text-xl">Travel across Africa's capital cities with NFT-powered tickets</p>
         </div>
       </div>
-      <div className="container mx-auto px-4 py-8">
-        {step === 1 && (
-          <Tabs defaultValue="single" className="w-full">
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6">
-              <TabsTrigger value="single">Single Route</TabsTrigger>
-              <TabsTrigger value="multi">Multi-City</TabsTrigger>
-            </TabsList>
-            <TabsContent value="single">
-              <RouteSearchForm onSearch={handleSearch} />
-            </TabsContent>
-            <TabsContent value="multi">
-              <MultiCitySearchForm onSearch={handleMultiCitySearch} />
-            </TabsContent>
-          </Tabs>
-        )}
-        {step === 2 && !isMultiCity && (
-          <div className="space-y-4 mt-8">
-            {routes.map(route => <RouteResultCard key={route.id} route={route} onSelect={handleRouteSelect} />)}
-          </div>
-        )}
-        {step === 2 && isMultiCity && (
-          <div className="space-y-6 mt-8">
-            <MultiCityRouteMap stops={multiCityStops} />
-            <MultiLegItinerary legs={multiCityLegs} onSelect={handleMultiCitySelect} />
-          </div>
-        )}
-        {step === 3 && <SeatSelectionMap totalSeats={40} selectedSeats={selectedSeats} onSeatToggle={handleSeatToggle} onConfirm={handleSeatsConfirm} />}
-        {step === 4 && <BookingSummary route={selectedRoute} seats={selectedSeats} date={searchParams.date} totalPrice={totalPrice} adults={searchParams.adults} children={searchParams.children} onConfirm={handlePayment} onBack={() => setStep(3)} />}
-        {step === 5 && <BookingConfirmation bookingId={bookingId} route={selectedRoute} seats={selectedSeats} date={searchParams.date} totalPrice={totalPrice} adults={searchParams.adults} children={searchParams.children} />}
 
+      {/* Booking Mode Selector */}
+      <div className="container mx-auto px-4 py-6">
+        <Tabs value={bookingMode} onValueChange={(v) => {
+          setBookingMode(v as BookingMode);
+          resetLegacyBooking();
+        }} className="w-full">
+          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 mb-6">
+            <TabsTrigger value="capital" className="flex items-center gap-2">
+              <MapPin className="w-4 h-4" />
+              Capital Cities
+            </TabsTrigger>
+            <TabsTrigger value="legacy-single" className="flex items-center gap-2">
+              <Ticket className="w-4 h-4" />
+              Single Route
+            </TabsTrigger>
+            <TabsTrigger value="legacy-multi" className="flex items-center gap-2">
+              <Train className="w-4 h-4" />
+              Multi-City
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Capital Cities Booking (Africa Railways Style) */}
+          <TabsContent value="capital">
+            <div className="bg-white rounded-lg shadow-lg p-2">
+              <CapitalCityTicketBooking />
+            </div>
+          </TabsContent>
+
+          {/* Legacy Single Route Booking */}
+          <TabsContent value="legacy-single">
+            <div className="space-y-6">
+              {step === 1 && <RouteSearchForm onSearch={handleSearch} />}
+              {step === 2 && !isMultiCity && (
+                <div className="space-y-4 mt-8">
+                  <Button variant="outline" onClick={resetLegacyBooking} className="mb-4">
+                    ← Back to Search
+                  </Button>
+                  {routes.map(route => (
+                    <RouteResultCard key={route.id} route={route} onSelect={handleRouteSelect} />
+                  ))}
+                </div>
+              )}
+              {step === 3 && (
+                <SeatSelectionMap 
+                  totalSeats={40} 
+                  selectedSeats={selectedSeats} 
+                  onSeatToggle={handleSeatToggle} 
+                  onConfirm={handleSeatsConfirm} 
+                />
+              )}
+              {step === 4 && (
+                <BookingSummary 
+                  route={selectedRoute} 
+                  seats={selectedSeats} 
+                  date={searchParams.date} 
+                  totalPrice={totalPrice} 
+                  adults={searchParams.adults} 
+                  children={searchParams.children} 
+                  onConfirm={handlePayment} 
+                  onBack={() => setStep(3)} 
+                />
+              )}
+              {step === 5 && (
+                <BookingConfirmation 
+                  bookingId={bookingId} 
+                  route={selectedRoute} 
+                  seats={selectedSeats} 
+                  date={searchParams.date} 
+                  totalPrice={totalPrice} 
+                  adults={searchParams.adults} 
+                  children={searchParams.children} 
+                />
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Legacy Multi-City Booking */}
+          <TabsContent value="legacy-multi">
+            <div className="space-y-6">
+              {step === 1 && <MultiCitySearchForm onSearch={handleMultiCitySearch} />}
+              {step === 2 && isMultiCity && (
+                <div className="space-y-6 mt-8">
+                  <Button variant="outline" onClick={resetLegacyBooking} className="mb-4">
+                    ← Back to Search
+                  </Button>
+                  <MultiCityRouteMap stops={multiCityStops} />
+                  <MultiLegItinerary legs={multiCityLegs} onSelect={handleMultiCitySelect} />
+                </div>
+              )}
+              {step === 3 && (
+                <SeatSelectionMap 
+                  totalSeats={40} 
+                  selectedSeats={selectedSeats} 
+                  onSeatToggle={handleSeatToggle} 
+                  onConfirm={handleSeatsConfirm} 
+                />
+              )}
+              {step === 4 && (
+                <BookingSummary 
+                  route={selectedRoute} 
+                  seats={selectedSeats} 
+                  date={searchParams.date} 
+                  totalPrice={totalPrice} 
+                  adults={searchParams.adults} 
+                  children={searchParams.children} 
+                  onConfirm={handlePayment} 
+                  onBack={() => setStep(3)} 
+                />
+              )}
+              {step === 5 && (
+                <BookingConfirmation 
+                  bookingId={bookingId} 
+                  route={selectedRoute} 
+                  seats={selectedSeats} 
+                  date={searchParams.date} 
+                  totalPrice={totalPrice} 
+                  adults={searchParams.adults} 
+                  children={searchParams.children} 
+                />
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
+
+      <MarketingFooter />
     </div>
   );
 }
-

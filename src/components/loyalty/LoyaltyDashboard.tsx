@@ -29,22 +29,32 @@ export function LoyaltyDashboard({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadLoyaltyData();
+    if (userId) {
+      loadLoyaltyData();
+    }
   }, [userId]);
 
   const loadLoyaltyData = async () => {
-    const { data } = await supabase
-      .from('loyalty_points')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('loyalty_points')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
 
-    if (data) {
-      setPoints(data.points_balance);
-      setLifetime(data.lifetime_points);
-      setTier(data.tier_level);
+      if (error) {
+        // User may not have loyalty record yet - not critical
+        console.warn('Could not load loyalty data:', error);
+      } else if (data) {
+        setPoints(data.points_balance || 0);
+        setLifetime(data.lifetime_points || 0);
+        setTier(data.tier_level || 'Bronze');
+      }
+    } catch (err) {
+      console.warn('Loyalty data fetch failed:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const nextTier = tier === 'Bronze' ? 'Silver' : tier === 'Silver' ? 'Gold' : tier === 'Gold' ? 'Platinum' : null;
