@@ -1,138 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { 
-  Wallet, Shield, TrendingUp, Users, Clock, 
-  AlertCircle, CheckCircle, ExternalLink, Loader2,
-  Award, Lock, Coins
+  Wallet, Shield, ExternalLink, Copy, CheckCircle,
+  Coins, Lock, Droplets, AlertCircle
 } from 'lucide-react';
 import MarketingNav from '@/components/MarketingNav';
 import MarketingFooter from '@/components/MarketingFooter';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import {
-  connectPolygonWallet,
-  isOnPolygon,
-  switchToPolygon,
-  getIdoStats,
-  calculateTokens,
-  participateInIdo,
-  SENT_IDO_CONFIG,
-  type IdoStats,
-} from '@/services/sentIdoService';
-import { SENT_TOKEN, formatTokenAmount } from '@/data/tokenConfig';
+import { SENT_IDO_CONFIG } from '@/services/sentIdoService';
+import { SENT_TOKEN } from '@/data/tokenConfig';
 
 export default function SentIdo() {
-  const { user } = useAuth();
-  const [walletConnected, setWalletConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [isParticipating, setIsParticipating] = useState(false);
-  const [contributionAmount, setContributionAmount] = useState('');
-  const [idoStats, setIdoStats] = useState<IdoStats | null>(null);
-  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [copied, setCopied] = useState<string | null>(null);
 
-  // Load IDO stats
-  useEffect(() => {
-    loadIdoStats();
-    const interval = setInterval(loadIdoStats, 30000); // Refresh every 30s
-    return () => clearInterval(interval);
-  }, []);
-
-  // Countdown timer
-  useEffect(() => {
-    const updateCountdown = () => {
-      const endDate = new Date(SENT_IDO_CONFIG.endDate).getTime();
-      const now = Date.now();
-      const distance = endDate - now;
-
-      if (distance > 0) {
-        setCountdown({
-          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((distance % (1000 * 60)) / 1000),
-        });
-      }
-    };
-
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadIdoStats = async () => {
-    const stats = await getIdoStats();
-    setIdoStats(stats);
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(label);
+    toast.success(`${label} copied to clipboard`);
+    setTimeout(() => setCopied(null), 2000);
   };
 
-  const handleConnectWallet = async () => {
-    setIsConnecting(true);
-    try {
-      const result = await connectPolygonWallet();
-      if (result.success && result.address) {
-        setWalletConnected(true);
-        setWalletAddress(result.address);
-        toast.success('Connected to Polygon wallet');
-      } else {
-        toast.error(result.error || 'Failed to connect wallet');
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Connection failed');
-    } finally {
-      setIsConnecting(false);
-    }
+  const formatNumber = (num: number) => {
+    if (num >= 1_000_000_000) return `${(num / 1_000_000_000).toFixed(2)}B`;
+    if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`;
+    if (num >= 1_000) return `${(num / 1_000).toFixed(2)}K`;
+    return num.toLocaleString();
   };
-
-  const handleParticipate = async () => {
-    if (!walletConnected || !walletAddress) {
-      toast.error('Please connect your Polygon wallet first');
-      return;
-    }
-
-    if (!user) {
-      toast.error('Please log in to participate');
-      return;
-    }
-
-    const amount = parseFloat(contributionAmount);
-    if (isNaN(amount) || amount < SENT_IDO_CONFIG.minBuy || amount > SENT_IDO_CONFIG.maxBuy) {
-      toast.error(`Please enter an amount between $${SENT_IDO_CONFIG.minBuy} and $${SENT_IDO_CONFIG.maxBuy}`);
-      return;
-    }
-
-    // Check network
-    if (!(await isOnPolygon())) {
-      const switchResult = await switchToPolygon();
-      if (!switchResult.success) {
-        toast.error(switchResult.error || 'Please switch to Polygon network');
-        return;
-      }
-    }
-
-    setIsParticipating(true);
-    try {
-      const result = await participateInIdo(user.id, walletAddress, amount);
-      if (result.success && result.participation) {
-        toast.success(`Successfully participated! You will receive ${formatTokenAmount(result.participation.tokensAllocated, SENT_TOKEN)}`);
-        setContributionAmount('');
-        loadIdoStats();
-      } else {
-        toast.error(result.error || 'Participation failed');
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Participation failed');
-    } finally {
-      setIsParticipating(false);
-    }
-  };
-
-  const tokenCalculation = contributionAmount ? calculateTokens(parseFloat(contributionAmount) || 0) : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-gray-900">
@@ -141,296 +37,329 @@ export default function SentIdo() {
       {/* Hero Section */}
       <div className="pt-24 pb-12 px-4">
         <div className="max-w-6xl mx-auto text-center">
-          <Badge className="mb-4 bg-green-500/20 text-green-400 border-green-500">
-            <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" />
-            SENT IDO - Polygon Network
+          <Badge className="mb-4 bg-yellow-500/20 text-yellow-400 border-yellow-500">
+            <span className="w-2 h-2 bg-yellow-400 rounded-full mr-2 animate-pulse" />
+            {SENT_IDO_CONFIG.status} - {SENT_IDO_CONFIG.saleType}
           </Badge>
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
-            🛡️ Sentinel Token IDO
+            🛡️ SENTINEL Token Fairlaunch
           </h1>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
             Governance token for the Africa Railways Sentinel safety network.
-            Connect your Polygon wallet to participate.
+            Live on PinkSale - Polygon Network.
           </p>
 
+          {/* PinkSale CTA */}
+          <a
+            href={SENT_IDO_CONFIG.launchpadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block"
+          >
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold text-lg px-8 py-6"
+            >
+              <ExternalLink className="w-5 h-5 mr-2" />
+              Participate on PinkSale
+            </Button>
+          </a>
+
           {/* Network Notice */}
-          <div className="inline-block bg-purple-500/20 border border-purple-500 rounded-lg px-6 py-3 mb-8">
+          <div className="inline-block bg-purple-500/20 border border-purple-500 rounded-lg px-6 py-3 mt-8">
             <p className="text-purple-300 flex items-center gap-2">
               <AlertCircle className="w-5 h-5" />
-              Polygon wallet required (MetaMask or compatible). We do not create wallets for you.
+              {SENT_IDO_CONFIG.whitelistOnly ? 'Whitelist Only' : 'Public Sale'} - Polygon wallet required (MetaMask or compatible)
             </p>
           </div>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 pb-16">
-        {/* Countdown */}
-        <Card className="mb-8 bg-gradient-to-r from-purple-900/50 to-indigo-900/50 border-purple-500">
+        {/* Sale Status Card */}
+        <Card className="mb-8 bg-gradient-to-r from-pink-900/50 to-purple-900/50 border-pink-500">
           <CardContent className="py-8">
-            <h3 className="text-center text-purple-300 mb-6">⏰ Time Remaining Until IDO Ends</h3>
-            <div className="flex justify-center gap-4 md:gap-8">
-              {[
-                { value: countdown.days, label: 'Days' },
-                { value: countdown.hours, label: 'Hours' },
-                { value: countdown.minutes, label: 'Minutes' },
-                { value: countdown.seconds, label: 'Seconds' },
-              ].map((item) => (
-                <div key={item.label} className="text-center bg-gray-900/50 rounded-lg p-4 min-w-[80px]">
-                  <div className="text-3xl md:text-4xl font-bold text-yellow-400">
-                    {String(item.value).padStart(2, '0')}
-                  </div>
-                  <div className="text-xs text-gray-400 uppercase tracking-wider mt-1">
-                    {item.label}
-                  </div>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="text-center md:text-left">
+                <h3 className="text-2xl font-bold text-white mb-2">Presale Status</h3>
+                <Badge variant="outline" className="text-yellow-400 border-yellow-400">
+                  {SENT_IDO_CONFIG.status}
+                </Badge>
+              </div>
+              <div className="text-center">
+                <div className="text-sm text-gray-400 mb-1">Soft Cap</div>
+                <div className="text-3xl font-bold text-cyan-400">
+                  {formatNumber(SENT_IDO_CONFIG.softCap)} POL
                 </div>
-              ))}
+                <div className="text-sm text-gray-500">~${formatNumber(SENT_IDO_CONFIG.softCapUsd)} USD</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm text-gray-400 mb-1">Max Buy</div>
+                <div className="text-3xl font-bold text-yellow-400">
+                  {formatNumber(SENT_IDO_CONFIG.maxBuyPol)} POL
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Progress Section */}
-        {idoStats && (
-          <Card className="mb-8 bg-gray-800/50 border-gray-700">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-yellow-400">Sale Progress</CardTitle>
-                <span className="text-3xl font-bold text-cyan-400">
-                  {idoStats.percentComplete.toFixed(1)}%
-                </span>
+        {/* Contract Addresses */}
+        <Card className="mb-8 bg-gray-800/50 border-gray-700">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-white">
+              <Shield className="w-5 h-5 text-green-400" />
+              Contract Addresses
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-4 bg-gray-900/50 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-400">Token Address</span>
+                <Badge variant="outline" className="text-red-400 border-red-400 text-xs">
+                  Do NOT send POL here
+                </Badge>
               </div>
-            </CardHeader>
-            <CardContent>
-              <Progress value={idoStats.percentComplete} className="h-4 mb-6" />
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-gray-900/50 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-400">
-                    ${idoStats.totalRaised.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-400">Total Raised</div>
-                </div>
-                <div className="text-center p-4 bg-gray-900/50 rounded-lg">
-                  <div className="text-2xl font-bold text-white">
-                    ${SENT_IDO_CONFIG.hardCap.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-400">Hard Cap</div>
-                </div>
-                <div className="text-center p-4 bg-gray-900/50 rounded-lg">
-                  <div className="text-2xl font-bold text-cyan-400">
-                    {(idoStats.tokensAllocated / 1e9).toFixed(2)}B
-                  </div>
-                  <div className="text-sm text-gray-400">Tokens Allocated</div>
-                </div>
-                <div className="text-center p-4 bg-gray-900/50 rounded-lg">
-                  <div className="text-2xl font-bold text-white">
-                    {idoStats.participants.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-400">Participants</div>
-                </div>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 text-sm text-cyan-400 font-mono break-all">
+                  {SENT_IDO_CONFIG.tokenAddress}
+                </code>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => copyToClipboard(SENT_IDO_CONFIG.tokenAddress, 'Token address')}
+                >
+                  {copied === 'Token address' ? (
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                </Button>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+
+            <div className="p-4 bg-gray-900/50 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-400">Pool Address (PinkSale)</span>
+                <Badge variant="outline" className="text-red-400 border-red-400 text-xs">
+                  Do NOT send POL here
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 text-sm text-purple-400 font-mono break-all">
+                  {SENT_IDO_CONFIG.poolAddress}
+                </code>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => copyToClipboard(SENT_IDO_CONFIG.poolAddress, 'Pool address')}
+                >
+                  {copied === 'Pool address' ? (
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-4">
+              <a
+                href={`https://polygonscan.com/token/${SENT_IDO_CONFIG.tokenAddress}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
+              >
+                <Button variant="outline" className="w-full">
+                  View Token on PolygonScan <ExternalLink className="w-4 h-4 ml-2" />
+                </Button>
+              </a>
+              <a
+                href={SENT_IDO_CONFIG.launchpadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
+              >
+                <Button variant="outline" className="w-full bg-pink-500/10 border-pink-500 text-pink-400 hover:bg-pink-500/20">
+                  View on PinkSale <ExternalLink className="w-4 h-4 ml-2" />
+                </Button>
+              </a>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Participation Card */}
+          {/* Token Info Card */}
           <Card className="bg-gray-800/50 border-gray-700">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-white">
-                <Wallet className="w-5 h-5 text-purple-400" />
-                Participate in SENT IDO
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Wallet Connection */}
-              {!walletConnected ? (
-                <div className="text-center py-8">
-                  <Wallet className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-                  <p className="text-gray-300 mb-4">
-                    Connect your Polygon wallet to participate
-                  </p>
-                  <Button
-                    onClick={handleConnectWallet}
-                    disabled={isConnecting}
-                    className="bg-gradient-to-r from-purple-500 to-pink-500"
-                  >
-                    {isConnecting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Connecting...
-                      </>
-                    ) : (
-                      <>
-                        <Wallet className="w-4 h-4 mr-2" />
-                        Connect Polygon Wallet
-                      </>
-                    )}
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  {/* Connected Status */}
-                  <div className="flex items-center justify-between p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-400" />
-                      <span className="text-green-400">Connected to Polygon</span>
-                    </div>
-                    <span className="font-mono text-sm text-gray-400">
-                      {walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}
-                    </span>
-                  </div>
-
-                  {/* Contribution Input */}
-                  <div>
-                    <Label className="text-gray-300">Contribution Amount (USD)</Label>
-                    <Input
-                      type="number"
-                      min={SENT_IDO_CONFIG.minBuy}
-                      max={SENT_IDO_CONFIG.maxBuy}
-                      value={contributionAmount}
-                      onChange={(e) => setContributionAmount(e.target.value)}
-                      placeholder={`$${SENT_IDO_CONFIG.minBuy} - $${SENT_IDO_CONFIG.maxBuy}`}
-                      className="mt-2 bg-gray-900 border-gray-600 text-white"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Min: ${SENT_IDO_CONFIG.minBuy} | Max: ${SENT_IDO_CONFIG.maxBuy}
-                    </p>
-                  </div>
-
-                  {/* Token Calculation */}
-                  {tokenCalculation && parseFloat(contributionAmount) >= SENT_IDO_CONFIG.minBuy && (
-                    <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">Base Tokens:</span>
-                        <span className="text-white">{tokenCalculation.baseTokens.toLocaleString()} SENT</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">Bonus ({tokenCalculation.bonusPercent}%):</span>
-                        <span className="text-green-400">+{tokenCalculation.bonusTokens.toLocaleString()} SENT</span>
-                      </div>
-                      <Separator className="bg-gray-700" />
-                      <div className="flex justify-between font-bold">
-                        <span className="text-gray-300">Total Tokens:</span>
-                        <span className="text-yellow-400">{tokenCalculation.totalTokens.toLocaleString()} SENT</span>
-                      </div>
-                      <Badge className="w-full justify-center mt-2" variant="outline">
-                        {tokenCalculation.tier.toUpperCase()} TIER
-                      </Badge>
-                    </div>
-                  )}
-
-                  <Button
-                    onClick={handleParticipate}
-                    disabled={isParticipating || !contributionAmount}
-                    className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold"
-                  >
-                    {isParticipating ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      'Participate Now'
-                    )}
-                  </Button>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* IDO Details Card */}
-          <Card className="bg-gray-800/50 border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <Shield className="w-5 h-5 text-green-400" />
-                SENT Token Details
+                <Coins className="w-5 h-5 text-yellow-400" />
+                Token Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-3 bg-gray-900/50 rounded-lg">
-                  <div className="text-xs text-gray-500 uppercase">Token Price</div>
-                  <div className="text-lg font-bold text-yellow-400">${SENT_IDO_CONFIG.idoPrice}</div>
+                  <div className="text-xs text-gray-500 uppercase">Name</div>
+                  <div className="text-lg font-bold text-white">{SENT_TOKEN.name}</div>
                 </div>
                 <div className="p-3 bg-gray-900/50 rounded-lg">
-                  <div className="text-xs text-gray-500 uppercase">Total Supply</div>
-                  <div className="text-lg font-bold text-white">5B SENT</div>
+                  <div className="text-xs text-gray-500 uppercase">Symbol</div>
+                  <div className="text-lg font-bold text-cyan-400">{SENT_TOKEN.symbol}</div>
                 </div>
                 <div className="p-3 bg-gray-900/50 rounded-lg">
-                  <div className="text-xs text-gray-500 uppercase">IDO Allocation</div>
-                  <div className="text-lg font-bold text-cyan-400">1B (20%)</div>
+                  <div className="text-xs text-gray-500 uppercase">Decimals</div>
+                  <div className="text-lg font-bold text-white">{SENT_TOKEN.decimals}</div>
                 </div>
                 <div className="p-3 bg-gray-900/50 rounded-lg">
                   <div className="text-xs text-gray-500 uppercase">Network</div>
                   <div className="text-lg font-bold text-purple-400">Polygon</div>
                 </div>
-              </div>
-
-              <Separator className="bg-gray-700" />
-
-              <div>
-                <h4 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
-                  <Lock className="w-4 h-4" /> Vesting Schedule
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">TGE Unlock:</span>
-                    <span className="text-white">{SENT_IDO_CONFIG.vestingSchedule.tgeUnlock}%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Cliff Period:</span>
-                    <span className="text-white">{SENT_IDO_CONFIG.vestingSchedule.cliffMonths} month</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Vesting Period:</span>
-                    <span className="text-white">{SENT_IDO_CONFIG.vestingSchedule.vestingMonths} months</span>
+                <div className="p-3 bg-gray-900/50 rounded-lg col-span-2">
+                  <div className="text-xs text-gray-500 uppercase">Total Supply</div>
+                  <div className="text-lg font-bold text-yellow-400">
+                    {formatNumber(SENT_IDO_CONFIG.totalSupply)} SENT
                   </div>
                 </div>
               </div>
 
               <Separator className="bg-gray-700" />
 
-              <div>
-                <h4 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
-                  <Award className="w-4 h-4" /> Tier Bonuses
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Bronze ($100-$500):</span>
-                    <span className="text-green-400">+5%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Silver ($500-$2,000):</span>
-                    <span className="text-green-400">+10%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Gold ($2,000-$5,000):</span>
-                    <span className="text-green-400">+15%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Platinum ($5,000):</span>
-                    <span className="text-green-400">+20%</span>
-                  </div>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Tokens for Presale</span>
+                  <span className="text-white font-semibold">
+                    {formatNumber(SENT_IDO_CONFIG.idoAllocation)} SENT
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Tokens for Liquidity</span>
+                  <span className="text-white font-semibold">
+                    {formatNumber(SENT_IDO_CONFIG.liquidityAllocation)} SENT
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Initial Market Cap</span>
+                  <span className="text-green-400 font-semibold">
+                    ${formatNumber(SENT_IDO_CONFIG.initialMarketCap)}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Listing Details Card */}
+          <Card className="bg-gray-800/50 border-gray-700">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Droplets className="w-5 h-5 text-blue-400" />
+                Listing Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-gray-900/50 rounded-lg">
+                  <div className="text-xs text-gray-500 uppercase">Launchpad</div>
+                  <div className="text-lg font-bold text-pink-400">{SENT_IDO_CONFIG.launchpad}</div>
+                </div>
+                <div className="p-3 bg-gray-900/50 rounded-lg">
+                  <div className="text-xs text-gray-500 uppercase">Listing DEX</div>
+                  <div className="text-lg font-bold text-blue-400">{SENT_IDO_CONFIG.listingDex}</div>
+                </div>
+                <div className="p-3 bg-gray-900/50 rounded-lg">
+                  <div className="text-xs text-gray-500 uppercase">Liquidity %</div>
+                  <div className="text-lg font-bold text-green-400">{SENT_IDO_CONFIG.liquidityPercent}%</div>
+                </div>
+                <div className="p-3 bg-gray-900/50 rounded-lg">
+                  <div className="text-xs text-gray-500 uppercase">Sale Type</div>
+                  <div className="text-lg font-bold text-yellow-400">{SENT_IDO_CONFIG.saleType}</div>
                 </div>
               </div>
 
-              <a
-                href="https://polygonscan.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 text-purple-400 hover:text-purple-300 text-sm mt-4"
-              >
-                View on PolygonScan <ExternalLink className="w-4 h-4" />
-              </a>
+              <Separator className="bg-gray-700" />
+
+              <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Lock className="w-5 h-5 text-green-400" />
+                  <span className="font-semibold text-green-400">Liquidity Lock</span>
+                </div>
+                <p className="text-gray-300">
+                  Liquidity will be locked for <span className="text-white font-bold">{SENT_IDO_CONFIG.liquidityLockDays} days</span> after pool ends
+                </p>
+              </div>
+
+              <Separator className="bg-gray-700" />
+
+              <div>
+                <h4 className="text-sm font-semibold text-gray-300 mb-3">Sale Timeline</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Start Time:</span>
+                    <span className="text-yellow-400">
+                      {SENT_IDO_CONFIG.startDate ? new Date(SENT_IDO_CONFIG.startDate).toLocaleString() : 'Not set'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">End Time:</span>
+                    <span className="text-yellow-400">
+                      {SENT_IDO_CONFIG.endDate ? new Date(SENT_IDO_CONFIG.endDate).toLocaleString() : 'Not set'}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* How to Participate */}
+        <Card className="mt-8 bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-500">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-white">
+              <Wallet className="w-5 h-5 text-purple-400" />
+              How to Participate
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-4 gap-6">
+              {[
+                { step: '1', title: 'Get POL', desc: 'Ensure you have POL tokens in your Polygon wallet' },
+                { step: '2', title: 'Connect Wallet', desc: 'Visit PinkSale and connect your MetaMask or compatible wallet' },
+                { step: '3', title: 'Join Whitelist', desc: 'Complete whitelist requirements if sale is whitelist-only' },
+                { step: '4', title: 'Contribute', desc: 'Enter your contribution amount (max 10,000 POL) and confirm' },
+              ].map((item) => (
+                <div key={item.step} className="text-center p-4 bg-gray-900/50 rounded-lg">
+                  <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-white font-bold">{item.step}</span>
+                  </div>
+                  <div className="font-semibold text-white mb-1">{item.title}</div>
+                  <div className="text-xs text-gray-400">{item.desc}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 text-center">
+              <a
+                href={SENT_IDO_CONFIG.launchpadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
+                >
+                  <ExternalLink className="w-5 h-5 mr-2" />
+                  Go to PinkSale Fairlaunch
+                </Button>
+              </a>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Token Utilities */}
         <Card className="mt-8 bg-gray-800/50 border-gray-700">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
-              <Coins className="w-5 h-5 text-yellow-400" />
-              SENT Token Utilities
+              <Shield className="w-5 h-5 text-green-400" />
+              SENTINEL Token Utilities
             </CardTitle>
           </CardHeader>
           <CardContent>

@@ -51,38 +51,44 @@ export const AFRC_TOKEN: TokenConfig = {
 // SENT - Governance Token (Polygon) - IDO Target
 export const SENT_TOKEN: TokenConfig = {
   symbol: 'SENT',
-  name: 'Sentinel',
+  name: 'SENTINEL',
   description: 'Governance token for the Sentinel safety network',
   network: 'polygon',
   chainId: '0x89', // Polygon Mainnet
+  contractAddress: '0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5',
   decimals: 18,
   icon: '🛡️',
   color: '#10B981',
   purpose: 'Governance, staking, fee rewards, priority access',
-  isLive: false, // Q1 2026 IDO
+  isLive: true, // Live on Pink Sale
 };
 
-// IDO Configuration for SENT
+// IDO Configuration for SENT - Pink Sale Fairlaunch
 export const SENT_IDO_CONFIG = {
   token: SENT_TOKEN,
-  totalSupply: 5_000_000_000, // 5 billion SENT
-  idoAllocation: 1_000_000_000, // 1 billion (20%) for IDO
-  idoPrice: 0.00005, // $0.00005 per SENT
-  hardCap: 50_000, // $50,000 USD
-  softCap: 25_000, // $25,000 USD
-  minBuy: 100, // $100 minimum
-  maxBuy: 5_000, // $5,000 maximum
-  vestingSchedule: {
-    tgeUnlock: 20, // 20% at TGE
-    cliffMonths: 1,
-    vestingMonths: 6,
-    vestingPercent: 80, // 80% vested over 6 months
-  },
+  totalSupply: 10_000_000_000, // 10 billion SENT
+  idoAllocation: 3_000_000_000, // 3 billion for presale
+  liquidityAllocation: 1_453_500_000, // 1.4535 billion for liquidity
+  initialMarketCap: 123_009.56, // $123,009.56 USD
+  softCap: 255_000, // 255,000 POL (~$36.9K USD)
+  softCapUsd: 36_900, // Approximate USD value
+  maxBuyPol: 10_000, // 10,000 POL maximum per wallet
+  // Pool addresses
+  tokenAddress: '0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5',
+  poolAddress: '0xf366e3aaCC54C99E50c90B7C57625776f88D8d08',
+  // Listing details
   launchpad: 'PinkSale',
-  listingDex: 'Cetus DEX',
-  startDate: '2026-03-01T00:00:00Z',
-  endDate: '2026-03-15T00:00:00Z',
-  tgeDate: '2026-03-20T00:00:00Z',
+  launchpadUrl: 'https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08',
+  listingDex: 'QuickSwap',
+  liquidityPercent: 51,
+  liquidityLockDays: 720, // 720 days after pool ends
+  // Sale type
+  saleType: 'Fairlaunch',
+  whitelistOnly: true,
+  status: 'Upcoming',
+  // Dates (to be set)
+  startDate: null, // Not set yet
+  endDate: null, // Not set yet
 };
 
 // Token utility breakdown
