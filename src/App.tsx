@@ -30,6 +30,7 @@ import VerifyEmail from "@/pages/VerifyEmail";
 import VerifyEmailSent from "@/pages/VerifyEmailSent";
 import AuthCallback from "@/pages/AuthCallback";
 import OAuthConsent from "@/pages/OAuthConsent";
+import SentIdo from "@/pages/SentIdo";
 
 export default function App() {
   return (
@@ -61,6 +62,8 @@ export default function App() {
               <Route path="/verify-email-sent" element={<VerifyEmailSent />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/oauth/consent" element={<OAuthConsent />} />
+              <Route path="/ido" element={<SentIdo />} />
+              <Route path="/sent-ido" element={<SentIdo />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
