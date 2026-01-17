@@ -401,11 +401,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
 
-  const updateProfile = async (data: any) => {
-    if (!user) return;
+  const updateProfile = async (data: Partial<UserProfile>): Promise<{ data: UserProfile | null; error: Error | null }> => {
+    if (!user) {
+      return { data: null, error: new Error('User not authenticated') };
+    }
     const { error } = await supabase.from('profiles').update(data).eq('id', user.id);
-    if (!error) await loadProfile(user.id);
-    return { error };
+    if (error) {
+      return { data: null, error: new Error(error.message) };
+    }
+    await loadProfile(user.id);
+    return { data: profile, error: null };
   };
 
   return (
