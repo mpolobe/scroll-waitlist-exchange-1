@@ -20,6 +20,82 @@ interface BlogPost {
   featured: boolean;
 }
 
+// Fallback blog posts when Supabase is unavailable
+const fallbackPosts: BlogPost[] = [
+  {
+    id: 'sent-token-pinksale-launch',
+    title: '$SENT Token IDO Live on PinkSale - Join the Sentinel Network',
+    excerpt: 'The SENT governance token is now live on PinkSale! Join the fairlaunch on Polygon network from January 19 to February 2, 2026.',
+    content: '',
+    category: 'Company News',
+    author: 'Africa Railways Team',
+    date: 'Jan 19, 2026',
+    image: 'https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285109834_4d14e31e.webp',
+    read_time: '4 min read',
+    featured: true
+  },
+  {
+    id: 'tazara-railway-50-years',
+    title: 'The TAZARA Turns 50: Riding the Railway That Bridges Tanzania and Zambia',
+    excerpt: 'A journey through 50 years of history on the Tanzania-Zambia Railway Authority line, exploring its challenges, significance, and future prospects with major Chinese investment.',
+    content: '',
+    category: 'Infrastructure',
+    author: 'Paul Stremple',
+    date: 'Dec 28, 2024',
+    image: 'https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285109834_4d14e31e.webp',
+    read_time: '8 min read',
+    featured: true
+  },
+  {
+    id: 'africoin-launch-2024',
+    title: 'Africoin Officially Launches Across 15 African Countries',
+    excerpt: 'We are thrilled to announce the official launch of Africoin, bringing seamless cryptocurrency payments to millions across Africa.',
+    content: '',
+    category: 'Company News',
+    author: 'Sarah Okonkwo',
+    date: 'Nov 20, 2024',
+    image: 'https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285109834_4d14e31e.webp',
+    read_time: '5 min read',
+    featured: true
+  },
+  {
+    id: 'mobile-money-integration',
+    title: 'How Mobile Money is Revolutionizing African Finance',
+    excerpt: 'Exploring the explosive growth of mobile money platforms and their impact on financial inclusion across the continent.',
+    content: '',
+    category: 'Fintech Trends',
+    author: 'James Mwangi',
+    date: 'Nov 18, 2024',
+    image: 'https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285110803_c14d926f.webp',
+    read_time: '7 min read',
+    featured: true
+  },
+  {
+    id: 'crypto-basics-beginners',
+    title: "Cryptocurrency 101: A Beginner's Guide for Africans",
+    excerpt: 'Everything you need to know about cryptocurrency, blockchain, and how to get started with digital currencies.',
+    content: '',
+    category: 'Education',
+    author: 'Amara Diop',
+    date: 'Nov 15, 2024',
+    image: 'https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285111680_3d3e2615.webp',
+    read_time: '10 min read',
+    featured: false
+  },
+  {
+    id: 'digital-payments-markets',
+    title: 'Digital Payments Transform Traditional African Markets',
+    excerpt: 'How vendors and small businesses are adopting digital payment solutions to reach more customers.',
+    content: '',
+    category: 'Case Studies',
+    author: 'Kofi Mensah',
+    date: 'Nov 12, 2024',
+    image: 'https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285112788_f2d50abf.webp',
+    read_time: '6 min read',
+    featured: true
+  }
+];
+
 const categories = ['All', 'Company News', 'Fintech Trends', 'Education', 'Case Studies', 'Infrastructure'];
 
 export default function Blog() {
@@ -40,9 +116,15 @@ export default function Blog() {
         .order('date', { ascending: false });
 
       if (error) throw error;
-      if (data) setPosts(data);
+      if (data && data.length > 0) {
+        setPosts(data);
+      } else {
+        // Use fallback data if no posts returned
+        setPosts(fallbackPosts);
+      }
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      console.error('Error fetching posts, using fallback data:', error);
+      setPosts(fallbackPosts);
     } finally {
       setLoading(false);
     }
