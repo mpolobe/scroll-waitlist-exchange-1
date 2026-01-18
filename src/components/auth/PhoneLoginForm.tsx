@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { otpService } from '@/lib/otpService';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Loader2, Smartphone, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { Loader2, Smartphone, ArrowLeft } from 'lucide-react';
 
 interface PhoneLoginFormProps {
   mode: 'login' | 'signup';
@@ -21,21 +20,9 @@ export function PhoneLoginForm({ mode, onBack }: PhoneLoginFormProps) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [useCustomOTP, setUseCustomOTP] = useState(false);
   
-  const { signInWithPhone, signUpWithPhone, verifyPhoneOTP } = useAuth();
+  const { verifyPhoneOTP } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Check if custom OTP service (Africa's Talking / Twilio) is configured
-    const isConfigured = otpService.isConfigured();
-    setUseCustomOTP(isConfigured);
-    
-    // Show warning if no SMS provider is configured
-    if (!isConfigured) {
-      console.warn('No SMS provider configured. Phone OTP will use Supabase phone auth.');
-    }
-  }, []);
 
   const formatPhoneNumber = (value: string) => {
     // Remove all non-digit characters
@@ -74,38 +61,25 @@ export function PhoneLoginForm({ mode, onBack }: PhoneLoginFormProps) {
     setIsLoading(true);
 
     try {
-      if (useCustomOTP) {
-        // Use Africa's Talking / Twilio
-        const result = await otpService.sendOTP(formattedPhone);
-        
-        if (result.success) {
-          setStep('otp');
-          setPhone(formattedPhone);
+      // Use server-side API endpoint for OTP
+      const response = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: formattedPhone })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setStep('otp');
+        setPhone(formattedPhone);
+        if (result.provider) {
           setSuccess(`Code sent via ${result.provider === 'africas-talking' ? "Africa's Talking" : 'Twilio'}`);
         } else {
-          setError(result.error || 'Failed to send OTP');
+          setSuccess('Verification code sent');
         }
       } else {
-        // Fallback to Supabase phone auth
-        let result;
-        if (mode === 'signup') {
-          result = await signUpWithPhone(formattedPhone, fullName, country);
-        } else {
-          result = await signInWithPhone(formattedPhone);
-        }
-
-        if (result.error) {
-          // Provide helpful error message for common issues
-          if (result.error.message.includes('Unsupported phone provider') || 
-              result.error.message.includes('Phone auth')) {
-            setError('Phone authentication is not available. Please use Email or Google sign-in instead.');
-          } else {
-            setError(result.error.message);
-          }
-        } else {
-          setStep('otp');
-          setPhone(formattedPhone);
-        }
+        setError(result.error || 'Failed to send OTP');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to send OTP');
@@ -126,13 +100,31 @@ export function PhoneLoginForm({ mode, onBack }: PhoneLoginFormProps) {
     setIsLoading(true);
 
     try {
-      const { error: verifyError } = await verifyPhoneOTP(phone, otp);
+      // Verify OTP via server-side API
+      const response = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, code: otp })
+      });
       
-      if (verifyError) {
-        setError(verifyError.message);
+      const result = await response.json();
+      
+      if (result.success) {
+        // Now authenticate with Supabase
+        const { error: verifyError } = await verifyPhoneOTP(phone, otp);
+        
+        if (verifyError) {
+          // Server verified but Supabase failed - still allow access in demo mode
+          if (result.demo) {
+            navigate('/wallet');
+            return;
+          }
+          setError(verifyError.message);
+        } else {
+          navigate('/wallet');
+        }
       } else {
-        // Redirect to wallet connection
-        navigate('/wallet');
+        setError(result.error || 'Failed to verify OTP');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to verify OTP');
@@ -143,16 +135,23 @@ export function PhoneLoginForm({ mode, onBack }: PhoneLoginFormProps) {
 
   const handleResendOTP = async () => {
     setError('');
+    setSuccess('');
     setIsLoading(true);
 
     try {
-      const result = await signInWithPhone(phone);
-      if (result.error) {
-        setError(result.error.message);
+      const response = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setSuccess('New code sent');
+        setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError('');
-        // Show success message
-        setTimeout(() => setError(''), 3000);
+        setError(result.error || 'Failed to resend OTP');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to resend OTP');
@@ -189,6 +188,7 @@ export function PhoneLoginForm({ mode, onBack }: PhoneLoginFormProps) {
           </div>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
+          {success && <p className="text-green-600 text-sm">{success}</p>}
 
           <Button
             type="submit"
@@ -224,39 +224,6 @@ export function PhoneLoginForm({ mode, onBack }: PhoneLoginFormProps) {
             </button>
           </div>
         </form>
-      </div>
-    );
-  }
-
-  // Show unavailable message if no SMS provider is configured
-  if (!useCustomOTP) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 p-3 bg-amber-50 rounded-lg border border-amber-200">
-          <AlertTriangle className="w-5 h-5 text-amber-600" />
-          <span className="text-sm text-amber-800">
-            Phone OTP is currently unavailable
-          </span>
-        </div>
-        <p className="text-sm text-gray-600">
-          SMS verification is not configured. Please use one of these alternatives:
-        </p>
-        <ul className="text-sm text-gray-600 list-disc list-inside space-y-1">
-          <li>Email sign up/sign in</li>
-          <li>Google authentication</li>
-          <li>Magic link via email</li>
-        </ul>
-        {onBack && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onBack}
-            className="w-full"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to other options
-          </Button>
-        )}
       </div>
     );
   }
