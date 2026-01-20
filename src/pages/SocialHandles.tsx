@@ -35,42 +35,56 @@ const promotionalAssets = [
 const tweetTemplates = [
   {
     title: 'IDO Announcement',
-    content: `🚂 $SENT Token IDO is LIVE on @paboratory! 
+    content: `🚨 $SENT (Sentinel) IDO is LIVE on PinkSale!
 
-🌍 Building Africa's railway safety infrastructure
-✅ Audited Contract
-✅ Locked Liquidity  
-✅ Real Utility - 2,000+ track workers
+📅 Launched: 19 January 2026
+🌐 Network: Polygon
+💰 Hard Cap: 255,000 POL
+🔒 Liquidity Lock: 720 days
 
-Join now: https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08
+Join the Africa Railways ecosystem:
+https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08
 
-#SENT #PinkSale #Polygon #Crypto`
+#SENT #PinkSale #Polygon #AfricaRailways`
   },
   {
-    title: 'Project Overview',
-    content: `🌍 Africa Railways is building the digital backbone of African infrastructure
+    title: 'Token Ecosystem',
+    content: `🔄 AFC vs AFRC vs SENT - What's the Difference?
 
-🔹 $AFC - Payment token on Sui
-🔹 $SENT - Governance token on Polygon  
-🔹 Real utility with railway integration
+🎫 $AFC = Buy train tickets (Sui blockchain)
+🏛️ $AFRC = Ecosystem rewards
+💎 $SENT = Investment & governance (Polygon)
 
-Website: https://africarailways.com
+Three tokens, one mission: Connecting Africa by rail! 🚂
 
 #AfricaRailways #Crypto #DeFi #RWA`
   },
   {
     title: 'Why SENT',
-    content: `Why I'm bullish on $SENT:
+    content: `Why $SENT is different:
 
-1️⃣ Real utility - 2,000+ railway workers
-2️⃣ Proof-of-Safety consensus
-3️⃣ Audited & verified on PinkSale
-4️⃣ Low market cap gem
-5️⃣ Strong roadmap through 2026
+🗳️ VOTING POWER: Decide on new routes & partnerships
+💰 REVENUE SHARE: Earn from transaction fees
+🔐 EXCLUSIVE ACCESS: Priority for Sentinel rewards
+🔒 720-day liquidity lock - no pump & dump
 
-DYOR: https://scroll-waitlist-exchange-1-nnjr.vercel.app/reviews/sent-token-sentinel-network
+Total Supply: 10B tokens
+Presale: 3B (30%)
 
-#SENT #CryptoGems`
+#SENT #CryptoGems #Polygon`
+  },
+  {
+    title: 'Sentinel Network',
+    content: `🛡️ What is the Sentinel Network?
+
+$SENT rewards 2,000+ track maintenance workers ("Sentinels") who use a mobile app to file Proof-of-Safety reports.
+
+Real utility. Real infrastructure. Real Africa.
+
+Token: 0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5
+Presale: 0xf366e3aaCC54C99E50c90B7C57625776f88D8d08
+
+#SENT #AfricaRailways`
   }
 ];
 
@@ -78,6 +92,7 @@ const affiliateLinks = {
   pinksale: 'https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08',
   website: 'https://africarailways.com',
   telegram: 'https://t.me/Africoin_Official',
+  sentinelGroup: 'https://t.me/afrcsentinel',
   twitter: 'https://x.com/africoin_afc',
   reviews: 'https://scroll-waitlist-exchange-1-nnjr.vercel.app/reviews'
 };
