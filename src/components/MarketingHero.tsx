@@ -39,12 +39,12 @@ const MarketingHero = () => {
         <div className="flex items-center justify-center gap-3 mb-6">
           <img 
             src="https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764284353488_fc5a167b.webp" 
-            alt="Africa Railways" 
+            alt="Africoin" 
             className="h-16 w-16"
           />
           <div className="text-left">
-            <h2 className="text-2xl font-bold text-white">Africa Railways</h2>
-            <p className="text-orange-300 text-sm">Powered by Africoin</p>
+            <h2 className="text-2xl font-bold text-white">Africoin</h2>
+            <p className="text-orange-300 text-sm">Powered by Africa Railways Infrastructure</p>
           </div>
         </div>
         
@@ -59,13 +59,13 @@ const MarketingHero = () => {
         </div>
 
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-          Blockchain Infrastructure<br />
-          <span className="bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">for African Railways</span>
+          Africa's Premier<br />
+          <span className="bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">Crypto Platform</span>
         </h1>
         
         <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto text-gray-300">
-          Connecting 54 nations through high-speed rail with integrated digital payments, 
-          safety monitoring, and transparent governance. Join 2,000+ Sentinels securing Africa's infrastructure.
+          Digital payments, crypto research, and blockchain infrastructure for Africa. 
+          Connecting 54 nations with integrated rail payments and transparent governance. Join 2,000+ Sentinels.
         </p>
 
         {/* Key Stats */}
