@@ -25,6 +25,18 @@ interface BlogPost {
 // Fallback blog posts when Supabase is unavailable
 const fallbackPosts: BlogPost[] = [
   {
+    id: 'africa-railways-crypto-promoter-announcement',
+    title: 'Africa Railways Launches Official Crypto Promotion Community',
+    excerpt: 'We are excited to announce that Africa Railways is now an official crypto promoter! Join our Telegram community @afrcsentinel for exclusive project updates, IDO alerts, and verified crypto opportunities.',
+    content: '',
+    category: 'Company News',
+    author: 'Africa Railways Team',
+    date: 'Jan 20, 2026',
+    image: 'https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285109834_4d14e31e.webp',
+    read_time: '4 min read',
+    featured: true
+  },
+  {
     id: 'sent-token-pinksale-launch',
     title: '$SENT Token IDO Live on PinkSale - Join the Sentinel Network',
     excerpt: 'The SENT governance token is now live on PinkSale! Join the fairlaunch on Polygon network from January 19 to February 2, 2026.',
