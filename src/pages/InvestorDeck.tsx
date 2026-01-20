@@ -145,8 +145,8 @@ const slides = [
     type: 'cta',
     title: 'Join Us in Building Africa\'s Future',
     contact: {
-      email: 'investors@africarailways.com',
-      phone: '+251 XXX XXX XXX',
+      email: 'admin@africarailways.com',
+      phone: '+260 975 190 740',
       website: 'africarailways.com/investors'
     },
     nextSteps: [
