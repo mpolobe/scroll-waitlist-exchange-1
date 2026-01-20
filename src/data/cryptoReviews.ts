@@ -84,8 +84,8 @@ The team includes railway industry veterans, blockchain developers, and African 
     },
     links: {
       website: 'https://africarailways.com',
-      twitter: 'https://twitter.com/africarailways',
-      telegram: 'https://t.me/africarailways',
+      twitter: 'https://x.com/africoin_afc',
+      telegram: 'https://t.me/Africoin_Official',
       launchpad: 'https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08'
     },
     pros: [
@@ -150,8 +150,8 @@ With real utility and a growing user base, SENT represents a unique opportunity 
     },
     links: {
       website: 'https://africarailways.com',
-      twitter: 'https://twitter.com/africarailways',
-      telegram: 'https://t.me/africarailways',
+      twitter: 'https://x.com/africoin_afc',
+      telegram: 'https://t.me/Africoin_Official',
       contract: '0xf366e3aaCC54C99E50c90B7C57625776f88D8d08',
       launchpad: 'https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08'
     },
@@ -215,8 +215,8 @@ AFC has a deflationary model with transaction burns and staking rewards. The tre
     },
     links: {
       website: 'https://africarailways.com',
-      twitter: 'https://twitter.com/africarailways',
-      telegram: 'https://t.me/africarailways',
+      twitter: 'https://x.com/africoin_afc',
+      telegram: 'https://t.me/Africoin_Official',
       contract: '0xc68c4cfb63d702227db09c28837e75abd23bbb3adc192e3bc45fecca4dd5b7e8::afc::AFC',
       launchpad: 'https://movepump.com/token/0xc68c4cfb63d702227db09c28837e75abd23bbb3adc192e3bc45fecca4dd5b7e8::afc::AFC'
     },

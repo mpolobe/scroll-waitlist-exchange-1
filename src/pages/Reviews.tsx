@@ -104,7 +104,7 @@ export default function Reviews() {
               <p className="text-sm text-gray-500">Latest insights</p>
               <ChevronRight className="w-5 h-5 text-orange-500 mt-2 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <a href="https://t.me/africarailways" target="_blank" rel="noopener noreferrer" className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow group">
+            <a href="https://t.me/Africoin_Official" target="_blank" rel="noopener noreferrer" className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow group">
               <Shield className="w-8 h-8 text-blue-500 mb-3" />
               <h3 className="font-semibold mb-1">Join Community</h3>
               <p className="text-sm text-gray-500">Get alpha first</p>
@@ -206,7 +206,7 @@ export default function Reviews() {
               and honest reviews to help quality projects gain visibility.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="https://t.me/africarailways" target="_blank" rel="noopener noreferrer">
+              <a href="https://t.me/Africoin_Official" target="_blank" rel="noopener noreferrer">
                 <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100">
                   Submit for Review
                 </Button>

@@ -68,7 +68,7 @@ Website: https://africarailways.com
 4️⃣ Low market cap gem
 5️⃣ Strong roadmap through 2026
 
-DYOR: https://africarailways.com/reviews/sent-token-sentinel-network
+DYOR: https://scroll-waitlist-exchange-1-nnjr.vercel.app/reviews/sent-token-sentinel-network
 
 #SENT #CryptoGems`
   }
@@ -77,9 +77,9 @@ DYOR: https://africarailways.com/reviews/sent-token-sentinel-network
 const affiliateLinks = {
   pinksale: 'https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08',
   website: 'https://africarailways.com',
-  telegram: 'https://t.me/africarailways',
-  twitter: 'https://twitter.com/africarailways',
-  reviews: 'https://africarailways.com/reviews'
+  telegram: 'https://t.me/Africoin_Official',
+  twitter: 'https://x.com/africoin_afc',
+  reviews: 'https://scroll-waitlist-exchange-1-nnjr.vercel.app/reviews'
 };
 
 export default function Promoter() {
