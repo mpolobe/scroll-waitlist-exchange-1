@@ -30,7 +30,7 @@ const MarketingFooter = () => {
   return (
     <footer className="bg-gray-900 text-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 mb-8">
 
           <div>
             <div className="flex items-center space-x-2 mb-4">
@@ -71,9 +71,23 @@ const MarketingFooter = () => {
           </div>
 
           <div>
-            <h4 className="font-bold mb-4">Partners</h4>
+            <h4 className="font-bold mb-4">Partners & Platforms</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="https://africarailways.com" target="_blank" rel="noopener noreferrer" className="hover:text-white">Africa Railways</a></li>
+              <li><a href="https://www.pinksale.finance" target="_blank" rel="noopener noreferrer" className="hover:text-white">PinkSale</a></li>
+              <li><a href="https://dexview.com" target="_blank" rel="noopener noreferrer" className="hover:text-white">DEXView</a></li>
+              <li><a href="https://movepump.com" target="_blank" rel="noopener noreferrer" className="hover:text-white">MovePump</a></li>
+              <li><a href="https://sui.io" target="_blank" rel="noopener noreferrer" className="hover:text-white">Sui Network</a></li>
+              <li><a href="https://polygon.technology" target="_blank" rel="noopener noreferrer" className="hover:text-white">Polygon</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-4">Research</h4>
+            <ul className="space-y-2 text-gray-400">
+              <li><Link to="/reviews" className="hover:text-white">Project Reviews</Link></li>
+              <li><Link to="/blog" className="hover:text-white">Blog & Analysis</Link></li>
+              <li><Link to="/promoter" className="hover:text-white">Promoter Hub</Link></li>
+              <li><Link to="/ido" className="hover:text-white">Active IDOs</Link></li>
             </ul>
           </div>
 

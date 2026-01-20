@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { BlogSearch } from '@/components/blog/BlogSearch';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import MarketingNav from '@/components/MarketingNav';
+import { MarketingBanner } from '@/components/blog/MarketingBanner';
 import { supabase } from '@/lib/supabase';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Star, TrendingUp, Rocket, ChevronRight } from 'lucide-react';
 
 interface BlogPost {
   id: string;
@@ -96,7 +98,7 @@ const fallbackPosts: BlogPost[] = [
   }
 ];
 
-const categories = ['All', 'Company News', 'Fintech Trends', 'Education', 'Case Studies', 'Infrastructure'];
+const categories = ['All', 'Company News', 'Crypto Analysis', 'DeFi', 'Education', 'Market Trends', 'Infrastructure', 'Project Reviews'];
 
 export default function Blog() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -151,18 +153,78 @@ export default function Blog() {
     <div className="min-h-screen bg-gray-50">
       <MarketingNav />
       {/* Header */}
-      <div className="bg-gradient-to-r from-orange-600 to-purple-600 text-white py-20 pt-32">
+      <div className="bg-gradient-to-br from-gray-900 via-purple-900 to-orange-900 text-white py-20 pt-32">
         <div className="container mx-auto px-4">
-          <h1 className="text-5xl font-bold mb-4">Africoin Blog</h1>
-          <p className="text-xl opacity-90">Insights on cryptocurrency, fintech trends, and the future of African finance</p>
+          <Badge className="bg-orange-500 text-white mb-4">Crypto Insights & Analysis</Badge>
+          <h1 className="text-5xl font-bold mb-4">Africa Railways Research Hub</h1>
+          <p className="text-xl opacity-90 max-w-2xl">
+            Expert analysis, market trends, and in-depth coverage of crypto projects shaping Africa's digital economy.
+          </p>
+          <div className="flex gap-4 mt-6">
+            <Link to="/reviews">
+              <Button size="lg" className="bg-orange-500 hover:bg-orange-600">
+                <Star className="w-4 h-4 mr-2" /> Project Reviews
+              </Button>
+            </Link>
+            <Link to="/ido">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                <Rocket className="w-4 h-4 mr-2" /> Active IDOs
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-12">
+        {/* Quick Links to Reviews */}
+        <section className="mb-12">
+          <div className="grid md:grid-cols-3 gap-6">
+            <Link to="/reviews" className="bg-gradient-to-r from-orange-500 to-purple-600 rounded-xl p-6 text-white hover:opacity-90 transition-opacity">
+              <Star className="w-8 h-8 mb-3" />
+              <h3 className="text-xl font-bold mb-2">Project Reviews</h3>
+              <p className="text-white/80 text-sm mb-3">In-depth analysis of crypto projects with ratings and due diligence</p>
+              <span className="flex items-center gap-1 text-sm font-semibold">
+                View Reviews <ChevronRight className="w-4 h-4" />
+              </span>
+            </Link>
+            <Link to="/ido" className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl p-6 text-white hover:opacity-90 transition-opacity">
+              <Rocket className="w-8 h-8 mb-3" />
+              <h3 className="text-xl font-bold mb-2">Live IDOs</h3>
+              <p className="text-white/80 text-sm mb-3">Participate in verified token launches on PinkSale and more</p>
+              <span className="flex items-center gap-1 text-sm font-semibold">
+                Join Now <ChevronRight className="w-4 h-4" />
+              </span>
+            </Link>
+            <a href="https://t.me/africarailways" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-6 text-white hover:opacity-90 transition-opacity">
+              <TrendingUp className="w-8 h-8 mb-3" />
+              <h3 className="text-xl font-bold mb-2">Get Alpha</h3>
+              <p className="text-white/80 text-sm mb-3">Join our Telegram for early access to project launches</p>
+              <span className="flex items-center gap-1 text-sm font-semibold">
+                Join Community <ChevronRight className="w-4 h-4" />
+              </span>
+            </a>
+          </div>
+        </section>
+
+        {/* Featured Banner */}
+        <section className="mb-12">
+          <MarketingBanner
+            badge="Featured IDO"
+            title="$SENT Token Live on PinkSale"
+            subtitle="Join the Sentinel Network - Africa's railway safety infrastructure token. Audited, verified, and backed by real utility."
+            ctaText="Participate Now"
+            ctaLink="https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08"
+          />
+        </section>
+
         {/* Featured Posts */}
         <section className="mb-16">
-
-          <h2 className="text-3xl font-bold mb-8">Featured Articles</h2>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold">Featured Articles</h2>
+            <Link to="/reviews" className="text-orange-600 hover:text-orange-700 flex items-center gap-1">
+              View All Reviews <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
           <div className="grid md:grid-cols-3 gap-8">
             {featuredPosts.map(post => (
               <BlogCard key={post.id} {...post} readTime={post.read_time} />

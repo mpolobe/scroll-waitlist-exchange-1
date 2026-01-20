@@ -10,6 +10,9 @@ import { Toaster } from "@/components/ui/toaster";
 import Index from "@/pages/Index";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
+import Reviews from "@/pages/Reviews";
+import ReviewDetail from "@/pages/ReviewDetail";
+import Promoter from "@/pages/Promoter";
 import MerchantPortal from "@/pages/MerchantPortal";
 import RailwayBooking from "@/pages/RailwayBooking";
 import WalletDashboard from "@/pages/WalletDashboard";
@@ -43,6 +46,9 @@ export default function App() {
               <Route path="/" element={<Index />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/reviews" element={<Reviews />} />
+              <Route path="/reviews/:id" element={<ReviewDetail />} />
+              <Route path="/promoter" element={<Promoter />} />
               <Route path="/merchant" element={<MerchantPortal />} />
               <Route path="/railway-booking" element={<RailwayBooking />} />
               <Route path="/wallet" element={<WalletDashboard />} />

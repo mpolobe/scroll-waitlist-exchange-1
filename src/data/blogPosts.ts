@@ -179,4 +179,190 @@ Most of the money will be spent on rehabilitating the tracks, but $400m will go 
   }
 ];
 
-export const categories = ['All', 'Company News', 'Fintech Trends', 'Education', 'Technology', 'Case Studies', 'Interviews', 'Infrastructure'];
+export const categories = ['All', 'Company News', 'Crypto Analysis', 'DeFi', 'Education', 'Market Trends', 'Infrastructure', 'Project Reviews', 'IDO Updates'];
+
+// Additional crypto marketing blog posts
+export const cryptoBlogPosts: BlogPost[] = [
+  {
+    id: 'how-to-spot-crypto-gems',
+    title: 'How to Spot Crypto Gems Before They Moon: A Complete Guide',
+    excerpt: 'Learn the key indicators that separate legitimate projects from scams. Our research team shares their due diligence process.',
+    content: `Finding early-stage crypto projects with 100x potential requires systematic research. Here's our proven framework:
+
+## 1. Team Analysis
+- Check LinkedIn profiles and past projects
+- Look for doxxed team members
+- Verify claims and experience
+
+## 2. Tokenomics Review
+- Total supply and distribution
+- Vesting schedules
+- Token utility
+
+## 3. Technical Due Diligence
+- Smart contract audits
+- GitHub activity
+- Technology innovation
+
+## 4. Community Strength
+- Organic growth vs bought followers
+- Engagement quality
+- Developer activity
+
+## 5. Market Opportunity
+- Problem being solved
+- Competition analysis
+- Addressable market size
+
+## Red Flags to Avoid
+- Anonymous teams with no track record
+- Unrealistic promises (guaranteed returns)
+- No clear utility
+- Copied whitepapers
+- Unlocked liquidity
+
+Follow our reviews for projects that pass our rigorous screening process.`,
+    category: 'Education',
+    author: 'Africa Railways Research',
+    date: 'Jan 18, 2026',
+    image: 'https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285111680_3d3e2615.webp',
+    readTime: '8 min read',
+    featured: true
+  },
+  {
+    id: 'pinksale-fairlaunch-guide',
+    title: 'Complete Guide to PinkSale Fairlaunches: How to Participate Safely',
+    excerpt: 'Step-by-step guide to participating in PinkSale IDOs. Learn how to evaluate projects and avoid common pitfalls.',
+    content: `PinkSale is the leading decentralized launchpad. Here's how to participate safely:
+
+## What is a Fairlaunch?
+A fairlaunch means everyone buys at the same price with no private sale or VC allocation. This creates a more equitable distribution.
+
+## How to Participate
+
+### Step 1: Connect Your Wallet
+- Use MetaMask or WalletConnect
+- Ensure you're on the correct network (BSC, Polygon, etc.)
+
+### Step 2: Evaluate the Project
+- Check if liquidity is locked
+- Look for audit badges
+- Review tokenomics
+- Research the team
+
+### Step 3: Contribute
+- Enter your contribution amount
+- Confirm the transaction
+- Wait for the sale to end
+
+### Step 4: Claim Tokens
+- After the sale ends, claim your tokens
+- Add the token to your wallet
+
+## Key Metrics to Check
+- Soft cap vs hard cap
+- Liquidity percentage
+- Lock duration
+- Vesting schedule
+
+## Our Current Recommendation
+$SENT on Polygon - Verified team, audited contract, real utility. [Join the IDO](https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08)`,
+    category: 'Education',
+    author: 'Africa Railways Research',
+    date: 'Jan 17, 2026',
+    image: 'https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285112788_f2d50abf.webp',
+    readTime: '6 min read',
+    featured: true
+  },
+  {
+    id: 'defi-yields-africa-2026',
+    title: 'Best DeFi Yield Opportunities in Africa for 2026',
+    excerpt: 'Explore the top yield farming and staking opportunities available to African crypto users with low entry barriers.',
+    content: `DeFi offers unprecedented earning opportunities. Here are the best options for African users in 2026:
+
+## Top Staking Opportunities
+
+### 1. AFC Staking (Coming Soon)
+- Expected APY: 15-25%
+- Network: Sui
+- Minimum: 1,000 AFC
+
+### 2. SENT Governance Staking
+- Expected APY: 20-30%
+- Network: Polygon
+- Minimum: 10,000 SENT
+
+### 3. SUI Staking
+- Current APY: 3-4%
+- Network: Sui
+- Minimum: 1 SUI
+
+## Yield Farming Strategies
+
+### Low Risk
+- Stablecoin lending on Aave
+- LP provision on major pairs
+
+### Medium Risk
+- New token farming
+- Cross-chain yield optimization
+
+### High Risk
+- Leveraged farming
+- New protocol incentives
+
+## Tips for African Users
+1. Use Polygon or Sui for low fees
+2. Start small and learn
+3. Never invest more than you can afford to lose
+4. Diversify across protocols`,
+    category: 'DeFi',
+    author: 'Africa Railways Research',
+    date: 'Jan 15, 2026',
+    image: 'https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285113670_87a4e142.webp',
+    readTime: '7 min read',
+    featured: false
+  },
+  {
+    id: 'sui-vs-solana-comparison',
+    title: 'Sui vs Solana: Which Blockchain is Better for African Projects?',
+    excerpt: 'A detailed comparison of two high-performance blockchains and why we chose Sui for Africoin.',
+    content: `Both Sui and Solana offer high throughput and low fees. Here's our analysis:
+
+## Performance Comparison
+
+| Metric | Sui | Solana |
+|--------|-----|--------|
+| TPS | 120,000+ | 65,000 |
+| Finality | <1 sec | 400ms |
+| Avg Fee | $0.001 | $0.00025 |
+
+## Why We Chose Sui for AFC
+
+### 1. Object-Centric Model
+Sui's unique data model allows for better scalability and parallel processing.
+
+### 2. Move Language
+More secure smart contract development with built-in safety features.
+
+### 3. Growing Ecosystem
+Rapid growth in DeFi, NFTs, and gaming projects.
+
+### 4. Developer Experience
+Excellent documentation and tooling.
+
+## Solana Strengths
+- Larger existing ecosystem
+- More established DeFi protocols
+- Higher liquidity
+
+## Conclusion
+Both are excellent choices. We chose Sui for its innovative technology and growing ecosystem. The low fees make it perfect for African users.`,
+    category: 'Crypto Analysis',
+    author: 'Africa Railways Research',
+    date: 'Jan 12, 2026',
+    image: 'https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285110803_c14d926f.webp',
+    readTime: '10 min read',
+    featured: false
+  }
+];
