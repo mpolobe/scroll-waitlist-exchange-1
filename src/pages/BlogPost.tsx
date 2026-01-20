@@ -23,6 +23,77 @@ interface BlogPost {
 // Fallback blog posts when Supabase is unavailable
 const fallbackPosts: BlogPost[] = [
   {
+    id: 'africa-railways-crypto-promoter-announcement',
+    title: 'Africa Railways Launches Official Crypto Promotion Community',
+    excerpt: 'We are excited to announce that Africa Railways is now an official crypto promoter! Join our Telegram community @afrcsentinel for exclusive project updates, IDO alerts, and verified crypto opportunities.',
+    content: `# Africa Railways is Now an Official Crypto Promoter!
+
+We are thrilled to announce a major milestone for our community: **Africa Railways is now officially promoting verified crypto projects** through our Telegram channel @afrcsentinel.
+
+## What This Means for You
+
+As a trusted voice in African blockchain infrastructure, we are expanding our mission to help our community discover legitimate crypto opportunities. Our research team will:
+
+- **Vet Projects Thoroughly** - Every project we promote undergoes rigorous due diligence
+- **Share Early Alpha** - Get access to IDOs and launches before the mainstream
+- **Provide Education** - Learn how to evaluate projects and avoid scams
+- **Build Community** - Connect with like-minded crypto enthusiasts across Africa
+
+## Our Commitment to Quality
+
+We will NEVER promote:
+- Unaudited contracts
+- Anonymous teams with no track record
+- Projects with unlocked liquidity
+- Obvious pump-and-dump schemes
+
+Every project featured on our channel has been reviewed by our research team.
+
+## Current Featured Projects
+
+### $SENT - Sentinel Network (LIVE NOW)
+Our flagship governance token is currently live on PinkSale:
+- **Network:** Polygon
+- **Status:** Fairlaunch LIVE
+- **Audit:** Passed
+- **Liquidity:** Locked
+
+### $AFC - Africoin
+Our payment token on Sui mainnet:
+- **Network:** Sui
+- **Status:** Trading Live
+- **Use Case:** Railway payments, merchant transactions
+
+## Join Our Community
+
+Be part of Africa's premier crypto research community:
+
+- **Telegram:** @afrcsentinel
+- **Website:** africarailways.com
+- **Reviews:** africarailways.com/reviews
+
+## For Project Teams
+
+Are you building something innovative? We're always looking for quality projects to feature. Contact us at admin@africarailways.com with:
+
+1. Project overview
+2. Team information
+3. Audit reports
+4. Tokenomics
+
+---
+
+**Together, we're building the future of African crypto.**
+
+*The Africa Railways Team*`,
+    category: 'Company News',
+    author: 'Africa Railways Team',
+    date: 'Jan 20, 2026',
+    image: 'https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285109834_4d14e31e.webp',
+    read_time: '4 min read',
+    featured: true
+  },
+  {
     id: 'sent-token-pinksale-launch',
     title: '$SENT Token IDO Live on PinkSale - Join the Sentinel Network',
     excerpt: 'The SENT governance token is now live on PinkSale! Join the fairlaunch on Polygon network from January 19 to February 2, 2026.',
