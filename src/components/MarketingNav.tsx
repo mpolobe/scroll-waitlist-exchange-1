@@ -3,8 +3,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from './auth/AuthModal';
 import { Button } from './ui/button';
 import { SmartWalletConnect } from './wallet/SmartWalletConnect';
-import { User, LogOut, Menu, X, Shield } from 'lucide-react';
+import { User, LogOut, Menu, X, Shield, ChevronDown, Map, FileText, Presentation, Users } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
 const MarketingNav = () => {
   const { user, signOut, isAdmin } = useAuth();
@@ -51,7 +57,38 @@ const MarketingNav = () => {
             <button onClick={() => scrollToSection('features')} className="text-gray-700 hover:text-orange-500 transition text-sm">Features</button>
             <Link to="/reviews" className="text-gray-700 hover:text-orange-500 transition text-sm font-medium">Reviews</Link>
             <Link to="/blog" className="text-gray-700 hover:text-orange-500 transition text-sm">Blog</Link>
-            <Link to="/promoter" className="text-gray-700 hover:text-orange-500 transition text-sm">Promoter</Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="text-gray-700 hover:text-orange-500 transition text-sm flex items-center gap-1">
+                Promoter <ChevronDown className="w-3 h-3" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link to="/promoter" className="flex items-center gap-2 cursor-pointer">
+                    <FileText className="w-4 h-4" /> Social Templates
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/network-map" className="flex items-center gap-2 cursor-pointer">
+                    <Map className="w-4 h-4" /> Network Map
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/press-kit" className="flex items-center gap-2 cursor-pointer">
+                    <FileText className="w-4 h-4" /> Press Kit
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/investor-deck" className="flex items-center gap-2 cursor-pointer">
+                    <Presentation className="w-4 h-4" /> Investor Deck
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/influencer-kit" className="flex items-center gap-2 cursor-pointer">
+                    <Users className="w-4 h-4" /> Influencer Kit
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Link to="/railway-booking" className="text-gray-700 hover:text-orange-500 transition text-sm">Book Tickets</Link>
             <Link to="/wallet" className="text-gray-700 hover:text-orange-500 transition text-sm">Wallet</Link>
             <Link to="/staking" className="text-gray-700 hover:text-orange-500 transition text-sm font-medium">Staking</Link>
@@ -100,7 +137,11 @@ const MarketingNav = () => {
             <button onClick={() => scrollToSection('features')} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Features</button>
             <Link to="/reviews" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 font-medium">Reviews</Link>
             <Link to="/blog" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Blog</Link>
-            <Link to="/promoter" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Promoter Hub</Link>
+            <Link to="/promoter" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Social Templates</Link>
+            <Link to="/network-map" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Network Map</Link>
+            <Link to="/press-kit" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Press Kit</Link>
+            <Link to="/investor-deck" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Investor Deck</Link>
+            <Link to="/influencer-kit" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Influencer Kit</Link>
             <Link to="/railway-booking" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Book Tickets</Link>
             <Link to="/wallet" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Wallet</Link>
             <Link to="/staking" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 font-medium">Staking</Link>
