@@ -45,20 +45,25 @@ const MarketingNav = () => {
 
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-md z-50">
+    <nav className="fixed top-0 left-0 right-0 bg-slate-900/95 backdrop-blur-sm border-b border-slate-800 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-2">
-            <img src="https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764284353488_fc5a167b.webp" alt="Africoin" className="h-10 w-10" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-purple-600 bg-clip-text text-transparent">Africoin</span>
-          </div>
+          <Link to="/" className="flex items-center space-x-2">
+            <img src="https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764284353488_fc5a167b.webp" alt="Africa Railways" className="h-10 w-10" />
+            <div className="flex flex-col">
+              <span className="text-lg font-bold text-white leading-tight">Africa Railways</span>
+              <span className="text-xs text-orange-400 leading-tight">Powered by Africoin</span>
+            </div>
+          </Link>
           
           <div className="hidden md:flex space-x-6 items-center">
-            <button onClick={() => scrollToSection('features')} className="text-gray-700 hover:text-orange-500 transition text-sm">Features</button>
-            <Link to="/reviews" className="text-gray-700 hover:text-orange-500 transition text-sm font-medium">Reviews</Link>
-            <Link to="/blog" className="text-gray-700 hover:text-orange-500 transition text-sm">Blog</Link>
+            <button onClick={() => scrollToSection('features')} className="text-gray-300 hover:text-orange-400 transition text-sm">Features</button>
+            <Link to="/reviews" className="text-gray-300 hover:text-orange-400 transition text-sm font-medium">Reviews</Link>
+            <Link to="/blog" className="text-gray-300 hover:text-orange-400 transition text-sm">Blog</Link>
+            <button onClick={() => scrollToSection('tokenomics')} className="text-gray-300 hover:text-orange-400 transition text-sm">Tokenomics</button>
+            <button onClick={() => scrollToSection('roadmap')} className="text-gray-300 hover:text-orange-400 transition text-sm">Roadmap</button>
             <DropdownMenu>
-              <DropdownMenuTrigger className="text-gray-700 hover:text-orange-500 transition text-sm flex items-center gap-1">
+              <DropdownMenuTrigger className="text-gray-300 hover:text-orange-400 transition text-sm flex items-center gap-1">
                 Promoter <ChevronDown className="w-3 h-3" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
@@ -94,10 +99,15 @@ const MarketingNav = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Link to="/railway-booking" className="text-gray-700 hover:text-orange-500 transition text-sm">Book Tickets</Link>
-            <Link to="/wallet" className="text-gray-700 hover:text-orange-500 transition text-sm">Wallet</Link>
-            <Link to="/staking" className="text-gray-700 hover:text-orange-500 transition text-sm font-medium">Staking</Link>
-            <Link to="/ido" className="text-purple-600 hover:text-purple-700 transition text-sm font-semibold">🛡️ SENT IDO</Link>
+            <Link to="/wallet" className="text-gray-300 hover:text-orange-400 transition text-sm">Wallet</Link>
+            <a 
+              href="https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-400 hover:text-orange-300 transition text-sm font-semibold"
+            >
+              🔥 SENT IDO
+            </a>
             
             <a 
               href="https://movepump.com/token/0xc68c4cfb63d702227db09c28837e75abd23bbb3adc192e3bc45fecca4dd5b7e8::afc::AFC" 
