@@ -207,7 +207,7 @@ export default function Blog() {
                 Join Now <ChevronRight className="w-4 h-4" />
               </span>
             </Link>
-            <a href="https://t.me/africarailways" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-6 text-white hover:opacity-90 transition-opacity">
+            <a href="https://t.me/Africoin_Official" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-6 text-white hover:opacity-90 transition-opacity">
               <TrendingUp className="w-8 h-8 mb-3" />
               <h3 className="text-xl font-bold mb-2">Get Alpha</h3>
               <p className="text-white/80 text-sm mb-3">Join our Telegram for early access to project launches</p>
