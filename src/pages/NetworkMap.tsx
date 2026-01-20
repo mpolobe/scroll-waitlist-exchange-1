@@ -175,18 +175,54 @@ export default function NetworkMap() {
               </CardHeader>
               <CardContent>
                 <div className="relative bg-slate-900 rounded-lg overflow-hidden">
+                  {/* Pulsing background effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 via-transparent to-blue-900/20 animate-pulse" style={{ animationDuration: '4s' }} />
+                  
                   <svg 
                     viewBox="0 0 800 750" 
-                    className="w-full h-auto"
+                    className="w-full h-auto relative z-10"
                     style={{ maxHeight: '600px' }}
                   >
-                    {/* Africa continent outline (simplified) */}
+                    {/* Definitions for gradients and filters */}
+                    <defs>
+                      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge>
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                      </filter>
+                      <linearGradient id="africaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#1e3a5f" />
+                        <stop offset="50%" stopColor="#1e293b" />
+                        <stop offset="100%" stopColor="#0f172a" />
+                      </linearGradient>
+                      <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.6" />
+                        <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.4" />
+                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.6" />
+                      </linearGradient>
+                    </defs>
+                    
+                    {/* Detailed Africa continent outline */}
                     <path
-                      d="M350 80 Q450 70 550 100 Q650 150 680 250 Q700 350 680 450 Q660 550 600 620 Q550 680 480 700 Q400 720 350 680 Q280 640 250 580 Q200 500 180 400 Q160 300 200 200 Q250 120 350 80"
-                      fill="#1e293b"
-                      stroke="#334155"
+                      d="M380 60 L420 55 L460 60 L500 70 L540 85 L575 105 L600 130 L620 160 L635 195 L645 230 L655 270 L665 310 L670 350 L668 390 L660 430 L645 470 L625 510 L600 545 L570 575 L535 600 L500 620 L465 635 L430 645 L400 650 L370 645 L340 635 L310 620 L285 600 L265 575 L250 545 L240 510 L235 470 L232 430 L230 390 L228 350 L225 310 L220 270 L210 230 L195 195 L185 165 L180 140 L185 115 L200 95 L225 80 L260 70 L300 62 L340 58 L380 60 M575 105 L590 115 L610 140 L625 170 L640 210 L650 250 L658 295 L662 340 L660 385 L652 430 L638 475 L618 515 L592 550 L560 580 L525 605 L485 625 L445 640 L405 648 L365 645 L325 635 L290 618 L260 595 L235 565 L218 530 L205 490 L198 445 L195 400 L195 355 L198 310 L205 265 L218 225 L238 190 L265 160 L298 138 L335 122 L375 112 L415 108 L455 110 L495 118 L530 132 L560 152 L585 178"
+                      fill="url(#africaGradient)"
+                      stroke="url(#borderGradient)"
                       strokeWidth="2"
-                    />
+                      className="drop-shadow-lg"
+                    >
+                      <animate attributeName="stroke-opacity" values="0.4;0.8;0.4" dur="3s" repeatCount="indefinite" />
+                    </path>
+                    
+                    {/* Country borders (simplified internal lines) */}
+                    <g stroke="#334155" strokeWidth="0.5" fill="none" opacity="0.5">
+                      <path d="M350 130 L400 180 L450 160" />
+                      <path d="M280 250 L350 280 L420 260 L500 290" />
+                      <path d="M400 350 L480 380 L520 420" />
+                      <path d="M320 400 L380 450 L440 480" />
+                      <path d="M380 520 L450 560 L520 540" />
+                    </g>
                     
                     {/* Grid lines */}
                     {[100, 200, 300, 400, 500, 600, 700].map(y => (
@@ -197,40 +233,82 @@ export default function NetworkMap() {
                     ))}
 
                     {/* Route lines */}
-                    {corridors.map((corridor) => (
+                    {corridors.map((corridor, corridorIndex) => (
                       <g key={corridor.id}>
-                        {/* Background glow */}
+                        {/* Outer glow effect */}
                         <path
                           d={generatePath(corridor.cities)}
                           fill="none"
                           stroke={corridor.color}
-                          strokeWidth="8"
+                          strokeWidth="12"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          opacity={selectedCorridor === corridor.id ? 0.4 : 0.1}
+                          opacity={selectedCorridor === corridor.id ? 0.3 : 0.05}
+                          filter="url(#glow)"
+                          className="transition-opacity duration-500"
+                        />
+                        {/* Background track */}
+                        <path
+                          d={generatePath(corridor.cities)}
+                          fill="none"
+                          stroke={corridor.color}
+                          strokeWidth="6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          opacity={selectedCorridor === corridor.id ? 0.5 : 0.15}
                           className="transition-opacity duration-300"
                         />
-                        {/* Main line */}
+                        {/* Main animated line with dash effect */}
                         <path
                           d={generatePath(corridor.cities)}
                           fill="none"
                           stroke={corridor.color}
-                          strokeWidth={selectedCorridor === corridor.id ? 4 : 2}
+                          strokeWidth={selectedCorridor === corridor.id ? 4 : 2.5}
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          opacity={selectedCorridor === null || selectedCorridor === corridor.id ? 1 : 0.3}
+                          strokeDasharray={selectedCorridor === corridor.id ? "none" : "8 4"}
+                          opacity={selectedCorridor === null || selectedCorridor === corridor.id ? 1 : 0.25}
                           className="transition-all duration-300 cursor-pointer"
                           onClick={() => setSelectedCorridor(selectedCorridor === corridor.id ? null : corridor.id)}
-                        />
-                        {/* Animated train dot */}
-                        {isAnimating && (selectedCorridor === null || selectedCorridor === corridor.id) && (
-                          <circle r="6" fill={corridor.color}>
-                            <animateMotion
-                              dur="4s"
-                              repeatCount="indefinite"
-                              path={generatePath(corridor.cities)}
+                        >
+                          {isAnimating && (
+                            <animate 
+                              attributeName="stroke-dashoffset" 
+                              values="0;24" 
+                              dur="1s" 
+                              repeatCount="indefinite" 
                             />
-                          </circle>
+                          )}
+                        </path>
+                        {/* Animated train with trail */}
+                        {isAnimating && (selectedCorridor === null || selectedCorridor === corridor.id) && (
+                          <g>
+                            {/* Train glow */}
+                            <circle r="10" fill={corridor.color} opacity="0.3" filter="url(#glow)">
+                              <animateMotion
+                                dur={`${4 + corridorIndex * 0.5}s`}
+                                repeatCount="indefinite"
+                                path={generatePath(corridor.cities)}
+                              />
+                            </circle>
+                            {/* Train body */}
+                            <circle r="6" fill={corridor.color}>
+                              <animateMotion
+                                dur={`${4 + corridorIndex * 0.5}s`}
+                                repeatCount="indefinite"
+                                path={generatePath(corridor.cities)}
+                              />
+                              <animate attributeName="r" values="5;7;5" dur="0.5s" repeatCount="indefinite" />
+                            </circle>
+                            {/* Train center */}
+                            <circle r="3" fill="white">
+                              <animateMotion
+                                dur={`${4 + corridorIndex * 0.5}s`}
+                                repeatCount="indefinite"
+                                path={generatePath(corridor.cities)}
+                              />
+                            </circle>
+                          </g>
                         )}
                       </g>
                     ))}
@@ -245,13 +323,41 @@ export default function NetworkMap() {
                           onMouseLeave={() => setHoveredCity(null)}
                           onClick={() => setSelectedCorridor(selectedCorridor === corridor.id ? null : corridor.id)}
                         >
+                          {/* Pulsing outer ring */}
+                          <circle
+                            cx={city.x}
+                            cy={city.y}
+                            r="14"
+                            fill="none"
+                            stroke={corridor.color}
+                            strokeWidth="2"
+                            opacity={selectedCorridor === corridor.id || hoveredCity === city.name ? 0.6 : 0}
+                            className="transition-opacity duration-300"
+                          >
+                            {isAnimating && (
+                              <animate attributeName="r" values="10;18;10" dur="2s" repeatCount="indefinite" />
+                            )}
+                            {isAnimating && (
+                              <animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite" />
+                            )}
+                          </circle>
+                          {/* Glow effect */}
+                          <circle
+                            cx={city.x}
+                            cy={city.y}
+                            r={hoveredCity === city.name ? 14 : 10}
+                            fill={corridor.color}
+                            opacity={selectedCorridor === null || selectedCorridor === corridor.id ? 0.25 : 0.08}
+                            filter="url(#glow)"
+                            className="transition-all duration-200"
+                          />
                           {/* Outer ring */}
                           <circle
                             cx={city.x}
                             cy={city.y}
-                            r={hoveredCity === city.name ? 12 : 8}
+                            r={hoveredCity === city.name ? 10 : 7}
                             fill={corridor.color}
-                            opacity={selectedCorridor === null || selectedCorridor === corridor.id ? 0.3 : 0.1}
+                            opacity={selectedCorridor === null || selectedCorridor === corridor.id ? 0.4 : 0.15}
                             className="transition-all duration-200"
                           />
                           {/* Inner dot */}
@@ -260,28 +366,39 @@ export default function NetworkMap() {
                             cy={city.y}
                             r={hoveredCity === city.name ? 6 : 4}
                             fill={corridor.color}
-                            opacity={selectedCorridor === null || selectedCorridor === corridor.id ? 1 : 0.3}
+                            opacity={selectedCorridor === null || selectedCorridor === corridor.id ? 1 : 0.35}
                             className="transition-all duration-200"
                           />
-                          {/* City label */}
+                          {/* White center */}
+                          <circle
+                            cx={city.x}
+                            cy={city.y}
+                            r={hoveredCity === city.name ? 2.5 : 1.5}
+                            fill="white"
+                            opacity={selectedCorridor === null || selectedCorridor === corridor.id ? 0.9 : 0.3}
+                            className="transition-all duration-200"
+                          />
+                          {/* City label with improved styling */}
                           {(hoveredCity === city.name || selectedCorridor === corridor.id) && (
-                            <g>
+                            <g className="pointer-events-none">
                               <rect
-                                x={city.x + 10}
-                                y={city.y - 12}
-                                width={city.name.length * 8 + 10}
-                                height="24"
-                                rx="4"
-                                fill="#1e293b"
+                                x={city.x + 12}
+                                y={city.y - 14}
+                                width={city.name.length * 7.5 + 16}
+                                height="28"
+                                rx="6"
+                                fill="#0f172a"
                                 stroke={corridor.color}
-                                strokeWidth="1"
+                                strokeWidth="1.5"
+                                opacity="0.95"
                               />
                               <text
-                                x={city.x + 15}
-                                y={city.y + 4}
+                                x={city.x + 20}
+                                y={city.y + 5}
                                 fill="white"
                                 fontSize="12"
-                                fontWeight="500"
+                                fontWeight="600"
+                                fontFamily="system-ui, sans-serif"
                               >
                                 {city.name}
                               </text>
@@ -292,15 +409,38 @@ export default function NetworkMap() {
                     )}
 
                     {/* Legend */}
-                    <g transform="translate(100, 620)">
-                      <rect x="0" y="0" width="200" height="100" rx="8" fill="#1e293b" stroke="#334155" />
-                      <text x="15" y="25" fill="white" fontSize="14" fontWeight="600">Corridors</text>
-                      {corridors.slice(0, 4).map((c, i) => (
-                        <g key={c.id} transform={`translate(15, ${40 + i * 15})`}>
-                          <circle cx="5" cy="0" r="4" fill={c.color} />
-                          <text x="15" y="4" fill="#94a3b8" fontSize="10">{c.name.split(' ')[0]}</text>
+                    <g transform="translate(80, 600)">
+                      <rect x="0" y="0" width="240" height="130" rx="10" fill="#0f172a" stroke="#334155" strokeWidth="1.5" opacity="0.95" />
+                      <text x="15" y="25" fill="white" fontSize="14" fontWeight="700">Rail Corridors</text>
+                      <line x1="15" y1="35" x2="225" y2="35" stroke="#334155" strokeWidth="1" />
+                      {corridors.map((c, i) => (
+                        <g 
+                          key={c.id} 
+                          transform={`translate(15, ${50 + i * 11})`}
+                          className="cursor-pointer"
+                          onClick={() => setSelectedCorridor(selectedCorridor === c.id ? null : c.id)}
+                          opacity={selectedCorridor === null || selectedCorridor === c.id ? 1 : 0.4}
+                        >
+                          <circle cx="6" cy="0" r="4" fill={c.color}>
+                            {isAnimating && selectedCorridor === c.id && (
+                              <animate attributeName="r" values="3;5;3" dur="1s" repeatCount="indefinite" />
+                            )}
+                          </circle>
+                          <text x="18" y="4" fill={selectedCorridor === c.id ? "white" : "#94a3b8"} fontSize="10" fontWeight={selectedCorridor === c.id ? "600" : "400"}>
+                            {c.name}
+                          </text>
+                          <text x="180" y="4" fill="#64748b" fontSize="9" textAnchor="end">{c.distance}</text>
                         </g>
                       ))}
+                    </g>
+                    
+                    {/* Network stats badge */}
+                    <g transform="translate(560, 620)">
+                      <rect x="0" y="0" width="160" height="80" rx="10" fill="#0f172a" stroke="#06b6d4" strokeWidth="1" opacity="0.95" />
+                      <text x="80" y="22" fill="#06b6d4" fontSize="11" fontWeight="600" textAnchor="middle">NETWORK STATS</text>
+                      <text x="80" y="42" fill="white" fontSize="20" fontWeight="700" textAnchor="middle">25,000+ km</text>
+                      <text x="80" y="60" fill="#64748b" fontSize="10" textAnchor="middle">54 Capitals • 7 Corridors</text>
+                      <text x="80" y="72" fill="#22c55e" fontSize="9" textAnchor="middle">● LIVE TRACKING</text>
                     </g>
                   </svg>
                 </div>
