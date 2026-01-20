@@ -13,6 +13,7 @@ import BlogPost from "@/pages/BlogPost";
 import Reviews from "@/pages/Reviews";
 import ReviewDetail from "@/pages/ReviewDetail";
 import Promoter from "@/pages/Promoter";
+import SocialHandles from "@/pages/SocialHandles";
 import PressKit from "@/pages/PressKit";
 import NetworkMap from "@/pages/NetworkMap";
 import InvestorDeck from "@/pages/InvestorDeck";
@@ -53,6 +54,7 @@ export default function App() {
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/reviews/:id" element={<ReviewDetail />} />
               <Route path="/promoter" element={<Promoter />} />
+              <Route path="/social-handles" element={<SocialHandles />} />
               <Route path="/press-kit" element={<PressKit />} />
               <Route path="/network-map" element={<NetworkMap />} />
               <Route path="/investor-deck" element={<InvestorDeck />} />
