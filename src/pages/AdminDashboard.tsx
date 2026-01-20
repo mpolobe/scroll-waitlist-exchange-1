@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, DollarSign, Ticket, TrendingUp, Mail, Bot, Play, Square } from 'lucide-react';
+import { Users, DollarSign, Ticket, TrendingUp, Mail, Bot, Play, Square, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { AdminUsers } from '@/components/admin/AdminUsers';
@@ -11,6 +11,7 @@ import { AdminTransactions } from '@/components/admin/AdminTransactions';
 import { AdminTickets } from '@/components/admin/AdminTickets';
 import { AdminAnalytics } from '@/components/admin/AdminAnalytics';
 import { AdminEmailCampaigns } from '@/components/admin/AdminEmailCampaigns';
+import { AdminTelegram } from '@/components/admin/AdminTelegram';
 import { TreasuryDashboard } from '@/components/admin/TreasuryDashboard';
 
 
@@ -101,18 +102,22 @@ export default function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="users" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="tickets">Support</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="campaigns">Email Campaigns</TabsTrigger>
+          <TabsTrigger value="campaigns">Email</TabsTrigger>
+          <TabsTrigger value="telegram" className="flex items-center gap-1">
+            <Send className="h-3 w-3" /> Telegram
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="users"><AdminUsers onStatsUpdate={(u) => setStats(s => ({ ...s, users: u }))} /></TabsContent>
         <TabsContent value="transactions"><AdminTransactions onStatsUpdate={(t, v) => setStats(s => ({ ...s, transactions: t, volume: v }))} /></TabsContent>
         <TabsContent value="tickets"><AdminTickets onStatsUpdate={(t) => setStats(s => ({ ...s, tickets: t }))} /></TabsContent>
         <TabsContent value="analytics"><AdminAnalytics /></TabsContent>
         <TabsContent value="campaigns"><AdminEmailCampaigns /></TabsContent>
+        <TabsContent value="telegram"><AdminTelegram /></TabsContent>
       </Tabs>
 
       <div className="mt-8 text-center text-xs text-gray-400 font-mono">
