@@ -24,9 +24,9 @@ const slides = [
     title: 'The Opportunity',
     points: [
       { icon: Globe, text: 'Africa\'s intra-continental trade is just 15% of total trade – lowest globally' },
-      { icon: Users, text: '1.4 billion people across 54 countries with limited connectivity' },
-      { icon: TrendingUp, text: 'AfCFTA creates $3.4 trillion economic bloc requiring infrastructure' },
-      { icon: Target, text: 'First-mover advantage in continent-wide rail network' }
+      { icon: Users, text: '1.55 billion people across 54 countries with limited connectivity (2025)' },
+      { icon: TrendingUp, text: 'Sub-Saharan Africa GDP: $1.98 trillion (2024) growing at 3.6% annually' },
+      { icon: Target, text: 'Only 34% internet penetration – massive digital infrastructure gap' }
     ]
   },
   {
@@ -85,7 +85,7 @@ const slides = [
       { icon: Users, value: '2M+', label: 'Jobs Created', desc: 'Construction & operations' },
       { icon: TrendingUp, value: '50%', label: 'Trade Increase', desc: 'Intra-African commerce' },
       { icon: DollarSign, value: '$100B', label: 'Economic Impact', desc: 'By 2035' },
-      { icon: Leaf, value: '60%', label: 'CO₂ Reduction', desc: 'vs. road/air travel' }
+      { icon: Leaf, value: '0.7t', label: 'CO₂ Per Capita', desc: 'Africa vs 4.7t global avg' }
     ]
   },
   {
