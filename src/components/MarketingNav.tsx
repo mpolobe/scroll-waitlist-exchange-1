@@ -63,6 +63,11 @@ const MarketingNav = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
                 <DropdownMenuItem asChild>
+                  <Link to="/social-handles" className="flex items-center gap-2 cursor-pointer">
+                    <Users className="w-4 h-4" /> Social Handles
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to="/promoter" className="flex items-center gap-2 cursor-pointer">
                     <FileText className="w-4 h-4" /> Social Templates
                   </Link>
@@ -137,6 +142,7 @@ const MarketingNav = () => {
             <button onClick={() => scrollToSection('features')} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Features</button>
             <Link to="/reviews" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 font-medium">Reviews</Link>
             <Link to="/blog" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Blog</Link>
+            <Link to="/social-handles" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Social Handles</Link>
             <Link to="/promoter" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Social Templates</Link>
             <Link to="/network-map" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Network Map</Link>
             <Link to="/press-kit" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Press Kit</Link>
