@@ -13,6 +13,10 @@ import BlogPost from "@/pages/BlogPost";
 import Reviews from "@/pages/Reviews";
 import ReviewDetail from "@/pages/ReviewDetail";
 import Promoter from "@/pages/Promoter";
+import PressKit from "@/pages/PressKit";
+import NetworkMap from "@/pages/NetworkMap";
+import InvestorDeck from "@/pages/InvestorDeck";
+import InfluencerKit from "@/pages/InfluencerKit";
 import MerchantPortal from "@/pages/MerchantPortal";
 import RailwayBooking from "@/pages/RailwayBooking";
 import WalletDashboard from "@/pages/WalletDashboard";
@@ -49,6 +53,10 @@ export default function App() {
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/reviews/:id" element={<ReviewDetail />} />
               <Route path="/promoter" element={<Promoter />} />
+              <Route path="/press-kit" element={<PressKit />} />
+              <Route path="/network-map" element={<NetworkMap />} />
+              <Route path="/investor-deck" element={<InvestorDeck />} />
+              <Route path="/influencer-kit" element={<InfluencerKit />} />
               <Route path="/merchant" element={<MerchantPortal />} />
               <Route path="/railway-booking" element={<RailwayBooking />} />
               <Route path="/wallet" element={<WalletDashboard />} />
