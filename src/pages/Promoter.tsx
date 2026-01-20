@@ -86,6 +86,16 @@ const instagramTemplates = [
 
 const twitterTemplates = [
   {
+    title: 'SENT IDO Live',
+    content: '🚨 $SENT IDO is LIVE on PinkSale! 720-day liquidity lock. 10B total supply. Governance & revenue share for Africa Railways. Join the Sentinel Network: pinksale.finance #SENT #PinkSale #Polygon',
+    gradient: 'from-purple-600 to-pink-600'
+  },
+  {
+    title: 'Token Ecosystem',
+    content: '🎫 $AFC = Train tickets (Sui)\n🏛️ $AFRC = Rewards\n💎 $SENT = Investment & governance (Polygon)\n\nThree tokens powering Africa\'s rail revolution. #AfricaRailways #Crypto',
+    gradient: 'from-orange-500 to-red-500'
+  },
+  {
     title: 'Journey Time',
     content: 'Cairo to Nairobi in 12 hours. The Nile Valley Corridor launches 2026, cutting journey times by 70% and connecting 130M people across 5 nations. This is the future of African mobility. #AfricaConnected',
     gradient: 'from-cyan-500 to-blue-500'
