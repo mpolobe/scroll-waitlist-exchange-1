@@ -129,6 +129,9 @@ export default function NetworkMap() {
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const polylinesRef = useRef<any[]>([]);
+  const trainMarkersRef = useRef<any[]>([]);
+  const animationRef = useRef<number | null>(null);
+  const trainPositionsRef = useRef<number[]>(corridors.map(() => 0));
 
   const selectedRoute = corridors.find(c => c.id === selectedCorridor);
 
@@ -278,7 +281,127 @@ export default function NetworkMap() {
         markersRef.current.push(marker);
       });
     });
+
+    // Create train markers for animation
+    createTrainMarkers();
   };
+
+  // Create animated train markers
+  const createTrainMarkers = () => {
+    const L = (window as any).L;
+    if (!L || !mapRef.current) return;
+
+    // Clear existing train markers
+    trainMarkersRef.current.forEach(m => {
+      if (mapRef.current) mapRef.current.removeLayer(m);
+    });
+    trainMarkersRef.current = [];
+
+    corridors.forEach((corridor, index) => {
+      const trainIcon = L.divIcon({
+        className: 'train-marker',
+        html: `<div style="
+          width: 20px;
+          height: 20px;
+          background: ${corridor.color};
+          border: 3px solid white;
+          border-radius: 50%;
+          box-shadow: 0 0 15px ${corridor.color}, 0 0 30px ${corridor.color}80;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        ">
+          <div style="
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+          "></div>
+        </div>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+      });
+
+      // Start at first city
+      const startCity = corridor.cities[0];
+      const trainMarker = L.marker([startCity.lat, startCity.lng], { 
+        icon: trainIcon,
+        zIndexOffset: 1000
+      }).addTo(mapRef.current);
+
+      trainMarkersRef.current.push({
+        marker: trainMarker,
+        corridorIndex: index,
+        corridor: corridor
+      });
+    });
+  };
+
+  // Interpolate position between two points
+  const interpolatePosition = (
+    start: { lat: number; lng: number },
+    end: { lat: number; lng: number },
+    t: number
+  ) => {
+    return {
+      lat: start.lat + (end.lat - start.lat) * t,
+      lng: start.lng + (end.lng - start.lng) * t
+    };
+  };
+
+  // Animation loop for trains
+  useEffect(() => {
+    if (!mapReady || !isAnimating) {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+      return;
+    }
+
+    const animate = () => {
+      trainMarkersRef.current.forEach((trainData, index) => {
+        const corridor = trainData.corridor;
+        const cities = corridor.cities;
+        
+        // Update position (0 to totalSegments)
+        const totalSegments = cities.length - 1;
+        const speed = 0.002; // Adjust for animation speed
+        
+        trainPositionsRef.current[index] += speed;
+        
+        // Loop back when reaching the end
+        if (trainPositionsRef.current[index] >= totalSegments) {
+          trainPositionsRef.current[index] = 0;
+        }
+        
+        const position = trainPositionsRef.current[index];
+        const segmentIndex = Math.floor(position);
+        const segmentProgress = position - segmentIndex;
+        
+        // Get current and next city
+        const currentCity = cities[segmentIndex];
+        const nextCity = cities[Math.min(segmentIndex + 1, cities.length - 1)];
+        
+        // Interpolate position
+        const newPos = interpolatePosition(currentCity, nextCity, segmentProgress);
+        
+        // Update marker position
+        trainData.marker.setLatLng([newPos.lat, newPos.lng]);
+      });
+
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+    };
+  }, [mapReady, isAnimating]);
 
   return (
     <div className="min-h-screen bg-slate-900">
@@ -292,9 +415,16 @@ export default function NetworkMap() {
         .dark-popup .leaflet-popup-tip {
           background: #1e293b;
         }
-        .custom-marker {
+        .custom-marker, .train-marker {
           background: transparent !important;
           border: none !important;
+        }
+        @keyframes trainPulse {
+          0%, 100% { transform: scale(1); box-shadow: 0 0 15px currentColor; }
+          50% { transform: scale(1.15); box-shadow: 0 0 25px currentColor; }
+        }
+        .train-marker > div {
+          animation: trainPulse 1s ease-in-out infinite;
         }
       `}</style>
       
