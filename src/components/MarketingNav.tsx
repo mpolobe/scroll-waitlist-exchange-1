@@ -50,10 +50,7 @@ const MarketingNav = () => {
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2">
             <img src="https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764284353488_fc5a167b.webp" alt="Africoin" className="h-10 w-10" />
-            <div className="flex flex-col">
-              <span className="text-lg font-bold text-white leading-tight">Africoin</span>
-              <span className="text-xs text-orange-400 leading-tight">Powered by Africa Railways</span>
-            </div>
+            <span className="text-xl font-bold text-white">Africoin</span>
           </Link>
           
           <div className="hidden md:flex space-x-6 items-center">
