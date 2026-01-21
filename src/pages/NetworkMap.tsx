@@ -1,7 +1,4 @@
-import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Train, MapPin, Clock, Users, Leaf, 
   ChevronRight, Play, Pause, Info, Maximize2
@@ -10,62 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import MarketingNav from '@/components/MarketingNav';
-
-// Fix Leaflet default marker icon issue
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
-
-// Custom marker icons for different corridor colors
-const createCustomIcon = (color: string, isActive: boolean = false) => {
-  const size = isActive ? 16 : 12;
-  return L.divIcon({
-    className: 'custom-marker',
-    html: `
-      <div style="
-        width: ${size}px;
-        height: ${size}px;
-        background: ${color};
-        border: 2px solid white;
-        border-radius: 50%;
-        box-shadow: 0 0 ${isActive ? '15px' : '8px'} ${color}, 0 2px 4px rgba(0,0,0,0.3);
-        ${isActive ? 'animation: pulse 1.5s ease-in-out infinite;' : ''}
-      "></div>
-    `,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-  });
-};
-
-// Train icon for animated markers
-const createTrainIcon = (color: string) => {
-  return L.divIcon({
-    className: 'train-marker',
-    html: `
-      <div style="
-        width: 24px;
-        height: 24px;
-        background: ${color};
-        border: 2px solid white;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 0 20px ${color}, 0 4px 8px rgba(0,0,0,0.4);
-        animation: trainPulse 0.8s ease-in-out infinite;
-      ">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-          <path d="M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h2.23l2-2H14l2 2h2v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
-        </svg>
-      </div>
-    `,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-  });
-};
 
 // Route data with real coordinates (lat, lng)
 const corridors = [
@@ -179,106 +120,181 @@ const corridors = [
   }
 ];
 
-// Component to handle map view changes
-function MapController({ selectedCorridor }: { selectedCorridor: string | null }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (selectedCorridor) {
-      const corridor = corridors.find(c => c.id === selectedCorridor);
-      if (corridor && corridor.cities.length > 0) {
-        const bounds = L.latLngBounds(
-          corridor.cities.map(city => [city.lat, city.lng] as [number, number])
-        );
-        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 6 });
-      }
-    } else {
-      // Reset to Africa view
-      map.setView([5, 20], 3);
-    }
-  }, [selectedCorridor, map]);
-  
-  return null;
-}
-
-// Animated train component
-function AnimatedTrain({ corridor, isAnimating }: { corridor: typeof corridors[0], isAnimating: boolean }) {
-  const [position, setPosition] = useState(0);
-  
-  useEffect(() => {
-    if (!isAnimating) return;
-    
-    const interval = setInterval(() => {
-      setPosition(prev => (prev + 0.5) % 100);
-    }, 50);
-    
-    return () => clearInterval(interval);
-  }, [isAnimating]);
-  
-  if (!isAnimating || corridor.cities.length < 2) return null;
-  
-  // Calculate position along the route
-  const totalSegments = corridor.cities.length - 1;
-  const progressAlongRoute = (position / 100) * totalSegments;
-  const currentSegment = Math.floor(progressAlongRoute);
-  const segmentProgress = progressAlongRoute - currentSegment;
-  
-  if (currentSegment >= totalSegments) return null;
-  
-  const startCity = corridor.cities[currentSegment];
-  const endCity = corridor.cities[currentSegment + 1];
-  
-  const lat = startCity.lat + (endCity.lat - startCity.lat) * segmentProgress;
-  const lng = startCity.lng + (endCity.lng - startCity.lng) * segmentProgress;
-  
-  return (
-    <Marker
-      position={[lat, lng]}
-      icon={createTrainIcon(corridor.color)}
-    />
-  );
-}
-
 export default function NetworkMap() {
   const [selectedCorridor, setSelectedCorridor] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+  const polylinesRef = useRef<any[]>([]);
 
   const selectedRoute = corridors.find(c => c.id === selectedCorridor);
 
-  // Africa center coordinates
-  const africaCenter: [number, number] = [5, 20];
-  const defaultZoom = 3;
+  // Load Leaflet dynamically
+  useEffect(() => {
+    // Check if Leaflet is already loaded
+    if ((window as any).L) {
+      setMapReady(true);
+      return;
+    }
+
+    // Load Leaflet CSS
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+
+    // Load Leaflet JS
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = () => setMapReady(true);
+    document.head.appendChild(script);
+
+    return () => {
+      // Cleanup if needed
+    };
+  }, []);
+
+  // Initialize map when Leaflet is ready
+  useEffect(() => {
+    const L = (window as any).L;
+    if (!mapReady || !L || !mapContainerRef.current || mapRef.current) return;
+
+    // Create map centered on Africa
+    mapRef.current = L.map(mapContainerRef.current, {
+      zoomControl: false,
+      attributionControl: false
+    }).setView([5, 20], 3);
+
+    // Dark map tiles
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19
+    }).addTo(mapRef.current);
+
+    // Add zoom control
+    L.control.zoom({ position: 'topright' }).addTo(mapRef.current);
+
+    // Render corridors
+    renderCorridors();
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [mapReady]);
+
+  // Update map when selected corridor changes
+  useEffect(() => {
+    const L = (window as any).L;
+    if (!mapRef.current || !L) return;
+
+    if (selectedCorridor) {
+      const corridor = corridors.find(c => c.id === selectedCorridor);
+      if (corridor && corridor.cities.length > 0) {
+        const bounds = L.latLngBounds(
+          corridor.cities.map(city => [city.lat, city.lng])
+        );
+        mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 6 });
+      }
+    } else {
+      mapRef.current.setView([5, 20], 3);
+    }
+
+    // Update polyline styles
+    polylinesRef.current.forEach((item) => {
+      const isSelected = selectedCorridor === item.corridorId;
+      const isNoneSelected = selectedCorridor === null;
+      item.polyline.setStyle({
+        weight: isSelected ? 5 : 3,
+        opacity: isNoneSelected || isSelected ? 0.9 : 0.3,
+        dashArray: isSelected ? null : '10, 5'
+      });
+    });
+  }, [selectedCorridor]);
+
+  const renderCorridors = () => {
+    const L = (window as any).L;
+    if (!L || !mapRef.current) return;
+
+    // Clear existing
+    markersRef.current.forEach(m => mapRef.current.removeLayer(m));
+    polylinesRef.current.forEach(p => mapRef.current.removeLayer(p.polyline));
+    markersRef.current = [];
+    polylinesRef.current = [];
+
+    corridors.forEach(corridor => {
+      // Add polyline for route
+      const latlngs = corridor.cities.map(city => [city.lat, city.lng]);
+      const polyline = L.polyline(latlngs, {
+        color: corridor.color,
+        weight: 3,
+        opacity: 0.9,
+        dashArray: '10, 5'
+      }).addTo(mapRef.current);
+
+      polyline.on('click', () => {
+        setSelectedCorridor(prev => prev === corridor.id ? null : corridor.id);
+      });
+
+      polylinesRef.current.push({ polyline, corridorId: corridor.id });
+
+      // Add markers for cities
+      corridor.cities.forEach(city => {
+        const icon = L.divIcon({
+          className: 'custom-marker',
+          html: `<div style="
+            width: 12px;
+            height: 12px;
+            background: ${corridor.color};
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 8px ${corridor.color}80;
+            cursor: pointer;
+          "></div>`,
+          iconSize: [12, 12],
+          iconAnchor: [6, 6]
+        });
+
+        const marker = L.marker([city.lat, city.lng], { icon })
+          .addTo(mapRef.current)
+          .bindPopup(`
+            <div style="text-align: center; min-width: 120px;">
+              <div style="font-weight: bold; font-size: 14px; color: white;">${city.name}</div>
+              <div style="color: #94a3b8; font-size: 12px;">${city.country}</div>
+              <div style="color: ${corridor.color}; font-size: 11px; margin-top: 5px;">${corridor.name}</div>
+            </div>
+          `, {
+            className: 'dark-popup'
+          });
+
+        marker.on('click', () => {
+          setSelectedCorridor(corridor.id);
+        });
+
+        markersRef.current.push(marker);
+      });
+    });
+  };
 
   return (
     <div className="min-h-screen bg-slate-900">
       <style>{`
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.3); opacity: 0.8; }
-        }
-        @keyframes trainPulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-        }
-        .leaflet-container {
-          background: #0f172a;
-        }
-        .custom-marker, .train-marker {
-          background: transparent !important;
-          border: none !important;
-        }
-        .leaflet-popup-content-wrapper {
+        .dark-popup .leaflet-popup-content-wrapper {
           background: #1e293b;
           color: white;
           border-radius: 8px;
           border: 1px solid #334155;
         }
-        .leaflet-popup-tip {
+        .dark-popup .leaflet-popup-tip {
           background: #1e293b;
         }
-        .leaflet-popup-content {
-          margin: 12px;
+        .custom-marker {
+          background: transparent !important;
+          border: none !important;
         }
       `}</style>
       
@@ -331,75 +347,17 @@ export default function NetworkMap() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className={`relative ${isFullscreen ? 'h-[calc(100vh-120px)]' : 'h-[500px]'}`}>
-                  <MapContainer
-                    center={africaCenter}
-                    zoom={defaultZoom}
-                    style={{ height: '100%', width: '100%' }}
-                    zoomControl={true}
-                    scrollWheelZoom={true}
-                  >
-                    <TileLayer
-                      attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-                      url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                    />
-                    
-                    <MapController selectedCorridor={selectedCorridor} />
-                    
-                    {/* Route lines */}
-                    {corridors.map((corridor) => (
-                      <Polyline
-                        key={corridor.id}
-                        positions={corridor.cities.map(city => [city.lat, city.lng] as [number, number])}
-                        pathOptions={{
-                          color: corridor.color,
-                          weight: selectedCorridor === corridor.id ? 5 : 3,
-                          opacity: selectedCorridor === null || selectedCorridor === corridor.id ? 0.9 : 0.3,
-                          dashArray: selectedCorridor === corridor.id ? undefined : '10, 5',
-                        }}
-                        eventHandlers={{
-                          click: () => setSelectedCorridor(selectedCorridor === corridor.id ? null : corridor.id),
-                        }}
-                      />
-                    ))}
-                    
-                    {/* City markers */}
-                    {corridors.map((corridor) => (
-                      corridor.cities.map((city) => (
-                        <Marker
-                          key={`${corridor.id}-${city.name}`}
-                          position={[city.lat, city.lng]}
-                          icon={createCustomIcon(
-                            corridor.color,
-                            selectedCorridor === corridor.id
-                          )}
-                          eventHandlers={{
-                            click: () => setSelectedCorridor(corridor.id),
-                          }}
-                        >
-                          <Popup>
-                            <div className="text-center">
-                              <div className="font-bold text-lg">{city.name}</div>
-                              <div className="text-gray-400 text-sm">{city.country}</div>
-                              <div className="mt-2 text-xs" style={{ color: corridor.color }}>
-                                {corridor.name}
-                              </div>
-                            </div>
-                          </Popup>
-                        </Marker>
-                      ))
-                    ))}
-                    
-                    {/* Animated trains */}
-                    {corridors.map((corridor) => (
-                      (selectedCorridor === null || selectedCorridor === corridor.id) && (
-                        <AnimatedTrain
-                          key={`train-${corridor.id}`}
-                          corridor={corridor}
-                          isAnimating={isAnimating}
-                        />
-                      )
-                    ))}
-                  </MapContainer>
+                  <div 
+                    ref={mapContainerRef}
+                    className="w-full h-full"
+                    style={{ background: '#0f172a' }}
+                  />
+                  
+                  {!mapReady && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
+                      <div className="text-cyan-400">Loading map...</div>
+                    </div>
+                  )}
                   
                   {/* Legend overlay */}
                   <div className="absolute bottom-4 left-4 bg-slate-800/90 backdrop-blur-sm rounded-lg p-3 z-[1000]">
