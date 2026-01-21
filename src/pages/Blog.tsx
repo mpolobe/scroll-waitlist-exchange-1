@@ -119,38 +119,37 @@ export default function Blog() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Use fallback data immediately, then try to fetch from Supabase
+    setPosts(fallbackPosts);
+    setLoading(false);
+    
+    // Attempt to fetch from Supabase in background
     fetchPosts();
   }, []);
 
   const fetchPosts = async () => {
-    // Set a timeout to use fallback data if Supabase is slow
-    const timeoutId = setTimeout(() => {
-      console.warn('Supabase request timed out, using fallback data');
-      setPosts(fallbackPosts);
-      setLoading(false);
-    }, 5000);
-
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .order('date', { ascending: false });
+      // Create a promise that rejects after timeout
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout')), 5000);
+      });
 
-      clearTimeout(timeoutId);
+      // Race between fetch and timeout
+      const result = await Promise.race([
+        supabase
+          .from('blog_posts')
+          .select('*')
+          .order('date', { ascending: false }),
+        timeoutPromise
+      ]) as { data: BlogPost[] | null; error: any };
 
-      if (error) throw error;
-      if (data && data.length > 0) {
-        setPosts(data);
-      } else {
-        // Use fallback data if no posts returned
-        setPosts(fallbackPosts);
+      if (result.error) throw result.error;
+      if (result.data && result.data.length > 0) {
+        setPosts(result.data);
       }
     } catch (error) {
-      clearTimeout(timeoutId);
-      console.error('Error fetching posts, using fallback data:', error);
-      setPosts(fallbackPosts);
-    } finally {
-      setLoading(false);
+      // Silently fail - we already have fallback data loaded
+      console.warn('Could not fetch blog posts from Supabase:', error);
     }
   };
 
