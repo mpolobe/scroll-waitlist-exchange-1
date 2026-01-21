@@ -6,7 +6,7 @@ import { Loader2 } from 'lucide-react';
 
 const Index: React.FC = () => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
   const [checkingOAuth, setCheckingOAuth] = useState(false);
 
   useEffect(() => {
@@ -15,26 +15,17 @@ const Index: React.FC = () => {
     if (hash && (hash.includes('access_token') || hash.includes('error'))) {
       setCheckingOAuth(true);
       // Supabase's onAuthStateChange will handle the token
-      // Give it a moment to process, then redirect
+      // Give it a moment to process, then redirect to wallet after OAuth login
       const timer = setTimeout(() => {
         setCheckingOAuth(false);
         // Clear the hash from URL
         window.history.replaceState(null, '', window.location.pathname);
+        // Only redirect to wallet after OAuth callback
+        navigate('/wallet');
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, []);
-
-  useEffect(() => {
-    // Redirect authenticated users to wallet after OAuth or regular login
-    if (!loading && user && !checkingOAuth) {
-      // Small delay to ensure auth state is fully processed
-      const timer = setTimeout(() => {
-        navigate('/wallet');
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [user, loading, checkingOAuth, navigate]);
+  }, [navigate]);
 
   // Show loading state during OAuth callback processing
   if (checkingOAuth || (loading && window.location.hash.includes('access_token'))) {
