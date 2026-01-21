@@ -2,6 +2,7 @@
  * Referral Service for SENT Token 310M Airdrop
  * - 50M SENT Referral Pool
  * - 100M SENT Social Tasks Pool
+ * - 160M SENT Worker Pool
  * Tracks in Supabase airdrop_referrals table with Sybil protection
  */
 
@@ -13,6 +14,9 @@ export interface AirdropReferral {
   user_wallet: string;
   referrer_wallet: string;
   task_completed: boolean;
+  claimed: boolean;
+  claimed_at: string | null;
+  tx_hash: string | null;
 }
 
 export interface LeaderboardEntry {
@@ -30,7 +34,7 @@ export async function logReferral(
   referrerWallet: string
 ): Promise<{ success: boolean; error?: string }> {
   // Prevent self-referral
-  if (userWallet.toLowerCase() === referrerWallet.toLowerCase()) {
+  if (referrerWallet && userWallet.toLowerCase() === referrerWallet.toLowerCase()) {
     return { success: false, error: 'Cannot refer yourself' };
   }
 
@@ -39,7 +43,7 @@ export async function logReferral(
     .insert([
       {
         user_wallet: userWallet.toLowerCase(),
-        referrer_wallet: referrerWallet.toLowerCase(),
+        referrer_wallet: referrerWallet ? referrerWallet.toLowerCase() : null,
       },
     ]);
 
@@ -52,6 +56,101 @@ export async function logReferral(
   }
 
   return { success: true };
+}
+
+/**
+ * Mark worker as claimed with transaction hash
+ * Called after successful on-chain transfer
+ */
+export async function markAsClaimed(
+  userWallet: string,
+  txHash: string
+): Promise<{ success: boolean; error?: string }> {
+  // First check if user exists
+  const { data: existing } = await supabase
+    .from('airdrop_referrals')
+    .select('id')
+    .eq('user_wallet', userWallet.toLowerCase())
+    .single();
+
+  if (existing) {
+    // Update existing record
+    const { error } = await supabase
+      .from('airdrop_referrals')
+      .update({
+        claimed: true,
+        claimed_at: new Date().toISOString(),
+        tx_hash: txHash,
+      })
+      .eq('user_wallet', userWallet.toLowerCase());
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+  } else {
+    // Insert new record with claimed status
+    const { error } = await supabase
+      .from('airdrop_referrals')
+      .insert([
+        {
+          user_wallet: userWallet.toLowerCase(),
+          referrer_wallet: getActiveReferrer()?.toLowerCase() || null,
+          claimed: true,
+          claimed_at: new Date().toISOString(),
+          tx_hash: txHash,
+        },
+      ]);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  return { success: true };
+}
+
+/**
+ * Check if user has already claimed tokens
+ */
+export async function hasClaimed(userWallet: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('airdrop_referrals')
+    .select('claimed')
+    .eq('user_wallet', userWallet.toLowerCase())
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Failed to check claim status:', error.message);
+  }
+
+  return data?.claimed === true;
+}
+
+/**
+ * Get user's claim status and details
+ */
+export async function getClaimStatus(userWallet: string): Promise<{
+  registered: boolean;
+  claimed: boolean;
+  claimedAt: string | null;
+  txHash: string | null;
+}> {
+  const { data, error } = await supabase
+    .from('airdrop_referrals')
+    .select('claimed, claimed_at, tx_hash')
+    .eq('user_wallet', userWallet.toLowerCase())
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Failed to get claim status:', error.message);
+  }
+
+  return {
+    registered: !!data,
+    claimed: data?.claimed === true,
+    claimedAt: data?.claimed_at || null,
+    txHash: data?.tx_hash || null,
+  };
 }
 
 /**
