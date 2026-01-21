@@ -4,6 +4,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { SuiWalletProvider } from "@/contexts/SuiWalletContext";
 import { SmartWalletProvider } from "@/contexts/SmartWalletContext";
 import { AppProvider } from "@/contexts/AppContext";
+import { ThirdwebWrapper } from "@/contexts/ThirdwebContext";
 import { Toaster } from "@/components/ui/toaster";
 
 // Pages
@@ -43,50 +44,52 @@ import SentIdo from "@/pages/SentIdo";
 export default function App() {
   return (
     <Router>
-      <AuthProvider>
-        <SuiWalletProvider>
-          <SmartWalletProvider>
-            <AppProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/reviews" element={<Reviews />} />
-              <Route path="/reviews/:id" element={<ReviewDetail />} />
-              <Route path="/promoter" element={<Promoter />} />
-              <Route path="/social-handles" element={<SocialHandles />} />
-              <Route path="/press-kit" element={<PressKit />} />
-              <Route path="/network-map" element={<NetworkMap />} />
-              <Route path="/investor-deck" element={<InvestorDeck />} />
-              <Route path="/influencer-kit" element={<InfluencerKit />} />
-              <Route path="/merchant" element={<MerchantPortal />} />
-              <Route path="/railway-booking" element={<RailwayBooking />} />
-              <Route path="/wallet" element={<WalletDashboard />} />
-              <Route path="/staking" element={<Staking />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/dashboard" element={<UserDashboard />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="/terms" element={<TermsOfService />} />
-              <Route path="/cookies" element={<CookiePolicy />} />
-              <Route path="/contact" element={<ContactUs />} />
-              <Route path="/partners" element={<Partners />} />
-              <Route path="/tracking" element={<TrainTracking />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/verify-email" element={<VerifyEmail />} />
-              <Route path="/verify-email-sent" element={<VerifyEmailSent />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/oauth/consent" element={<OAuthConsent />} />
-              <Route path="/ido" element={<SentIdo />} />
-              <Route path="/sent-ido" element={<SentIdo />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster />
-            </AppProvider>
-          </SmartWalletProvider>
-        </SuiWalletProvider>
-      </AuthProvider>
+      <ThirdwebWrapper>
+        <AuthProvider>
+          <SuiWalletProvider>
+            <SmartWalletProvider>
+              <AppProvider>
+                <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/reviews" element={<Reviews />} />
+                <Route path="/reviews/:id" element={<ReviewDetail />} />
+                <Route path="/promoter" element={<Promoter />} />
+                <Route path="/social-handles" element={<SocialHandles />} />
+                <Route path="/press-kit" element={<PressKit />} />
+                <Route path="/network-map" element={<NetworkMap />} />
+                <Route path="/investor-deck" element={<InvestorDeck />} />
+                <Route path="/influencer-kit" element={<InfluencerKit />} />
+                <Route path="/merchant" element={<MerchantPortal />} />
+                <Route path="/railway-booking" element={<RailwayBooking />} />
+                <Route path="/wallet" element={<WalletDashboard />} />
+                <Route path="/staking" element={<Staking />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/dashboard" element={<UserDashboard />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/cookies" element={<CookiePolicy />} />
+                <Route path="/contact" element={<ContactUs />} />
+                <Route path="/partners" element={<Partners />} />
+                <Route path="/tracking" element={<TrainTracking />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route path="/verify-email-sent" element={<VerifyEmailSent />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/oauth/consent" element={<OAuthConsent />} />
+                <Route path="/ido" element={<SentIdo />} />
+                <Route path="/sent-ido" element={<SentIdo />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster />
+              </AppProvider>
+            </SmartWalletProvider>
+          </SuiWalletProvider>
+        </AuthProvider>
+      </ThirdwebWrapper>
     </Router>
   );
 }
