@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import MarketingNav from '@/components/MarketingNav';
 import { MarketingBanner } from '@/components/blog/MarketingBanner';
-import { supabase } from '@/lib/supabase';
-import { Loader2, Star, TrendingUp, Rocket, ChevronRight } from 'lucide-react';
+import { Star, TrendingUp, Rocket, ChevronRight } from 'lucide-react';
 
 interface BlogPost {
   id: string;
@@ -115,43 +114,7 @@ const categories = ['All', 'Company News', 'Crypto Analysis', 'DeFi', 'Education
 export default function Blog() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Use fallback data immediately, then try to fetch from Supabase
-    setPosts(fallbackPosts);
-    setLoading(false);
-    
-    // Attempt to fetch from Supabase in background
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
-    try {
-      // Create a promise that rejects after timeout
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout')), 5000);
-      });
-
-      // Race between fetch and timeout
-      const result = await Promise.race([
-        supabase
-          .from('blog_posts')
-          .select('*')
-          .order('date', { ascending: false }),
-        timeoutPromise
-      ]) as { data: BlogPost[] | null; error: any };
-
-      if (result.error) throw result.error;
-      if (result.data && result.data.length > 0) {
-        setPosts(result.data);
-      }
-    } catch (error) {
-      // Silently fail - we already have fallback data loaded
-      console.warn('Could not fetch blog posts from Supabase:', error);
-    }
-  };
+  const [posts, setPosts] = useState<BlogPost[]>(fallbackPosts);
 
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -161,14 +124,6 @@ export default function Blog() {
   });
 
   const featuredPosts = posts.filter(post => post.featured);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
