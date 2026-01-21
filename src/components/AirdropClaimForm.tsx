@@ -1,7 +1,7 @@
 /**
- * Airdrop Claim Form Component
- * For mobile workers who can't connect MetaMask
- * Paste wallet address to register for 310M SENT airdrop
+ * Airdrop Registration Form Component
+ * Workers paste their Polygon wallet address to register for 310M SENT airdrop
+ * Tokens are distributed later via Thirdweb Airdrop tool
  */
 
 import { useState } from "react";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Loader2, Wallet, CheckCircle, AlertCircle, Copy, Users } from "lucide-react";
+import { Loader2, Wallet, CheckCircle, AlertCircle, Copy, Gift } from "lucide-react";
 import { getActiveReferrer } from "@/services/referralService";
 
 interface AirdropClaimFormProps {
@@ -118,9 +118,14 @@ export function AirdropClaimForm({ onSuccess, onError }: AirdropClaimFormProps) 
             <div className="bg-muted/50 rounded-lg p-3">
               <code className="text-xs break-all">{walletAddress}</code>
             </div>
-            <p className="text-xs text-muted-foreground">
-              You'll receive 100 SENT when the airdrop is processed
-            </p>
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+              <p className="text-sm text-purple-800 font-medium">
+                100 SENT tokens will be sent to your wallet
+              </p>
+              <p className="text-xs text-purple-600 mt-1">
+                Airdrop distribution coming soon
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -131,11 +136,11 @@ export function AirdropClaimForm({ onSuccess, onError }: AirdropClaimFormProps) 
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Wallet className="h-5 w-5" />
+          <Gift className="h-5 w-5 text-purple-600" />
           Register for SENT Airdrop
         </CardTitle>
         <CardDescription>
-          Paste your Polygon wallet address to receive 100 SENT tokens
+          Enter your Polygon wallet address to receive 100 SENT tokens
         </CardDescription>
       </CardHeader>
       
@@ -166,7 +171,7 @@ export function AirdropClaimForm({ onSuccess, onError }: AirdropClaimFormProps) 
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Find your address in MetaMask → Copy Address
+              Open MetaMask → Copy your wallet address → Paste here
             </p>
           </div>
 
@@ -189,7 +194,7 @@ export function AirdropClaimForm({ onSuccess, onError }: AirdropClaimFormProps) 
               </>
             ) : (
               <>
-                <Users className="mr-2 h-4 w-4" />
+                <Gift className="mr-2 h-4 w-4" />
                 Register for Airdrop
               </>
             )}
@@ -197,7 +202,7 @@ export function AirdropClaimForm({ onSuccess, onError }: AirdropClaimFormProps) 
 
           <div className="text-center pt-2">
             <p className="text-xs text-muted-foreground">
-              310M SENT Pool: 50M Referrals • 100M Tasks • 160M Workers
+              310M SENT Airdrop: 50M Referrals • 100M Tasks • 160M Workers
             </p>
           </div>
         </form>
