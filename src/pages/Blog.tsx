@@ -123,11 +123,20 @@ export default function Blog() {
   }, []);
 
   const fetchPosts = async () => {
+    // Set a timeout to use fallback data if Supabase is slow
+    const timeoutId = setTimeout(() => {
+      console.warn('Supabase request timed out, using fallback data');
+      setPosts(fallbackPosts);
+      setLoading(false);
+    }, 5000);
+
     try {
       const { data, error } = await supabase
         .from('blog_posts')
         .select('*')
         .order('date', { ascending: false });
+
+      clearTimeout(timeoutId);
 
       if (error) throw error;
       if (data && data.length > 0) {
@@ -137,6 +146,7 @@ export default function Blog() {
         setPosts(fallbackPosts);
       }
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error('Error fetching posts, using fallback data:', error);
       setPosts(fallbackPosts);
     } finally {
