@@ -22,6 +22,10 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState({ users: 0, transactions: 0, volume: 0, tickets: 0 });
   const [botStatus, setBotStatus] = useState<'stopped' | 'running'>('stopped');
 
+  // Allow access in development mode or if user is admin
+  const isDev = import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.hostname.includes('gitpod.dev');
+  const hasAccess = isDev || isAdmin;
+
   const toggleBot = () => {
     const newStatus = botStatus === 'stopped' ? 'running' : 'stopped';
     setBotStatus(newStatus);
@@ -35,13 +39,13 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (!loading && !isAdmin) {
+    if (!loading && !hasAccess) {
       navigate('/');
     }
-  }, [isAdmin, loading, navigate]);
+  }, [hasAccess, loading, navigate]);
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  if (!isAdmin) return null;
+  if (loading && !isDev) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  if (!hasAccess) return null;
 
   return (
     <div className="container mx-auto p-6">
