@@ -1,0 +1,72 @@
+{
+  "name": "Africoin - Africa Railways",
+  "short_name": "Africoin",
+  "description": "Africa's premier crypto platform powered by Africa Railways infrastructure. Book train tickets, manage your wallet, and invest in $SENT token.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#F97316",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["finance", "travel", "transportation"],
+  "icons": [
+    {
+      "src": "https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764284353488_fc5a167b.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any"
+    },
+    {
+      "src": "https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764284353488_fc5a167b.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764285109834_4d14e31e.webp",
+      "sizes": "1200x630",
+      "type": "image/webp",
+      "label": "Africoin Homepage"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Wallet",
+      "short_name": "Wallet",
+      "description": "Access your Africoin wallet",
+      "url": "/wallet",
+      "icons": [{ "src": "https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764284353488_fc5a167b.webp", "sizes": "96x96" }]
+    },
+    {
+      "name": "Book Tickets",
+      "short_name": "Book",
+      "description": "Book railway tickets",
+      "url": "/railway-booking",
+      "icons": [{ "src": "https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764284353488_fc5a167b.webp", "sizes": "96x96" }]
+    },
+    {
+      "name": "SENT IDO",
+      "short_name": "IDO",
+      "description": "Invest in SENT token",
+      "url": "/ido",
+      "icons": [{ "src": "https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764284353488_fc5a167b.webp", "sizes": "96x96" }]
+    },
+    {
+      "name": "Network Map",
+      "short_name": "Map",
+      "description": "View rail corridors",
+      "url": "/network-map",
+      "icons": [{ "src": "https://d64gsuwffb70l.cloudfront.net/6928d753085881c25b2cb3fb_1764284353488_fc5a167b.webp", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.mpolobe.africoin"
+    }
+  ],
+  "prefer_related_applications": false
+}
