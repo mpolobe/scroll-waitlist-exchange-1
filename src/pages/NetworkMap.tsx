@@ -1,14 +1,73 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { 
   Train, MapPin, Clock, Users, Leaf, 
-  ChevronRight, Play, Pause, Info
+  ChevronRight, Play, Pause, Info, Maximize2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import MarketingNav from '@/components/MarketingNav';
 
-// Route data with coordinates (simplified for SVG positioning)
+// Fix Leaflet default marker icon issue
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
+
+// Custom marker icons for different corridor colors
+const createCustomIcon = (color: string, isActive: boolean = false) => {
+  const size = isActive ? 16 : 12;
+  return L.divIcon({
+    className: 'custom-marker',
+    html: `
+      <div style="
+        width: ${size}px;
+        height: ${size}px;
+        background: ${color};
+        border: 2px solid white;
+        border-radius: 50%;
+        box-shadow: 0 0 ${isActive ? '15px' : '8px'} ${color}, 0 2px 4px rgba(0,0,0,0.3);
+        ${isActive ? 'animation: pulse 1.5s ease-in-out infinite;' : ''}
+      "></div>
+    `,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+};
+
+// Train icon for animated markers
+const createTrainIcon = (color: string) => {
+  return L.divIcon({
+    className: 'train-marker',
+    html: `
+      <div style="
+        width: 24px;
+        height: 24px;
+        background: ${color};
+        border: 2px solid white;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 20px ${color}, 0 4px 8px rgba(0,0,0,0.4);
+        animation: trainPulse 0.8s ease-in-out infinite;
+      ">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+          <path d="M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h2.23l2-2H14l2 2h2v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+        </svg>
+      </div>
+    `,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+  });
+};
+
+// Route data with real coordinates (lat, lng)
 const corridors = [
   {
     id: 'nile-valley',
@@ -19,11 +78,11 @@ const corridors = [
     population: '130M',
     launchYear: '2026-2028',
     cities: [
-      { name: 'Cairo', country: 'Egypt', x: 580, y: 180 },
-      { name: 'Khartoum', country: 'Sudan', x: 560, y: 280 },
-      { name: 'Addis Ababa', country: 'Ethiopia', x: 620, y: 350 },
-      { name: 'Nairobi', country: 'Kenya', x: 600, y: 430 },
-      { name: 'Kampala', country: 'Uganda', x: 550, y: 400 }
+      { name: 'Cairo', country: 'Egypt', lat: 30.0444, lng: 31.2357 },
+      { name: 'Khartoum', country: 'Sudan', lat: 15.5007, lng: 32.5599 },
+      { name: 'Addis Ababa', country: 'Ethiopia', lat: 9.0320, lng: 38.7469 },
+      { name: 'Kampala', country: 'Uganda', lat: 0.3476, lng: 32.5825 },
+      { name: 'Nairobi', country: 'Kenya', lat: -1.2921, lng: 36.8219 }
     ]
   },
   {
@@ -35,11 +94,11 @@ const corridors = [
     population: '200M',
     launchYear: '2026-2028',
     cities: [
-      { name: 'Dakar', country: 'Senegal', x: 180, y: 260 },
-      { name: 'Bamako', country: 'Mali', x: 260, y: 280 },
-      { name: 'Ouagadougou', country: 'Burkina Faso', x: 310, y: 290 },
-      { name: 'Niamey', country: 'Niger', x: 350, y: 270 },
-      { name: "N'Djamena", country: 'Chad', x: 430, y: 280 }
+      { name: 'Dakar', country: 'Senegal', lat: 14.7167, lng: -17.4677 },
+      { name: 'Bamako', country: 'Mali', lat: 12.6392, lng: -8.0029 },
+      { name: 'Ouagadougou', country: 'Burkina Faso', lat: 12.3714, lng: -1.5197 },
+      { name: 'Accra', country: 'Ghana', lat: 5.6037, lng: -0.1870 },
+      { name: 'Lagos', country: 'Nigeria', lat: 6.5244, lng: 3.3792 }
     ]
   },
   {
@@ -51,26 +110,26 @@ const corridors = [
     population: '100M',
     launchYear: '2027-2029',
     cities: [
-      { name: 'Rabat', country: 'Morocco', x: 260, y: 140 },
-      { name: 'Algiers', country: 'Algeria', x: 350, y: 130 },
-      { name: 'Tunis', country: 'Tunisia', x: 410, y: 130 },
-      { name: 'Tripoli', country: 'Libya', x: 470, y: 140 },
-      { name: 'Nouakchott', country: 'Mauritania', x: 200, y: 210 }
+      { name: 'Casablanca', country: 'Morocco', lat: 33.5731, lng: -7.5898 },
+      { name: 'Rabat', country: 'Morocco', lat: 34.0209, lng: -6.8416 },
+      { name: 'Algiers', country: 'Algeria', lat: 36.7538, lng: 3.0588 },
+      { name: 'Tunis', country: 'Tunisia', lat: 36.8065, lng: 10.1815 },
+      { name: 'Tripoli', country: 'Libya', lat: 32.8872, lng: 13.1913 }
     ]
   },
   {
     id: 'indian-ocean',
     name: 'Indian Ocean Arc',
-    tagline: 'Island Nations Connected',
+    tagline: 'East Coast Connection',
     color: '#00CED1',
     distance: '2,800 km',
     population: '80M',
     launchYear: '2027-2029',
     cities: [
-      { name: 'Nairobi', country: 'Kenya', x: 600, y: 430 },
-      { name: 'Dodoma', country: 'Tanzania', x: 590, y: 480 },
-      { name: 'Antananarivo', country: 'Madagascar', x: 700, y: 540 },
-      { name: 'Djibouti', country: 'Djibouti', x: 660, y: 320 }
+      { name: 'Mombasa', country: 'Kenya', lat: -4.0435, lng: 39.6682 },
+      { name: 'Dar es Salaam', country: 'Tanzania', lat: -6.7924, lng: 39.2083 },
+      { name: 'Maputo', country: 'Mozambique', lat: -25.9692, lng: 32.5732 },
+      { name: 'Durban', country: 'South Africa', lat: -29.8587, lng: 31.0218 }
     ]
   },
   {
@@ -82,10 +141,9 @@ const corridors = [
     population: '90M',
     launchYear: '2028-2030',
     cities: [
-      { name: 'Bamako', country: 'Mali', x: 260, y: 280 },
-      { name: 'Niamey', country: 'Niger', x: 350, y: 270 },
-      { name: "N'Djamena", country: 'Chad', x: 430, y: 280 },
-      { name: 'Khartoum', country: 'Sudan', x: 560, y: 280 }
+      { name: 'Niamey', country: 'Niger', lat: 13.5137, lng: 2.1098 },
+      { name: "N'Djamena", country: 'Chad', lat: 12.1348, lng: 15.0557 },
+      { name: 'Khartoum', country: 'Sudan', lat: 15.5007, lng: 32.5599 }
     ]
   },
   {
@@ -97,10 +155,10 @@ const corridors = [
     population: '120M',
     launchYear: '2028-2030',
     cities: [
-      { name: 'Kinshasa', country: 'DRC', x: 430, y: 450 },
-      { name: 'Brazzaville', country: 'Congo', x: 435, y: 455 },
-      { name: 'Luanda', country: 'Angola', x: 380, y: 500 },
-      { name: 'Libreville', country: 'Gabon', x: 370, y: 400 }
+      { name: 'Kinshasa', country: 'DRC', lat: -4.4419, lng: 15.2663 },
+      { name: 'Brazzaville', country: 'Congo', lat: -4.2634, lng: 15.2429 },
+      { name: 'Luanda', country: 'Angola', lat: -8.8390, lng: 13.2894 },
+      { name: 'Libreville', country: 'Gabon', lat: 0.4162, lng: 9.4673 }
     ]
   },
   {
@@ -112,33 +170,118 @@ const corridors = [
     population: '150M',
     launchYear: '2029-2031',
     cities: [
-      { name: 'Cape Town', country: 'South Africa', x: 420, y: 680 },
-      { name: 'Windhoek', country: 'Namibia', x: 410, y: 580 },
-      { name: 'Gaborone', country: 'Botswana', x: 480, y: 580 },
-      { name: 'Harare', country: 'Zimbabwe', x: 530, y: 540 },
-      { name: 'Lusaka', country: 'Zambia', x: 510, y: 510 },
-      { name: 'Lilongwe', country: 'Malawi', x: 570, y: 500 }
+      { name: 'Cape Town', country: 'South Africa', lat: -33.9249, lng: 18.4241 },
+      { name: 'Johannesburg', country: 'South Africa', lat: -26.2041, lng: 28.0473 },
+      { name: 'Gaborone', country: 'Botswana', lat: -24.6282, lng: 25.9231 },
+      { name: 'Harare', country: 'Zimbabwe', lat: -17.8252, lng: 31.0335 },
+      { name: 'Lusaka', country: 'Zambia', lat: -15.3875, lng: 28.3228 }
     ]
   }
 ];
 
+// Component to handle map view changes
+function MapController({ selectedCorridor }: { selectedCorridor: string | null }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (selectedCorridor) {
+      const corridor = corridors.find(c => c.id === selectedCorridor);
+      if (corridor && corridor.cities.length > 0) {
+        const bounds = L.latLngBounds(
+          corridor.cities.map(city => [city.lat, city.lng] as [number, number])
+        );
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 6 });
+      }
+    } else {
+      // Reset to Africa view
+      map.setView([5, 20], 3);
+    }
+  }, [selectedCorridor, map]);
+  
+  return null;
+}
+
+// Animated train component
+function AnimatedTrain({ corridor, isAnimating }: { corridor: typeof corridors[0], isAnimating: boolean }) {
+  const [position, setPosition] = useState(0);
+  
+  useEffect(() => {
+    if (!isAnimating) return;
+    
+    const interval = setInterval(() => {
+      setPosition(prev => (prev + 0.5) % 100);
+    }, 50);
+    
+    return () => clearInterval(interval);
+  }, [isAnimating]);
+  
+  if (!isAnimating || corridor.cities.length < 2) return null;
+  
+  // Calculate position along the route
+  const totalSegments = corridor.cities.length - 1;
+  const progressAlongRoute = (position / 100) * totalSegments;
+  const currentSegment = Math.floor(progressAlongRoute);
+  const segmentProgress = progressAlongRoute - currentSegment;
+  
+  if (currentSegment >= totalSegments) return null;
+  
+  const startCity = corridor.cities[currentSegment];
+  const endCity = corridor.cities[currentSegment + 1];
+  
+  const lat = startCity.lat + (endCity.lat - startCity.lat) * segmentProgress;
+  const lng = startCity.lng + (endCity.lng - startCity.lng) * segmentProgress;
+  
+  return (
+    <Marker
+      position={[lat, lng]}
+      icon={createTrainIcon(corridor.color)}
+    />
+  );
+}
+
 export default function NetworkMap() {
   const [selectedCorridor, setSelectedCorridor] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(true);
-  const [hoveredCity, setHoveredCity] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const selectedRoute = corridors.find(c => c.id === selectedCorridor);
 
-  // Generate path string for a corridor
-  const generatePath = (cities: { x: number; y: number }[]) => {
-    if (cities.length < 2) return '';
-    return cities.map((city, i) => 
-      `${i === 0 ? 'M' : 'L'} ${city.x} ${city.y}`
-    ).join(' ');
-  };
+  // Africa center coordinates
+  const africaCenter: [number, number] = [5, 20];
+  const defaultZoom = 3;
 
   return (
     <div className="min-h-screen bg-slate-900">
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.3); opacity: 0.8; }
+        }
+        @keyframes trainPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+        }
+        .leaflet-container {
+          background: #0f172a;
+        }
+        .custom-marker, .train-marker {
+          background: transparent !important;
+          border: none !important;
+        }
+        .leaflet-popup-content-wrapper {
+          background: #1e293b;
+          color: white;
+          border-radius: 8px;
+          border: 1px solid #334155;
+        }
+        .leaflet-popup-tip {
+          background: #1e293b;
+        }
+        .leaflet-popup-content {
+          margin: 12px;
+        }
+      `}</style>
+      
       <MarketingNav />
       
       {/* Hero */}
@@ -159,517 +302,301 @@ export default function NetworkMap() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Map Section */}
-          <div className="lg:col-span-2">
-            <Card className="bg-slate-800 border-slate-700">
+          <div className={`${isFullscreen ? 'fixed inset-0 z-50 p-4 bg-slate-900' : 'lg:col-span-2'}`}>
+            <Card className="bg-slate-800 border-slate-700 h-full">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-white">Continental Network</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsAnimating(!isAnimating)}
-                  className="border-slate-600 text-slate-300"
-                >
-                  {isAnimating ? <Pause className="w-4 h-4 mr-1" /> : <Play className="w-4 h-4 mr-1" />}
-                  {isAnimating ? 'Pause' : 'Animate'}
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="relative bg-slate-900 rounded-lg overflow-hidden">
-                  {/* Pulsing background effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 via-transparent to-blue-900/20 animate-pulse" style={{ animationDuration: '4s' }} />
-                  
-                  <svg 
-                    viewBox="0 0 800 750" 
-                    className="w-full h-auto relative z-10"
-                    style={{ maxHeight: '600px' }}
+                <CardTitle className="text-white flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-cyan-400" />
+                  Sentinel Network
+                </CardTitle>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsAnimating(!isAnimating)}
+                    className="border-slate-600 text-slate-300"
                   >
-                    {/* Definitions for gradients and filters */}
-                    <defs>
-                      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                        <feMerge>
-                          <feMergeNode in="coloredBlur"/>
-                          <feMergeNode in="SourceGraphic"/>
-                        </feMerge>
-                      </filter>
-                      <linearGradient id="africaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#1e3a5f" />
-                        <stop offset="50%" stopColor="#1e293b" />
-                        <stop offset="100%" stopColor="#0f172a" />
-                      </linearGradient>
-                      <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.6" />
-                        <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.4" />
-                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.6" />
-                      </linearGradient>
-                    </defs>
-                    
-                    {/* Africa continent outline */}
-                    <path
-                      d="M400 80 
-                         C450 75, 520 90, 560 120 
-                         C600 150, 630 200, 650 260 
-                         C670 320, 675 390, 665 460 
-                         C655 530, 625 600, 580 650 
-                         C535 700, 470 730, 410 735 
-                         C350 740, 290 720, 250 680 
-                         C210 640, 190 580, 185 520 
-                         C180 460, 190 400, 210 350 
-                         C230 300, 260 260, 280 230 
-                         C300 200, 310 180, 300 160 
-                         C290 140, 260 130, 230 140 
-                         C200 150, 180 180, 175 220 
-                         C170 260, 185 310, 200 350 
-                         C215 390, 220 420, 210 450 
-                         C200 480, 175 500, 160 480 
-                         C145 460, 150 420, 170 390 
-                         C190 360, 220 340, 240 310 
-                         C260 280, 265 240, 250 210 
-                         C235 180, 200 165, 180 180 
-                         L180 180 
-                         C200 220, 210 280, 230 340 
-                         C250 400, 260 470, 290 530 
-                         C320 590, 370 640, 430 670 
-                         C490 700, 560 690, 610 650 
-                         C660 610, 690 540, 700 470 
-                         C710 400, 700 320, 670 260 
-                         C640 200, 590 150, 530 120 
-                         C470 90, 400 85, 400 80 Z"
-                      fill="url(#africaGradient)"
-                      stroke="url(#borderGradient)"
-                      strokeWidth="3"
-                      className="drop-shadow-2xl"
-                    >
-                      <animate attributeName="stroke-opacity" values="0.4;0.9;0.4" dur="3s" repeatCount="indefinite" />
-                    </path>
-                    
-                    {/* Glow effect overlay */}
-                    <path
-                      d="M400 80 
-                         C450 75, 520 90, 560 120 
-                         C600 150, 630 200, 650 260 
-                         C670 320, 675 390, 665 460 
-                         C655 530, 625 600, 580 650 
-                         C535 700, 470 730, 410 735 
-                         C350 740, 290 720, 250 680 
-                         C210 640, 190 580, 185 520 
-                         C180 460, 190 400, 210 350 
-                         C230 300, 260 260, 280 230 
-                         C300 200, 310 180, 300 160 
-                         C290 140, 260 130, 230 140 
-                         C200 150, 180 180, 175 220 
-                         C170 260, 185 310, 200 350 
-                         C215 390, 220 420, 210 450 
-                         C200 480, 175 500, 160 480 
-                         C145 460, 150 420, 170 390 
-                         C190 360, 220 340, 240 310 
-                         C260 280, 265 240, 250 210 
-                         C235 180, 200 165, 180 180 
-                         L180 180 
-                         C200 220, 210 280, 230 340 
-                         C250 400, 260 470, 290 530 
-                         C320 590, 370 640, 430 670 
-                         C490 700, 560 690, 610 650 
-                         C660 610, 690 540, 700 470 
-                         C710 400, 700 320, 670 260 
-                         C640 200, 590 150, 530 120 
-                         C470 90, 400 85, 400 80 Z"
-                      fill="none"
-                      stroke="#06b6d4"
-                      strokeWidth="1"
-                      opacity="0.3"
-                      filter="url(#glow)"
+                    {isAnimating ? <Pause className="w-4 h-4 mr-1" /> : <Play className="w-4 h-4 mr-1" />}
+                    {isAnimating ? 'Pause' : 'Animate'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsFullscreen(!isFullscreen)}
+                    className="border-slate-600 text-slate-300"
+                  >
+                    <Maximize2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className={`relative ${isFullscreen ? 'h-[calc(100vh-120px)]' : 'h-[500px]'}`}>
+                  <MapContainer
+                    center={africaCenter}
+                    zoom={defaultZoom}
+                    style={{ height: '100%', width: '100%' }}
+                    zoomControl={true}
+                    scrollWheelZoom={true}
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+                      url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                     />
                     
-                    {/* Country borders (simplified internal lines) */}
-                    <g stroke="#334155" strokeWidth="0.5" fill="none" opacity="0.5">
-                      <path d="M350 130 L400 180 L450 160" />
-                      <path d="M280 250 L350 280 L420 260 L500 290" />
-                      <path d="M400 350 L480 380 L520 420" />
-                      <path d="M320 400 L380 450 L440 480" />
-                      <path d="M380 520 L450 560 L520 540" />
-                    </g>
+                    <MapController selectedCorridor={selectedCorridor} />
                     
-                    {/* Grid lines */}
-                    {[100, 200, 300, 400, 500, 600, 700].map(y => (
-                      <line key={`h-${y}`} x1="100" y1={y} x2="700" y2={y} stroke="#334155" strokeWidth="0.5" strokeDasharray="5,5" />
-                    ))}
-                    {[200, 300, 400, 500, 600].map(x => (
-                      <line key={`v-${x}`} x1={x} y1="100" x2={x} y2="700" stroke="#334155" strokeWidth="0.5" strokeDasharray="5,5" />
-                    ))}
-
                     {/* Route lines */}
-                    {corridors.map((corridor, corridorIndex) => (
-                      <g key={corridor.id}>
-                        {/* Outer glow effect */}
-                        <path
-                          d={generatePath(corridor.cities)}
-                          fill="none"
-                          stroke={corridor.color}
-                          strokeWidth="12"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          opacity={selectedCorridor === corridor.id ? 0.3 : 0.05}
-                          filter="url(#glow)"
-                          className="transition-opacity duration-500"
-                        />
-                        {/* Background track */}
-                        <path
-                          d={generatePath(corridor.cities)}
-                          fill="none"
-                          stroke={corridor.color}
-                          strokeWidth="6"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          opacity={selectedCorridor === corridor.id ? 0.5 : 0.15}
-                          className="transition-opacity duration-300"
-                        />
-                        {/* Main animated line with dash effect */}
-                        <path
-                          d={generatePath(corridor.cities)}
-                          fill="none"
-                          stroke={corridor.color}
-                          strokeWidth={selectedCorridor === corridor.id ? 4 : 2.5}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeDasharray={selectedCorridor === corridor.id ? "none" : "8 4"}
-                          opacity={selectedCorridor === null || selectedCorridor === corridor.id ? 1 : 0.25}
-                          className="transition-all duration-300 cursor-pointer"
-                          onClick={() => setSelectedCorridor(selectedCorridor === corridor.id ? null : corridor.id)}
-                        >
-                          {isAnimating && (
-                            <animate 
-                              attributeName="stroke-dashoffset" 
-                              values="0;24" 
-                              dur="1s" 
-                              repeatCount="indefinite" 
-                            />
-                          )}
-                        </path>
-                        {/* Animated train with trail */}
-                        {isAnimating && (selectedCorridor === null || selectedCorridor === corridor.id) && (
-                          <g>
-                            {/* Train glow */}
-                            <circle r="10" fill={corridor.color} opacity="0.3" filter="url(#glow)">
-                              <animateMotion
-                                dur={`${4 + corridorIndex * 0.5}s`}
-                                repeatCount="indefinite"
-                                path={generatePath(corridor.cities)}
-                              />
-                            </circle>
-                            {/* Train body */}
-                            <circle r="6" fill={corridor.color}>
-                              <animateMotion
-                                dur={`${4 + corridorIndex * 0.5}s`}
-                                repeatCount="indefinite"
-                                path={generatePath(corridor.cities)}
-                              />
-                              <animate attributeName="r" values="5;7;5" dur="0.5s" repeatCount="indefinite" />
-                            </circle>
-                            {/* Train center */}
-                            <circle r="3" fill="white">
-                              <animateMotion
-                                dur={`${4 + corridorIndex * 0.5}s`}
-                                repeatCount="indefinite"
-                                path={generatePath(corridor.cities)}
-                              />
-                            </circle>
-                          </g>
-                        )}
-                      </g>
+                    {corridors.map((corridor) => (
+                      <Polyline
+                        key={corridor.id}
+                        positions={corridor.cities.map(city => [city.lat, city.lng] as [number, number])}
+                        pathOptions={{
+                          color: corridor.color,
+                          weight: selectedCorridor === corridor.id ? 5 : 3,
+                          opacity: selectedCorridor === null || selectedCorridor === corridor.id ? 0.9 : 0.3,
+                          dashArray: selectedCorridor === corridor.id ? undefined : '10, 5',
+                        }}
+                        eventHandlers={{
+                          click: () => setSelectedCorridor(selectedCorridor === corridor.id ? null : corridor.id),
+                        }}
+                      />
                     ))}
-
+                    
                     {/* City markers */}
-                    {corridors.map((corridor) => 
+                    {corridors.map((corridor) => (
                       corridor.cities.map((city) => (
-                        <g 
+                        <Marker
                           key={`${corridor.id}-${city.name}`}
-                          className="cursor-pointer"
-                          onMouseEnter={() => setHoveredCity(city.name)}
-                          onMouseLeave={() => setHoveredCity(null)}
+                          position={[city.lat, city.lng]}
+                          icon={createCustomIcon(
+                            corridor.color,
+                            selectedCorridor === corridor.id
+                          )}
+                          eventHandlers={{
+                            click: () => setSelectedCorridor(corridor.id),
+                          }}
+                        >
+                          <Popup>
+                            <div className="text-center">
+                              <div className="font-bold text-lg">{city.name}</div>
+                              <div className="text-gray-400 text-sm">{city.country}</div>
+                              <div className="mt-2 text-xs" style={{ color: corridor.color }}>
+                                {corridor.name}
+                              </div>
+                            </div>
+                          </Popup>
+                        </Marker>
+                      ))
+                    ))}
+                    
+                    {/* Animated trains */}
+                    {corridors.map((corridor) => (
+                      (selectedCorridor === null || selectedCorridor === corridor.id) && (
+                        <AnimatedTrain
+                          key={`train-${corridor.id}`}
+                          corridor={corridor}
+                          isAnimating={isAnimating}
+                        />
+                      )
+                    ))}
+                  </MapContainer>
+                  
+                  {/* Legend overlay */}
+                  <div className="absolute bottom-4 left-4 bg-slate-800/90 backdrop-blur-sm rounded-lg p-3 z-[1000]">
+                    <div className="text-xs text-gray-400 mb-2">Corridors</div>
+                    <div className="space-y-1">
+                      {corridors.slice(0, 4).map((corridor) => (
+                        <div
+                          key={corridor.id}
+                          className={`flex items-center gap-2 cursor-pointer px-2 py-1 rounded transition-colors ${
+                            selectedCorridor === corridor.id ? 'bg-slate-700' : 'hover:bg-slate-700/50'
+                          }`}
                           onClick={() => setSelectedCorridor(selectedCorridor === corridor.id ? null : corridor.id)}
                         >
-                          {/* Pulsing outer ring */}
-                          <circle
-                            cx={city.x}
-                            cy={city.y}
-                            r="14"
-                            fill="none"
-                            stroke={corridor.color}
-                            strokeWidth="2"
-                            opacity={selectedCorridor === corridor.id || hoveredCity === city.name ? 0.6 : 0}
-                            className="transition-opacity duration-300"
-                          >
-                            {isAnimating && (
-                              <animate attributeName="r" values="10;18;10" dur="2s" repeatCount="indefinite" />
-                            )}
-                            {isAnimating && (
-                              <animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite" />
-                            )}
-                          </circle>
-                          {/* Glow effect */}
-                          <circle
-                            cx={city.x}
-                            cy={city.y}
-                            r={hoveredCity === city.name ? 14 : 10}
-                            fill={corridor.color}
-                            opacity={selectedCorridor === null || selectedCorridor === corridor.id ? 0.25 : 0.08}
-                            filter="url(#glow)"
-                            className="transition-all duration-200"
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: corridor.color }}
                           />
-                          {/* Outer ring */}
-                          <circle
-                            cx={city.x}
-                            cy={city.y}
-                            r={hoveredCity === city.name ? 10 : 7}
-                            fill={corridor.color}
-                            opacity={selectedCorridor === null || selectedCorridor === corridor.id ? 0.4 : 0.15}
-                            className="transition-all duration-200"
-                          />
-                          {/* Inner dot */}
-                          <circle
-                            cx={city.x}
-                            cy={city.y}
-                            r={hoveredCity === city.name ? 6 : 4}
-                            fill={corridor.color}
-                            opacity={selectedCorridor === null || selectedCorridor === corridor.id ? 1 : 0.35}
-                            className="transition-all duration-200"
-                          />
-                          {/* White center */}
-                          <circle
-                            cx={city.x}
-                            cy={city.y}
-                            r={hoveredCity === city.name ? 2.5 : 1.5}
-                            fill="white"
-                            opacity={selectedCorridor === null || selectedCorridor === corridor.id ? 0.9 : 0.3}
-                            className="transition-all duration-200"
-                          />
-                          {/* City label with improved styling */}
-                          {(hoveredCity === city.name || selectedCorridor === corridor.id) && (
-                            <g className="pointer-events-none">
-                              <rect
-                                x={city.x + 12}
-                                y={city.y - 14}
-                                width={city.name.length * 7.5 + 16}
-                                height="28"
-                                rx="6"
-                                fill="#0f172a"
-                                stroke={corridor.color}
-                                strokeWidth="1.5"
-                                opacity="0.95"
-                              />
-                              <text
-                                x={city.x + 20}
-                                y={city.y + 5}
-                                fill="white"
-                                fontSize="12"
-                                fontWeight="600"
-                                fontFamily="system-ui, sans-serif"
-                              >
-                                {city.name}
-                              </text>
-                            </g>
-                          )}
-                        </g>
-                      ))
-                    )}
-
-                    {/* Legend */}
-                    <g transform="translate(80, 600)">
-                      <rect x="0" y="0" width="240" height="130" rx="10" fill="#0f172a" stroke="#334155" strokeWidth="1.5" opacity="0.95" />
-                      <text x="15" y="25" fill="white" fontSize="14" fontWeight="700">Rail Corridors</text>
-                      <line x1="15" y1="35" x2="225" y2="35" stroke="#334155" strokeWidth="1" />
-                      {corridors.map((c, i) => (
-                        <g 
-                          key={c.id} 
-                          transform={`translate(15, ${50 + i * 11})`}
-                          className="cursor-pointer"
-                          onClick={() => setSelectedCorridor(selectedCorridor === c.id ? null : c.id)}
-                          opacity={selectedCorridor === null || selectedCorridor === c.id ? 1 : 0.4}
-                        >
-                          <circle cx="6" cy="0" r="4" fill={c.color}>
-                            {isAnimating && selectedCorridor === c.id && (
-                              <animate attributeName="r" values="3;5;3" dur="1s" repeatCount="indefinite" />
-                            )}
-                          </circle>
-                          <text x="18" y="4" fill={selectedCorridor === c.id ? "white" : "#94a3b8"} fontSize="10" fontWeight={selectedCorridor === c.id ? "600" : "400"}>
-                            {c.name}
-                          </text>
-                          <text x="180" y="4" fill="#64748b" fontSize="9" textAnchor="end">{c.distance}</text>
-                        </g>
+                          <span className="text-xs text-gray-300">{corridor.name.split(' ')[0]}</span>
+                        </div>
                       ))}
-                    </g>
-                    
-                    {/* Network stats badge */}
-                    <g transform="translate(560, 620)">
-                      <rect x="0" y="0" width="160" height="80" rx="10" fill="#0f172a" stroke="#06b6d4" strokeWidth="1" opacity="0.95" />
-                      <text x="80" y="22" fill="#06b6d4" fontSize="11" fontWeight="600" textAnchor="middle">NETWORK STATS</text>
-                      <text x="80" y="42" fill="white" fontSize="20" fontWeight="700" textAnchor="middle">25,000+ km</text>
-                      <text x="80" y="60" fill="#64748b" fontSize="10" textAnchor="middle">54 Capitals • 7 Corridors</text>
-                      <text x="80" y="72" fill="#22c55e" fontSize="9" textAnchor="middle">● LIVE TRACKING</text>
-                    </g>
-                  </svg>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-4">
-            {/* Route selector */}
-            <Card className="bg-slate-800 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white text-lg">Select Corridor</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {corridors.map((corridor) => (
-                  <button
-                    key={corridor.id}
-                    onClick={() => setSelectedCorridor(selectedCorridor === corridor.id ? null : corridor.id)}
-                    className={`w-full p-3 rounded-lg flex items-center gap-3 transition-all ${
-                      selectedCorridor === corridor.id 
-                        ? 'bg-slate-700 ring-2' 
-                        : 'bg-slate-900 hover:bg-slate-700'
-                    }`}
-                    style={{ 
-                      ringColor: selectedCorridor === corridor.id ? corridor.color : 'transparent' 
-                    }}
-                  >
-                    <div 
-                      className="w-4 h-4 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: corridor.color }}
-                    />
-                    <div className="text-left flex-1">
-                      <p className="text-white text-sm font-medium">{corridor.name}</p>
-                      <p className="text-slate-400 text-xs">{corridor.launchYear}</p>
-                    </div>
-                    <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${
-                      selectedCorridor === corridor.id ? 'rotate-90' : ''
-                    }`} />
-                  </button>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Selected route details */}
-            {selectedRoute && (
+          <div className={`space-y-6 ${isFullscreen ? 'hidden' : ''}`}>
+            {/* Selected Route Info */}
+            {selectedRoute ? (
               <Card className="bg-slate-800 border-slate-700">
                 <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full"
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-4 h-4 rounded-full"
                       style={{ backgroundColor: selectedRoute.color }}
                     />
                     <CardTitle className="text-white">{selectedRoute.name}</CardTitle>
                   </div>
-                  <p className="text-slate-400 text-sm">{selectedRoute.tagline}</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <p className="text-gray-400 italic">{selectedRoute.tagline}</p>
+                  
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-slate-900 p-3 rounded-lg">
-                      <Train className="w-5 h-5 text-cyan-400 mb-1" />
-                      <p className="text-white font-bold">{selectedRoute.distance}</p>
-                      <p className="text-slate-400 text-xs">Total Distance</p>
+                    <div className="bg-slate-700/50 rounded-lg p-3">
+                      <div className="text-gray-400 text-xs">Distance</div>
+                      <div className="text-white font-bold">{selectedRoute.distance}</div>
                     </div>
-                    <div className="bg-slate-900 p-3 rounded-lg">
-                      <Users className="w-5 h-5 text-green-400 mb-1" />
-                      <p className="text-white font-bold">{selectedRoute.population}</p>
-                      <p className="text-slate-400 text-xs">People Served</p>
-                    </div>
-                    <div className="bg-slate-900 p-3 rounded-lg">
-                      <Clock className="w-5 h-5 text-orange-400 mb-1" />
-                      <p className="text-white font-bold">{selectedRoute.launchYear}</p>
-                      <p className="text-slate-400 text-xs">Launch Period</p>
-                    </div>
-                    <div className="bg-slate-900 p-3 rounded-lg">
-                      <MapPin className="w-5 h-5 text-pink-400 mb-1" />
-                      <p className="text-white font-bold">{selectedRoute.cities.length}</p>
-                      <p className="text-slate-400 text-xs">Major Stations</p>
+                    <div className="bg-slate-700/50 rounded-lg p-3">
+                      <div className="text-gray-400 text-xs">Population</div>
+                      <div className="text-white font-bold">{selectedRoute.population}</div>
                     </div>
                   </div>
-
+                  
+                  <div className="bg-slate-700/50 rounded-lg p-3">
+                    <div className="text-gray-400 text-xs mb-2">Launch Timeline</div>
+                    <div className="text-cyan-400 font-bold">{selectedRoute.launchYear}</div>
+                  </div>
+                  
                   <div>
-                    <p className="text-slate-400 text-sm mb-2">Route Stations:</p>
+                    <div className="text-gray-400 text-xs mb-2">Stations</div>
                     <div className="space-y-2">
-                      {selectedRoute.cities.map((city, i) => (
+                      {selectedRoute.cities.map((city) => (
                         <div key={city.name} className="flex items-center gap-2">
-                          <div 
+                          <div
                             className="w-2 h-2 rounded-full"
                             style={{ backgroundColor: selectedRoute.color }}
                           />
                           <span className="text-white text-sm">{city.name}</span>
-                          <span className="text-slate-500 text-xs">({city.country})</span>
-                          {i < selectedRoute.cities.length - 1 && (
-                            <div className="flex-1 border-t border-dashed border-slate-600 mx-2" />
-                          )}
+                          <span className="text-gray-500 text-xs">({city.country})</span>
                         </div>
                       ))}
                     </div>
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    className="w-full border-slate-600 text-slate-300"
+                    onClick={() => setSelectedCorridor(null)}
+                  >
+                    View All Routes
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Info className="w-5 h-5 text-cyan-400" />
+                    Select a Corridor
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-400 text-sm mb-4">
+                    Click on any route line or city marker to view details about that corridor.
+                  </p>
+                  <div className="space-y-2">
+                    {corridors.map((corridor) => (
+                      <div
+                        key={corridor.id}
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-700/50 cursor-pointer transition-colors"
+                        onClick={() => setSelectedCorridor(corridor.id)}
+                      >
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: corridor.color }}
+                        />
+                        <div className="flex-1">
+                          <div className="text-white text-sm">{corridor.name}</div>
+                          <div className="text-gray-500 text-xs">{corridor.distance}</div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-gray-500" />
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
             )}
 
-            {/* Network stats */}
-            <Card className="bg-gradient-to-br from-cyan-900 to-blue-900 border-0">
-              <CardContent className="p-6">
-                <h3 className="text-white font-bold mb-4">Network Totals</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-cyan-200">Total Distance</span>
-                    <span className="text-white font-bold">25,000+ km</span>
+            {/* Stats */}
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white text-lg">Network Stats</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                    <Train className="w-5 h-5 text-cyan-400" />
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-cyan-200">Capitals Connected</span>
-                    <span className="text-white font-bold">54</span>
+                  <div>
+                    <div className="text-white font-bold">24,200 km</div>
+                    <div className="text-gray-400 text-xs">Total Track Length</div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-cyan-200">Max Speed</span>
-                    <span className="text-white font-bold">250 km/h</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-green-400" />
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-cyan-200">Jobs Created</span>
-                    <span className="text-white font-bold">2M+</span>
+                  <div>
+                    <div className="text-white font-bold">870M+</div>
+                    <div className="text-gray-400 text-xs">Population Served</div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-cyan-200">CO₂ Reduction</span>
-                    <span className="text-white font-bold">60%</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-orange-400" />
+                  </div>
+                  <div>
+                    <div className="text-white font-bold">54</div>
+                    <div className="text-gray-400 text-xs">Connected Capitals</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                    <Leaf className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <div className="text-white font-bold">100%</div>
+                    <div className="text-gray-400 text-xs">Electric Powered</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </div>
 
-        {/* Timeline section */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold text-white mb-6 text-center">Construction Timeline</h2>
-          <div className="relative">
-            <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-cyan-500 to-blue-500" />
-            <div className="space-y-8">
-              {[
-                { year: '2026', title: 'Phase 1 Launch', desc: 'Nile Valley & West African Coastal corridors begin construction' },
-                { year: '2027', title: 'Expansion', desc: 'Maghreb Express & Indian Ocean Arc projects commence' },
-                { year: '2028', title: 'First Services', desc: 'Inaugural passenger services on completed sections' },
-                { year: '2029', title: 'Integration', desc: 'Major corridors complete, multi-country journeys available' },
-                { year: '2030', title: 'Network Effect', desc: '15,000+ km operational, 20M annual passengers' },
-                { year: '2035', title: 'Full Network', desc: 'All 54 capitals connected, continental unity achieved' }
-              ].map((item, i) => (
-                <div key={item.year} className={`flex items-center gap-8 ${i % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}>
-                  <div className={`flex-1 ${i % 2 === 0 ? 'text-right' : 'text-left'}`}>
-                    <Card className="bg-slate-800 border-slate-700 inline-block">
-                      <CardContent className="p-4">
-                        <p className="text-cyan-400 font-bold">{item.year}</p>
-                        <p className="text-white font-semibold">{item.title}</p>
-                        <p className="text-slate-400 text-sm">{item.desc}</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  <div className="w-4 h-4 bg-cyan-500 rounded-full border-4 border-slate-900 z-10" />
-                  <div className="flex-1" />
+            {/* Timeline */}
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white text-lg flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-cyan-400" />
+                  Launch Timeline
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { year: '2026-2028', corridors: ['Nile Valley', 'West African'] },
+                    { year: '2027-2029', corridors: ['Maghreb', 'Indian Ocean'] },
+                    { year: '2028-2030', corridors: ['Sahel', 'Congo Basin'] },
+                    { year: '2029-2031', corridors: ['Southern Cross'] },
+                  ].map((phase, index) => (
+                    <div key={phase.year} className="flex gap-3">
+                      <div className="flex flex-col items-center">
+                        <div className="w-3 h-3 rounded-full bg-cyan-500" />
+                        {index < 3 && <div className="w-0.5 h-full bg-slate-700 flex-1" />}
+                      </div>
+                      <div className="pb-4">
+                        <div className="text-cyan-400 font-bold text-sm">{phase.year}</div>
+                        <div className="text-gray-400 text-xs">
+                          {phase.corridors.join(', ')}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
