@@ -52,11 +52,20 @@ export default async function handler(req: any, res: any) {
     privateKey: process.env.ADMIN_PRIVATE_KEY! 
   });
 
-  const signature = await generateAirdropSignatureERC20({
+  // SENT token address on Polygon
+  const SENT_TOKEN = "0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5";
+  
+  const { req, signature } = await generateAirdropSignatureERC20({
     account: adminAccount,
     contract: airdropContract,
-    contents: [{ recipient: address, amount: "100" }] // 100 $SENT
+    airdropRequest: {
+      tokenAddress: SENT_TOKEN,
+      contents: [{ 
+        recipient: address, 
+        amount: BigInt("100000000000000000000") // 100 SENT with 18 decimals
+      }]
+    }
   });
 
-  return res.status(200).json(signature);
+  return res.status(200).json({ req, signature });
 }
