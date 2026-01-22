@@ -10,17 +10,10 @@
 
 import { TransactionButton, useActiveAccount } from "thirdweb/react";
 import { airdropERC20WithSignature } from "thirdweb/extensions/airdrop";
-import { getContract } from "thirdweb";
-import { client, polygon, AIRDROP_CONTRACT_ADDRESS } from "@/lib/thirdwebClient";
+import { airdropContract } from "@/lib/thirdwebClient";
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { Gift, CheckCircle, AlertCircle } from "lucide-react";
-
-const airdropContract = AIRDROP_CONTRACT_ADDRESS ? getContract({
-  client,
-  chain: polygon,
-  address: AIRDROP_CONTRACT_ADDRESS,
-}) : null;
 
 interface ClaimButtonProps {
   onSuccess?: () => void;
@@ -52,13 +45,7 @@ export default function SentinelClaim({ onSuccess, onError }: ClaimButtonProps) 
     );
   }
 
-  if (!airdropContract) {
-    return (
-      <div className="w-full py-4 px-6 bg-yellow-100 text-yellow-700 rounded-lg font-medium text-center">
-        Airdrop contract not configured
-      </div>
-    );
-  }
+
 
   return (
     <div className="space-y-3">
