@@ -34,9 +34,9 @@ import {
 } from "lucide-react";
 import { AfricaRailwaysQuiz } from "@/components/AfricaRailwaysQuiz";
 import { ReferralLeaderboard } from "@/components/ReferralLeaderboard";
-import SentinelClaim from "@/components/ClaimButton";
+import ClaimButton from "@/components/ClaimButton";
 import { useActiveAccount, ConnectButton } from "thirdweb/react";
-import { client, polygon, AIRDROP_CONTRACT_ADDRESS } from "@/lib/thirdwebClient";
+import { client, polygon } from "@/lib/thirdwebClient";
 import { getAirdropStatus, verifyTwitter, verifyTelegram } from "@/services/airdropService";
 import { setActiveReferrer } from "@/services/referralService";
 import { useToast } from "@/hooks/use-toast";
@@ -530,22 +530,7 @@ export default function Airdrop() {
                     </p>
                   </div>
                 ) : (
-                  <SentinelClaim 
-                    onSuccess={() => {
-                      setProgress(prev => ({ ...prev, claimed: true }));
-                      toast({
-                        title: "Claimed!",
-                        description: "SENT tokens sent to your wallet"
-                      });
-                    }}
-                    onError={(err) => {
-                      toast({
-                        title: "Claim Failed",
-                        description: err,
-                        variant: "destructive"
-                      });
-                    }}
-                  />
+                  <ClaimButton />
                 )}
               </CardContent>
             </Card>
