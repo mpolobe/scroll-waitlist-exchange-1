@@ -87,6 +87,7 @@ export async function verifyTelegram(walletAddress: string): Promise<{ success: 
 
 /**
  * Submit quiz score
+ * Uses upsert to create record if it doesn't exist
  */
 export async function submitQuizScore(
   walletAddress: string, 
@@ -94,8 +95,10 @@ export async function submitQuizScore(
 ): Promise<{ success: boolean }> {
   const { error } = await supabase
     .from('airdrop_status')
-    .update({ quiz_score: score })
-    .eq('wallet_address', walletAddress.toLowerCase());
+    .upsert({ 
+      wallet_address: walletAddress.toLowerCase(), 
+      quiz_score: score 
+    });
 
   return { success: !error };
 }
