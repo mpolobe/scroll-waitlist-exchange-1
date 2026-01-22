@@ -57,16 +57,18 @@ export default function ClaimButtonTracked({ onSuccess, onError }: ClaimButtonPr
             body: JSON.stringify({ address: account.address }),
           });
  
-          const sigData = await res.json();
- 
           if (!res.ok) {
-            throw new Error(sigData.error || "Not eligible - complete quiz first");
+            const errorData = await res.json();
+            throw new Error(errorData.error || "Not eligible - complete quiz first");
           }
+
+          const { req, signature } = await res.json();
  
           // B. Call the Airdrop contract's pull function
           return airdropERC20WithSignature({
             contract: airdropContract,
-            ...sigData,
+            req,
+            signature,
           });
         }}
         onTransactionConfirmed={async (result) => {
