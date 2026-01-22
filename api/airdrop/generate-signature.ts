@@ -5,18 +5,19 @@
  * a cryptographic signature for claiming SENT tokens.
  * 
  * Contracts (Polygon Mainnet):
- * - SENT Token: 0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf
- * - Airdrop Contract: AIRDROP_CONTRACT_ADDRESS env var
+ * - SENT Token: 0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5
+ * - Airdrop Contract: 0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf
  */
 
 import { createThirdwebClient, getContract } from "thirdweb";
 import { generateAirdropSignatureERC20 } from "thirdweb/extensions/airdrop";
-import { defineChain } from "thirdweb/chains";
+import { polygon } from "thirdweb/chains";
 import { privateKeyToAccount } from "thirdweb/wallets";
 import { createClient } from "@supabase/supabase-js";
 
+// Supabase client (project: llvprbmrnjvamjzavmhg)
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_URL || "https://llvprbmrnjvamjzavmhg.supabase.co",
   process.env.SUPABASE_SERVICE_KEY!
 );
 
@@ -24,9 +25,9 @@ const client = createThirdwebClient({
   secretKey: process.env.THIRDWEB_SECRET_KEY! 
 });
 
-// Polygon Mainnet
-const POLYGON = defineChain(137);
-const AIRDROP_CONTRACT_ADDRESS = process.env.AIRDROP_CONTRACT_ADDRESS!;
+// Contract addresses (Polygon Mainnet)
+const SENT_TOKEN_ADDRESS = "0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5";
+const AIRDROP_CONTRACT_ADDRESS = "0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf";
 
 export default async function handler(req: any, res: any) {
   // CORS
@@ -90,7 +91,7 @@ export default async function handler(req: any, res: any) {
 
     const airdropContract = getContract({
       client,
-      chain: POLYGON,
+      chain: polygon,
       address: AIRDROP_CONTRACT_ADDRESS,
     });
 
