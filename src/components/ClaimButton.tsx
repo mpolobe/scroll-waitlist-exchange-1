@@ -11,13 +11,10 @@
 import { TransactionButton, useActiveAccount } from "thirdweb/react";
 import { airdropERC20WithSignature } from "thirdweb/extensions/airdrop";
 import { getContract } from "thirdweb";
-import { client, polygon } from "@/lib/thirdwebClient";
+import { client, polygon, AIRDROP_CONTRACT_ADDRESS } from "@/lib/thirdwebClient";
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
-import { Loader2, Gift, CheckCircle, AlertCircle } from "lucide-react";
-
-// Airdrop contract deployed on Polygon
-const AIRDROP_CONTRACT_ADDRESS = import.meta.env.VITE_AIRDROP_CONTRACT_ADDRESS || "";
+import { Gift, CheckCircle, AlertCircle } from "lucide-react";
 
 const airdropContract = AIRDROP_CONTRACT_ADDRESS ? getContract({
   client,

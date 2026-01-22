@@ -36,14 +36,13 @@ import { AfricaRailwaysQuiz } from "@/components/AfricaRailwaysQuiz";
 import { ReferralLeaderboard } from "@/components/ReferralLeaderboard";
 import SentinelClaim from "@/components/ClaimButton";
 import { useActiveAccount, ConnectButton } from "thirdweb/react";
-import { client, polygon } from "@/lib/thirdwebClient";
+import { client, polygon, AIRDROP_CONTRACT_ADDRESS } from "@/lib/thirdwebClient";
 import { getAirdropStatus, verifyTwitter, verifyTelegram } from "@/services/airdropService";
 import { setActiveReferrer } from "@/services/referralService";
 import { useToast } from "@/hooks/use-toast";
 import AppLayout from "@/components/AppLayout";
 
-// Airdrop contract address (set after deployment)
-const AIRDROP_CONTRACT_ADDRESS = import.meta.env.VITE_AIRDROP_CONTRACT_ADDRESS || "";
+
 
 interface AirdropProgress {
   registered: boolean;
