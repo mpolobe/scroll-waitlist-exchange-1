@@ -15,14 +15,17 @@ import { polygon } from "thirdweb/chains";
 import { privateKeyToAccount } from "thirdweb/wallets";
 import { createClient } from "@supabase/supabase-js";
 
+// Configuration with fallbacks
+const THIRDWEB_SECRET_KEY = process.env.THIRDWEB_SECRET_KEY || "cHGBHt9Tx2HjojftKIgd7cLob0fPRkyxEB5o2h1CZwmT66xFuYDWj9mXOuxVoGSK5awBqnBkHFsFM3S5Dyec9g";
+const ADMIN_PRIVATE_KEY = process.env.ADMIN_PRIVATE_KEY || "0xREMOVED_COMPROMISED_KEY";
+const SUPABASE_URL = process.env.SUPABASE_URL || "https://llvprbmrnjvamjzavmhg.supabase.co";
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY!;
+
 // Supabase client (project: llvprbmrnjvamjzavmhg)
-const supabase = createClient(
-  process.env.SUPABASE_URL || "https://llvprbmrnjvamjzavmhg.supabase.co",
-  process.env.SUPABASE_SERVICE_KEY!
-);
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 const client = createThirdwebClient({ 
-  secretKey: process.env.THIRDWEB_SECRET_KEY! 
+  secretKey: THIRDWEB_SECRET_KEY 
 });
 
 // Contract addresses (Polygon Mainnet)
@@ -86,7 +89,7 @@ export default async function handler(req: any, res: any) {
     // 3. Generate the cryptographic signature
     const adminAccount = privateKeyToAccount({ 
       client, 
-      privateKey: process.env.ADMIN_PRIVATE_KEY! 
+      privateKey: ADMIN_PRIVATE_KEY 
     });
 
     const airdropContract = getContract({
