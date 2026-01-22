@@ -41,6 +41,7 @@ import AuthCallback from "@/pages/AuthCallback";
 import OAuthConsent from "@/pages/OAuthConsent";
 import SentIdo from "@/pages/SentIdo";
 import Airdrop from "@/pages/Airdrop";
+import AirdropHelp from "@/pages/AirdropHelp";
 
 export default function App() {
   return (
@@ -84,6 +85,7 @@ export default function App() {
                 <Route path="/ido" element={<SentIdo />} />
                 <Route path="/sent-ido" element={<SentIdo />} />
                 <Route path="/airdrop" element={<Airdrop />} />
+                <Route path="/airdrop/help" element={<AirdropHelp />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <Toaster />
