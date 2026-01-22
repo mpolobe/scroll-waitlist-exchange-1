@@ -15,7 +15,7 @@ export const client = createThirdwebClient({
 export const polygon = defineChain(137);
 
 // SENT Token contract on Polygon Mainnet
-export const SENT_CONTRACT_ADDRESS = "0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf";
+export const SENT_CONTRACT_ADDRESS = "0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5";
 
 // Airdrop Contract on Polygon Mainnet
 export const AIRDROP_CONTRACT_ADDRESS = "0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf";
