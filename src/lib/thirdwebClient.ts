@@ -17,6 +17,9 @@ export const polygon = defineChain(137);
 // SENT Token contract on Polygon Mainnet
 export const SENT_CONTRACT_ADDRESS = "0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf";
 
+// Airdrop Contract on Polygon Mainnet
+export const AIRDROP_CONTRACT_ADDRESS = "0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf";
+
 // Connect to SENT contract
 export const sentContract = getContract({
   client,
