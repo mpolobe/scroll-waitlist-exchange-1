@@ -6,6 +6,7 @@
 import { TransactionButton, useActiveAccount } from "thirdweb/react";
 import { airdropERC20WithSignature } from "thirdweb/extensions/airdrop";
 import { airdropContract } from "@/lib/thirdwebClient";
+import { supabase } from "@/lib/supabase";
 
 export default function ClaimButton() {
   const account = useActiveAccount();
@@ -40,7 +41,18 @@ export default function ClaimButton() {
           signature,
         });
       }}
-      onTransactionConfirmed={() => alert("Successfully claimed 100 $SENT!")}
+      onTransactionConfirmed={async (result) => {
+        // Update Supabase so the Admin Dashboard sees it in real-time
+        await supabase
+          .from("airdrop_status")
+          .update({ 
+            claimed: true,
+            claimed_at: new Date().toISOString()
+          })
+          .eq("wallet_address", account.address.toLowerCase());
+        
+        alert("Successfully claimed 100 $SENT!");
+      }}
       onError={(err) => alert(err.message)}
     >
       Claim $SENT Reward
