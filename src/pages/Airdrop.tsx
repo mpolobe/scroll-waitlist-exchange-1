@@ -7,10 +7,15 @@
  * - 100M SENT: Social Tasks Pool (Twitter + Telegram)
  * - 10M SENT: Quiz Pool (5/5 correct)
  * - 150M SENT: Worker Pool (base allocation)
+ * 
+ * Airdrop Start: Friday, January 23rd, 2026 at 8:00 AM UTC
  */
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+
+// Airdrop start time: Friday, January 23rd, 2026 at 8:00 AM UTC
+const AIRDROP_START_TIME = new Date("2026-01-23T08:00:00Z");
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +59,13 @@ interface AirdropProgress {
   claimed: boolean;
 }
 
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
 export default function Airdrop() {
   const [searchParams] = useSearchParams();
   const account = useActiveAccount();
@@ -73,6 +85,35 @@ export default function Airdrop() {
     totalAllocation: 0,
     claimed: false
   });
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [airdropStarted, setAirdropStarted] = useState(false);
+
+  // Countdown timer
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date();
+      const difference = AIRDROP_START_TIME.getTime() - now.getTime();
+
+      if (difference <= 0) {
+        setAirdropStarted(true);
+        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+      }
+
+      return {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / (1000 * 60)) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+      };
+    };
+
+    setTimeLeft(calculateTimeLeft());
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
   
 
 
@@ -258,6 +299,70 @@ export default function Airdrop() {
             310 Million SENT tokens for the Africa Railways community
           </p>
         </div>
+
+        {/* Countdown Timer */}
+        {!airdropStarted ? (
+          <Card className="mb-8 bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-purple-500/50">
+            <CardContent className="pt-6">
+              <h2 className="text-lg text-center text-purple-300 mb-4 font-semibold">
+                Airdrop Claims Start In
+              </h2>
+              <div className="grid grid-cols-4 gap-2 md:gap-4 max-w-md mx-auto">
+                <div className="text-center">
+                  <div className="bg-gray-900/80 rounded-lg p-3 border border-purple-500/30">
+                    <span className="text-2xl md:text-3xl font-bold text-white font-mono">
+                      {timeLeft.days.toString().padStart(2, "0")}
+                    </span>
+                  </div>
+                  <p className="text-purple-300 text-xs mt-1">Days</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-gray-900/80 rounded-lg p-3 border border-purple-500/30">
+                    <span className="text-2xl md:text-3xl font-bold text-white font-mono">
+                      {timeLeft.hours.toString().padStart(2, "0")}
+                    </span>
+                  </div>
+                  <p className="text-purple-300 text-xs mt-1">Hours</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-gray-900/80 rounded-lg p-3 border border-purple-500/30">
+                    <span className="text-2xl md:text-3xl font-bold text-white font-mono">
+                      {timeLeft.minutes.toString().padStart(2, "0")}
+                    </span>
+                  </div>
+                  <p className="text-purple-300 text-xs mt-1">Minutes</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-gray-900/80 rounded-lg p-3 border border-purple-500/30">
+                    <span className="text-2xl md:text-3xl font-bold text-white font-mono">
+                      {timeLeft.seconds.toString().padStart(2, "0")}
+                    </span>
+                  </div>
+                  <p className="text-purple-300 text-xs mt-1">Seconds</p>
+                </div>
+              </div>
+              <p className="text-center text-gray-400 mt-4 text-sm">
+                Friday, January 23rd, 2026 at 8:00 AM UTC
+              </p>
+              <p className="text-center text-purple-400 mt-2 text-xs">
+                Complete tasks now to be ready when claims open!
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="mb-8 bg-gradient-to-r from-green-900/50 to-emerald-900/50 border-green-500/50">
+            <CardContent className="pt-6 pb-6">
+              <div className="flex items-center justify-center gap-3">
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
+                <h2 className="text-xl font-bold text-green-400">Airdrop is LIVE!</h2>
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
+              </div>
+              <p className="text-center text-green-300 mt-2">
+                Claim your 100 $SENT tokens now
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Pool Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
