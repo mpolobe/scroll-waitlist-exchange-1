@@ -40,7 +40,13 @@ export default async function handler(req: any, res: any) {
     return res.status(403).json({ error: "Unauthorized" });
   }
 
-  // 2. Sign the "Permission Slip"
+  // 2. Mark as claimed before signing (prevents double-claim)
+  await supabase
+    .from("airdrop_status")
+    .update({ claimed: true })
+    .eq("wallet_address", address.toLowerCase());
+
+  // 3. Sign the "Permission Slip"
   const adminAccount = privateKeyToAccount({ 
     client, 
     privateKey: process.env.ADMIN_PRIVATE_KEY! 
