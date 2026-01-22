@@ -30,21 +30,25 @@ export { polygon };
 export const SENT_CONTRACT_ADDRESS = "0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5";
 export const AIRDROP_CONTRACT_ADDRESS = "0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf";
 
+// Pre-instantiated contract objects for direct import
+export const sentContract = twGetContract({
+  client,
+  chain: polygon,
+  address: SENT_CONTRACT_ADDRESS,
+});
+
+export const airdropContract = twGetContract({
+  client,
+  chain: polygon,
+  address: AIRDROP_CONTRACT_ADDRESS,
+});
+
 /**
  * Get a contract instance by address. This does not require the contract
  * to be imported in the thirdweb dashboard — just provide the address.
  */
-export async function getContractByAddress(address: string, chain = polygon) {
+export function getContractByAddress(address: string, chain = polygon) {
   return twGetContract({ client, chain, address });
-}
-
-/** Convenience helpers for known contracts */
-export function getSentContract() {
-  return getContractByAddress(SENT_CONTRACT_ADDRESS, polygon);
-}
-
-export function getAirdropContract() {
-  return getContractByAddress(AIRDROP_CONTRACT_ADDRESS, polygon);
 }
 
 export default client;
