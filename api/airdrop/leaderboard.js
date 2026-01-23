@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     // Query the referral_leaderboard view
     const { data, error } = await supabase
       .from("referral_leaderboard")
-      .select("referrer_wallet, total_referrals")
+      .select("referrer_wallet, referral_count, verified_count")
       .limit(limit);
 
     if (error) {
