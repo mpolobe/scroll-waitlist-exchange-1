@@ -6,6 +6,9 @@ on:
     - cron: '0 9 * * *'
     # Evening reminder at 6 PM UTC
     - cron: '0 18 * * *'
+  push:
+    paths:
+      - '.github/workflows/telegram-scheduled-posts.yml'
   workflow_dispatch:
     inputs:
       message_type:
@@ -33,6 +36,8 @@ env:
 jobs:
   post-to-telegram:
     runs-on: ubuntu-latest
+    # Skip actual posting on push events (just validate workflow syntax)
+    if: github.event_name != 'push'
     steps:
       - name: Determine message content
         id: message
