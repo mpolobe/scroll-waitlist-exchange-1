@@ -16,7 +16,6 @@ import {
   ArrowRight,
   RotateCcw
 } from "lucide-react";
-import { submitQuizScore } from "@/services/airdropService";
 
 // Quiz Questions about Africa Railways
 const QUIZ_QUESTIONS = [
@@ -120,9 +119,17 @@ export function AfricaRailwaysQuiz({ walletAddress, onComplete }: AfricaRailways
     const percentage = (correct / QUIZ_QUESTIONS.length) * 100;
     setScore(finalScore);
     
-    // Submit to Supabase - only 5/5 (100%) qualifies for Quiz Pool
+    // Submit to API - only 5/5 (100%) qualifies for Quiz Pool
     try {
-      await submitQuizScore(walletAddress, percentage);
+      const response = await fetch("/api/airdrop/submit-quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ walletAddress, score: percentage })
+      });
+      const result = await response.json();
+      if (!result.success) {
+        console.error("Failed to submit quiz score:", result.error);
+      }
     } catch (err) {
       console.error("Failed to submit quiz score:", err);
     }
