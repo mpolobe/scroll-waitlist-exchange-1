@@ -3,6 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import AppLayout from '@/components/AppLayout';
 import { Loader2 } from 'lucide-react';
+import MarketingHero from '@/components/MarketingHero';
+import IDOProgressBanner, { TrustBadges } from '@/components/IDOProgressBanner';
+import TokenomicsPreview from '@/components/TokenomicsPreview';
+import AfricoinFeatures from '@/components/AfricoinFeatures';
+import RailwayIntegrationSection from '@/components/RailwayIntegrationSection';
+import RoadmapTimeline from '@/components/RoadmapTimeline';
+import TrustIndicators from '@/components/TrustIndicators';
+import FAQSection from '@/components/FAQSection';
+import MarketingCTA from '@/components/MarketingCTA';
 
 const Index: React.FC = () => {
   const navigate = useNavigate();
@@ -40,7 +49,20 @@ const Index: React.FC = () => {
     );
   }
 
-  return <AppLayout />;
+  return (
+    <AppLayout>
+      <IDOProgressBanner />
+      <MarketingHero />
+      <TrustBadges />
+      <TokenomicsPreview />
+      <AfricoinFeatures />
+      <RailwayIntegrationSection />
+      <RoadmapTimeline />
+      <TrustIndicators />
+      <FAQSection />
+      <MarketingCTA />
+    </AppLayout>
+  );
 };
 
 export default Index;
