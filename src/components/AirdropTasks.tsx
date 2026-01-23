@@ -122,12 +122,12 @@ export function AirdropTasks({ walletAddress, onAllTasksComplete }: AirdropTasks
   const earnedPoints = tasks.filter(t => t.completed).reduce((sum, t) => sum + t.points, 0);
   const progress = (completedTasks / tasks.length) * 100;
 
-  const handleTaskAction = async (taskId: string) => {
+  const handleTaskAction = async (taskId: string, skipLink = false) => {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
 
-    // Open external link if available
-    if (task.link) {
+    // Open external link if available (unless skipping for "already done")
+    if (task.link && !skipLink) {
       window.open(task.link, "_blank");
     }
 
@@ -221,15 +221,27 @@ export function AirdropTasks({ walletAddress, onAllTasksComplete }: AirdropTasks
               {task.completed ? (
                 <CheckCircle className="h-5 w-5 text-green-600" />
               ) : (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleTaskAction(task.id)}
-                  className="h-7 text-xs"
-                >
-                  {task.action}
-                  {task.link && <ExternalLink className="ml-1 h-3 w-3" />}
-                </Button>
+                <div className="flex gap-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleTaskAction(task.id, false)}
+                    className="h-7 text-xs"
+                  >
+                    {task.action}
+                    {task.link && <ExternalLink className="ml-1 h-3 w-3" />}
+                  </Button>
+                  {(task.id === "twitter_follow" || task.id === "telegram_join") && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleTaskAction(task.id, true)}
+                      className="h-7 text-xs text-green-600 hover:text-green-700 hover:bg-green-50"
+                    >
+                      <CheckCircle className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
           </div>

@@ -34,12 +34,16 @@ function TaskItem({
   label, 
   completed, 
   icon,
-  onClick 
+  onClick,
+  onAlreadyDone,
+  alreadyDoneLabel = "Already Done"
 }: { 
   label: string; 
   completed: boolean; 
   icon: React.ReactNode;
   onClick?: () => void;
+  onAlreadyDone?: () => void;
+  alreadyDoneLabel?: string;
 }) {
   return (
     <div className={`flex items-center gap-3 p-4 rounded-lg border transition-all ${
@@ -56,11 +60,21 @@ function TaskItem({
           {label}
         </span>
       </div>
-      {!completed && onClick && (
-        <Button size="sm" variant="outline" onClick={onClick}>
-          Start
-          <ExternalLink className="ml-1 h-3 w-3" />
-        </Button>
+      {!completed && (
+        <div className="flex gap-2">
+          {onClick && (
+            <Button size="sm" variant="outline" onClick={onClick}>
+              Start
+              <ExternalLink className="ml-1 h-3 w-3" />
+            </Button>
+          )}
+          {onAlreadyDone && (
+            <Button size="sm" variant="ghost" onClick={onAlreadyDone} className="text-green-600 hover:text-green-700 hover:bg-green-50">
+              <CheckCircle className="mr-1 h-3 w-3" />
+              {alreadyDoneLabel}
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );
@@ -143,16 +157,20 @@ export function AirdropChecklist() {
   }, [tasks, referralCount]);
 
   // Task handlers
-  const handleTwitter = async () => {
-    window.open("https://x.com/africoin_afc", "_blank");
+  const handleTwitter = async (alreadyFollowing = false) => {
+    if (!alreadyFollowing) {
+      window.open("https://x.com/africoin_afc", "_blank");
+    }
     if (account?.address) {
       await verifyTwitter(account.address);
       setTasks(prev => ({ ...prev, twitter: true }));
     }
   };
 
-  const handleTelegram = async () => {
-    window.open("https://t.me/afrcsentinel", "_blank");
+  const handleTelegram = async (alreadyJoined = false) => {
+    if (!alreadyJoined) {
+      window.open("https://t.me/afrcsentinel", "_blank");
+    }
     if (account?.address) {
       await verifyTelegram(account.address);
       setTasks(prev => ({ ...prev, telegram: true }));
@@ -241,16 +259,20 @@ export function AirdropChecklist() {
       {/* Task Checklist */}
       <div className="space-y-3 my-6">
         <TaskItem 
-          label="Follow Twitter & Retweet" 
+          label="Follow @africoin_afc on Twitter" 
           completed={tasks.twitter}
           icon={<Twitter className="h-5 w-5 text-blue-400" />}
-          onClick={handleTwitter}
+          onClick={() => handleTwitter(false)}
+          onAlreadyDone={() => handleTwitter(true)}
+          alreadyDoneLabel="Already Following"
         />
         <TaskItem 
-          label="Join Telegram Group" 
+          label="Join @afrcsentinel on Telegram" 
           completed={tasks.telegram}
           icon={<Send className="h-5 w-5 text-blue-500" />}
-          onClick={handleTelegram}
+          onClick={() => handleTelegram(false)}
+          onAlreadyDone={() => handleTelegram(true)}
+          alreadyDoneLabel="Already Joined"
         />
         <TaskItem 
           label={`Africa Railways Quiz ${quizScore > 0 ? `(${quizScore}%)` : ""}`}

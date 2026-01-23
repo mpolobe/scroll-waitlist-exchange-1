@@ -226,12 +226,10 @@ export default function Airdrop() {
     }
   };
 
-  // Verify Twitter
+  // Verify Twitter - opens link and verifies
   const handleTwitterVerify = async () => {
-    // Open Twitter follow link
     window.open("https://x.com/africoin_afc", "_blank");
     
-    // Mark as verified after delay (in production, use Twitter API)
     setTimeout(async () => {
       await verifyTwitter(walletAddress);
       setProgress(prev => ({ ...prev, twitterVerified: true }));
@@ -239,17 +237,29 @@ export default function Airdrop() {
     }, 3000);
   };
 
-  // Verify Telegram
+  // Already following Twitter - direct verification
+  const handleTwitterAlreadyFollowing = async () => {
+    await verifyTwitter(walletAddress);
+    setProgress(prev => ({ ...prev, twitterVerified: true }));
+    toast({ title: "Twitter Verified!", description: "+50 SENT unlocked" });
+  };
+
+  // Verify Telegram - opens link and verifies
   const handleTelegramVerify = async () => {
-    // Open Telegram join link
     window.open("https://t.me/afrcsentinel", "_blank");
     
-    // Mark as verified after delay (in production, use Telegram Bot API)
     setTimeout(async () => {
       await verifyTelegram(walletAddress);
       setProgress(prev => ({ ...prev, telegramVerified: true }));
       toast({ title: "Telegram Verified!", description: "+50 SENT unlocked" });
     }, 3000);
+  };
+
+  // Already joined Telegram - direct verification
+  const handleTelegramAlreadyJoined = async () => {
+    await verifyTelegram(walletAddress);
+    setProgress(prev => ({ ...prev, telegramVerified: true }));
+    toast({ title: "Telegram Verified!", description: "+50 SENT unlocked" });
   };
 
   // Quiz completion handler
@@ -510,17 +520,23 @@ export default function Airdrop() {
                         <Twitter className={`h-5 w-5 ${progress.twitterVerified ? 'text-green-600' : 'text-blue-500'}`} />
                       </div>
                       <div>
-                        <h3 className="font-medium">Follow on Twitter</h3>
+                        <h3 className="font-medium">Follow @africoin_afc on Twitter</h3>
                         <p className="text-sm text-muted-foreground">+50 SENT</p>
                       </div>
                     </div>
                     {progress.twitterVerified ? (
                       <CheckCircle className="h-6 w-6 text-green-500" />
                     ) : (
-                      <Button onClick={handleTwitterVerify} variant="outline">
-                        <ExternalLink className="mr-2 h-4 w-4" />
-                        Follow
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button onClick={handleTwitterVerify} variant="outline" size="sm">
+                          <ExternalLink className="mr-1 h-3 w-3" />
+                          Follow
+                        </Button>
+                        <Button onClick={handleTwitterAlreadyFollowing} variant="ghost" size="sm" className="text-green-600 hover:text-green-700 hover:bg-green-50">
+                          <CheckCircle className="mr-1 h-3 w-3" />
+                          Already Following
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </CardContent>
@@ -535,17 +551,23 @@ export default function Airdrop() {
                         <Send className={`h-5 w-5 ${progress.telegramVerified ? 'text-green-600' : 'text-blue-500'}`} />
                       </div>
                       <div>
-                        <h3 className="font-medium">Join Telegram</h3>
+                        <h3 className="font-medium">Join @afrcsentinel on Telegram</h3>
                         <p className="text-sm text-muted-foreground">+50 SENT</p>
                       </div>
                     </div>
                     {progress.telegramVerified ? (
                       <CheckCircle className="h-6 w-6 text-green-500" />
                     ) : (
-                      <Button onClick={handleTelegramVerify} variant="outline">
-                        <ExternalLink className="mr-2 h-4 w-4" />
-                        Join
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button onClick={handleTelegramVerify} variant="outline" size="sm">
+                          <ExternalLink className="mr-1 h-3 w-3" />
+                          Join
+                        </Button>
+                        <Button onClick={handleTelegramAlreadyJoined} variant="ghost" size="sm" className="text-green-600 hover:text-green-700 hover:bg-green-50">
+                          <CheckCircle className="mr-1 h-3 w-3" />
+                          Already Joined
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </CardContent>
