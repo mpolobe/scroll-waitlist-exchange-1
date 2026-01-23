@@ -80,6 +80,8 @@ export default async function handler(req, res) {
       .eq("wallet_address", normalizedWallet)
       .single();
 
+    console.log("Status check:", { existingStatus, statusCheckError: statusCheckError?.message });
+
     // If airdrop_status table exists and wallet is found
     if (existingStatus) {
       return res.status(409).json({
@@ -91,11 +93,13 @@ export default async function handler(req, res) {
     }
 
     // Also check legacy airdrop_referrals table
-    const { data: existingReferral } = await db
+    const { data: existingReferral, error: referralCheckError } = await db
       .from("airdrop_referrals")
       .select("id, created_at")
       .eq("user_wallet", normalizedWallet)
       .single();
+
+    console.log("Referral check:", { existingReferral, referralCheckError: referralCheckError?.message });
 
     if (existingReferral) {
       // Migrate to airdrop_status if not already there
@@ -206,7 +210,8 @@ export default async function handler(req, res) {
       return res.status(500).json({ 
         success: false, 
         error: "Failed to register wallet",
-        details: error.message
+        details: error.message,
+        code: error.code
       });
     }
 
