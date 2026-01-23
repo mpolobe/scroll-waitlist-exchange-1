@@ -7,16 +7,15 @@ import { supabase } from '@/lib/supabase';
 
 export interface AirdropStatus {
   wallet_address: string;
+  referrer_wallet: string | null;
+  twitter_verified: boolean;
+  telegram_verified: boolean;
   quiz_score: number;
-  tasks_completed: boolean;
-  signature_issued: boolean;
+  referral_count: number;
+  total_allocation: number;
   claimed: boolean;
   claimed_at: string | null;
-  // Computed fields for compatibility
-  twitter_verified?: boolean;
-  telegram_verified?: boolean;
-  referral_count?: number;
-  total_allocation?: number;
+  created_at: string;
 }
 
 /**
@@ -26,13 +25,19 @@ export async function registerWallet(
   walletAddress: string,
   referrerWallet?: string
 ): Promise<{ success: boolean; error?: string }> {
+  const normalizedWallet = walletAddress.toLowerCase();
+  const normalizedReferrer = referrerWallet ? referrerWallet.toLowerCase() : null;
+
   const { error } = await supabase
     .from('airdrop_status')
     .insert([{ 
-      wallet_address: walletAddress.toLowerCase(),
+      wallet_address: normalizedWallet,
+      referrer_wallet: normalizedReferrer,
+      twitter_verified: false,
+      telegram_verified: false,
       quiz_score: 0,
-      tasks_completed: false,
-      signature_issued: false,
+      referral_count: 0,
+      total_allocation: 0,
       claimed: false,
     }]);
 
@@ -41,6 +46,22 @@ export async function registerWallet(
       return { success: false, error: 'Wallet already registered' };
     }
     return { success: false, error: error.message };
+  }
+
+  // Increment referrer's count if provided
+  if (normalizedReferrer) {
+    const { data: refData } = await supabase
+      .from('airdrop_status')
+      .select('referral_count')
+      .eq('wallet_address', normalizedReferrer)
+      .single();
+    
+    if (refData) {
+      await supabase
+        .from('airdrop_status')
+        .update({ referral_count: (refData.referral_count || 0) + 1 })
+        .eq('wallet_address', normalizedReferrer);
+    }
   }
 
   return { success: true };
@@ -61,35 +82,28 @@ export async function getAirdropStatus(walletAddress: string): Promise<AirdropSt
     return null;
   }
 
-  // Map tasks_completed to twitter/telegram verified for compatibility
-  return {
-    ...data,
-    twitter_verified: data.tasks_completed,
-    telegram_verified: data.tasks_completed,
-    referral_count: 0,
-    total_allocation: data.quiz_score || 0,
-  };
+  return data;
 }
 
 /**
- * Verify Twitter follow (marks tasks_completed)
+ * Verify Twitter follow (optional bonus task)
  */
 export async function verifyTwitter(walletAddress: string): Promise<{ success: boolean }> {
   const { error } = await supabase
     .from('airdrop_status')
-    .update({ tasks_completed: true })
+    .update({ twitter_verified: true })
     .eq('wallet_address', walletAddress.toLowerCase());
 
   return { success: !error };
 }
 
 /**
- * Verify Telegram join (marks tasks_completed)
+ * Verify Telegram join (optional bonus task)
  */
 export async function verifyTelegram(walletAddress: string): Promise<{ success: boolean }> {
   const { error } = await supabase
     .from('airdrop_status')
-    .update({ tasks_completed: true })
+    .update({ telegram_verified: true })
     .eq('wallet_address', walletAddress.toLowerCase());
 
   return { success: !error };
@@ -97,7 +111,6 @@ export async function verifyTelegram(walletAddress: string): Promise<{ success: 
 
 /**
  * Submit quiz score
- * Uses upsert to create record if it doesn't exist
  */
 export async function submitQuizScore(
   walletAddress: string, 
@@ -105,48 +118,58 @@ export async function submitQuizScore(
 ): Promise<{ success: boolean }> {
   const { error } = await supabase
     .from('airdrop_status')
-    .upsert({ 
-      wallet_address: walletAddress.toLowerCase(), 
-      quiz_score: score,
-      tasks_completed: false,
-      signature_issued: false,
-      claimed: false,
-    }, { onConflict: 'wallet_address' });
+    .update({ quiz_score: score })
+    .eq('wallet_address', walletAddress.toLowerCase());
 
   return { success: !error };
 }
 
 /**
- * Calculate total allocation based on completed tasks
+ * Calculate and update total allocation based on completed tasks
  */
 export async function calculateAllocation(walletAddress: string): Promise<number> {
   const status = await getAirdropStatus(walletAddress);
   if (!status) return 0;
 
-  let allocation = 0;
+  let allocation = 100; // Base allocation for all registered workers
 
-  // Base allocation for social tasks (100M pool)
-  if (status.tasks_completed) {
-    allocation += 100; // Base SENT for completing social tasks
+  // Bonus for social tasks (optional)
+  if (status.twitter_verified) {
+    allocation += 50;
+  }
+  if (status.telegram_verified) {
+    allocation += 50;
   }
 
-  // Quiz bonus (10M pool)
+  // Referral bonus - 25 SENT per referral
+  if (status.referral_count > 0) {
+    allocation += 25 * status.referral_count;
+  }
+
+  // Quiz bonus
   if (status.quiz_score > 0) {
-    allocation += status.quiz_score; // Score = bonus SENT
+    allocation += status.quiz_score;
   }
+
+  // Update allocation in database
+  await supabase
+    .from('airdrop_status')
+    .update({ total_allocation: allocation })
+    .eq('wallet_address', walletAddress.toLowerCase());
 
   return allocation;
 }
 
 /**
  * Check if wallet is eligible to claim
+ * Sentinels/workers can claim without social tasks - just need to be registered
  */
 export async function isEligibleToClaim(walletAddress: string): Promise<boolean> {
   const status = await getAirdropStatus(walletAddress);
   if (!status) return false;
 
-  // Must have tasks completed
-  return status.tasks_completed && !status.claimed;
+  // Registered wallets can claim - social tasks are optional bonus
+  return !status.claimed;
 }
 
 /**
