@@ -8,8 +8,10 @@ let supabase = null;
 
 function getSupabase() {
   if (!supabase) {
-    const url = process.env.SUPABASE_URL || "https://llvprbmrnjvamjzavmhg.supabase.co";
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "https://llvprbmrnjvamjzavmhg.supabase.co";
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+    
+    console.log("Supabase config:", { url, hasKey: !!key, keyPrefix: key?.substring(0, 20) });
     
     if (!key) {
       throw new Error("Supabase credentials not configured");
