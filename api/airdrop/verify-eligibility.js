@@ -6,10 +6,14 @@ import { createClient } from "@supabase/supabase-js";
 let supabase = null;
 function getSupabase() {
   if (!supabase) {
-    supabase = createClient(
-      process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
-    );
+    const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "https://llvprbmrnjvamjzavmhg.supabase.co";
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+    
+    if (!key) {
+      throw new Error("Supabase credentials not configured");
+    }
+    
+    supabase = createClient(url, key);
   }
   return supabase;
 }
