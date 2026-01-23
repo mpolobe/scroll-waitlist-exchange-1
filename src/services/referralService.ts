@@ -288,7 +288,7 @@ export default {
   logReferral,
   getLeaderboard,
   getReferralCount,
-  getVerifiedReferralCount,
+  getTaskCompletedCount,
   hasBeenReferred,
   setActiveReferrer,
   getActiveReferrer,

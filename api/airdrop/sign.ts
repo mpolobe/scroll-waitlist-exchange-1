@@ -55,7 +55,7 @@ export default async function handler(req: any, res: any) {
   // SENT token address on Polygon
   const SENT_TOKEN = "0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5";
   
-  const { req, signature } = await generateAirdropSignatureERC20({
+  const { req: airdropReq, signature } = await generateAirdropSignatureERC20({
     account: adminAccount,
     contract: airdropContract,
     airdropRequest: {
@@ -67,5 +67,5 @@ export default async function handler(req: any, res: any) {
     }
   });
 
-  return res.status(200).json({ req, signature });
+  return res.status(200).json({ req: airdropReq, signature });
 }
