@@ -158,7 +158,12 @@ export function AirdropChecklist() {
 
   // Task handlers
   const handleTwitter = async (alreadyFollowing = false) => {
-    if (!alreadyFollowing) {
+    if (alreadyFollowing) {
+      const confirmed = window.confirm(
+        "By confirming, you declare that you are following @africoin_afc on Twitter.\n\nFalse claims may result in disqualification from the airdrop."
+      );
+      if (!confirmed) return;
+    } else {
       window.open("https://x.com/africoin_afc", "_blank");
     }
     if (account?.address) {
@@ -168,7 +173,12 @@ export function AirdropChecklist() {
   };
 
   const handleTelegram = async (alreadyJoined = false) => {
-    if (!alreadyJoined) {
+    if (alreadyJoined) {
+      const confirmed = window.confirm(
+        "By confirming, you declare that you have joined @afrcsentinel on Telegram.\n\nFalse claims may result in disqualification from the airdrop."
+      );
+      if (!confirmed) return;
+    } else {
       window.open("https://t.me/afrcsentinel", "_blank");
     }
     if (account?.address) {

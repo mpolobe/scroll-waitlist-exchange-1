@@ -237,8 +237,13 @@ export default function Airdrop() {
     }, 3000);
   };
 
-  // Already following Twitter - direct verification
+  // Already following Twitter - direct verification with confirmation
   const handleTwitterAlreadyFollowing = async () => {
+    const confirmed = window.confirm(
+      "By confirming, you declare that you are following @africoin_afc on Twitter.\n\nFalse claims may result in disqualification from the airdrop."
+    );
+    if (!confirmed) return;
+    
     await verifyTwitter(walletAddress);
     setProgress(prev => ({ ...prev, twitterVerified: true }));
     toast({ title: "Twitter Verified!", description: "+50 SENT unlocked" });
@@ -255,8 +260,13 @@ export default function Airdrop() {
     }, 3000);
   };
 
-  // Already joined Telegram - direct verification
+  // Already joined Telegram - direct verification with confirmation
   const handleTelegramAlreadyJoined = async () => {
+    const confirmed = window.confirm(
+      "By confirming, you declare that you have joined @afrcsentinel on Telegram.\n\nFalse claims may result in disqualification from the airdrop."
+    );
+    if (!confirmed) return;
+    
     await verifyTelegram(walletAddress);
     setProgress(prev => ({ ...prev, telegramVerified: true }));
     toast({ title: "Telegram Verified!", description: "+50 SENT unlocked" });

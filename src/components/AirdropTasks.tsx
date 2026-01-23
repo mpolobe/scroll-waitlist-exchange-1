@@ -126,6 +126,15 @@ export function AirdropTasks({ walletAddress, onAllTasksComplete }: AirdropTasks
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
 
+    // Honor system confirmation for "already following" claims
+    if (skipLink && (taskId === "twitter_follow" || taskId === "telegram_join")) {
+      const platform = taskId === "twitter_follow" ? "@africoin_afc on Twitter" : "@afrcsentinel on Telegram";
+      const confirmed = window.confirm(
+        `By confirming, you declare that you are following ${platform}.\n\nFalse claims may result in disqualification from the airdrop.`
+      );
+      if (!confirmed) return;
+    }
+
     // Open external link if available (unless skipping for "already done")
     if (task.link && !skipLink) {
       window.open(task.link, "_blank");
