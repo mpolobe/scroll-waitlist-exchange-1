@@ -26,10 +26,12 @@ export default async function handler(req, res) {
   const limit = Math.min(parseInt(req.query.limit) || 5, 100);
 
   try {
-    // Query the referral_leaderboard view
+    // Query airdrop_status for referral leaderboard
     const { data, error } = await supabase
-      .from("referral_leaderboard")
-      .select("referrer_wallet, referral_count, verified_count")
+      .from("airdrop_status")
+      .select("wallet_address, referral_count")
+      .gt("referral_count", 0)
+      .order("referral_count", { ascending: false })
       .limit(limit);
 
     if (error) {
