@@ -141,12 +141,9 @@ export default async function handler(req, res) {
         .upsert([
           {
             wallet_address: normalizedWallet,
-            referrer_wallet: normalizedReferrer,
-            twitter_verified: false,
-            telegram_verified: false,
             quiz_score: 0,
-            referral_count: 0,
-            total_allocation: 0,
+            tasks_completed: false,
+            signature_issued: false,
             claimed: false,
           },
         ], { onConflict: "wallet_address" });
@@ -164,17 +161,15 @@ export default async function handler(req, res) {
     }
 
     // Register wallet in airdrop_status table
+    // Using only columns that exist in the current schema
     const { data, error } = await db
       .from("airdrop_status")
       .insert([
         {
           wallet_address: normalizedWallet,
-          referrer_wallet: normalizedReferrer,
-          twitter_verified: false,
-          telegram_verified: false,
           quiz_score: 0,
-          referral_count: 0,
-          total_allocation: 0,
+          tasks_completed: false,
+          signature_issued: false,
           claimed: false,
         },
       ])
@@ -200,7 +195,7 @@ export default async function handler(req, res) {
           .insert([
             {
               user_wallet: normalizedWallet,
-              referrer_wallet: normalizedReferrer,
+              referrer_wallet: normalizedReferrer || null,
             },
           ])
           .select()
@@ -248,25 +243,8 @@ export default async function handler(req, res) {
       });
     }
 
-    // Increment referrer's count if provided
-    if (normalizedReferrer) {
-      // Use RPC function if available for atomic increment
-      await db.rpc("increment_referral_count", { referrer: normalizedReferrer }).catch(async () => {
-        // Fallback: manual increment if RPC not available
-        const { data: refData } = await db
-          .from("airdrop_status")
-          .select("referral_count")
-          .eq("wallet_address", normalizedReferrer)
-          .single();
-        
-        if (refData) {
-          await db
-            .from("airdrop_status")
-            .update({ referral_count: (refData.referral_count || 0) + 1 })
-            .eq("wallet_address", normalizedReferrer);
-        }
-      });
-    }
+    // Note: referral tracking skipped - column doesn't exist in current schema
+    // To enable referrals, add referrer_wallet and referral_count columns to airdrop_status
 
     // Get current registration count
     const { count } = await db

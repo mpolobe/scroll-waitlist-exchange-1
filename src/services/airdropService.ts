@@ -7,12 +7,16 @@ import { supabase } from '@/lib/supabase';
 
 export interface AirdropStatus {
   wallet_address: string;
-  twitter_verified: boolean;
-  telegram_verified: boolean;
   quiz_score: number;
-  referral_count: number;
-  total_allocation: number;
+  tasks_completed: boolean;
+  signature_issued: boolean;
   claimed: boolean;
+  claimed_at: string | null;
+  // Computed fields for compatibility
+  twitter_verified?: boolean;
+  telegram_verified?: boolean;
+  referral_count?: number;
+  total_allocation?: number;
 }
 
 /**
@@ -24,20 +28,19 @@ export async function registerWallet(
 ): Promise<{ success: boolean; error?: string }> {
   const { error } = await supabase
     .from('airdrop_status')
-    .insert([{ wallet_address: walletAddress.toLowerCase() }]);
+    .insert([{ 
+      wallet_address: walletAddress.toLowerCase(),
+      quiz_score: 0,
+      tasks_completed: false,
+      signature_issued: false,
+      claimed: false,
+    }]);
 
   if (error) {
     if (error.code === '23505') {
       return { success: false, error: 'Wallet already registered' };
     }
     return { success: false, error: error.message };
-  }
-
-  // Increment referrer's count if provided
-  if (referrerWallet) {
-    await supabase.rpc('increment_referral', { 
-      referrer: referrerWallet.toLowerCase() 
-    });
   }
 
   return { success: true };
@@ -58,28 +61,35 @@ export async function getAirdropStatus(walletAddress: string): Promise<AirdropSt
     return null;
   }
 
-  return data;
+  // Map tasks_completed to twitter/telegram verified for compatibility
+  return {
+    ...data,
+    twitter_verified: data.tasks_completed,
+    telegram_verified: data.tasks_completed,
+    referral_count: 0,
+    total_allocation: data.quiz_score || 0,
+  };
 }
 
 /**
- * Verify Twitter follow
+ * Verify Twitter follow (marks tasks_completed)
  */
 export async function verifyTwitter(walletAddress: string): Promise<{ success: boolean }> {
   const { error } = await supabase
     .from('airdrop_status')
-    .update({ twitter_verified: true })
+    .update({ tasks_completed: true })
     .eq('wallet_address', walletAddress.toLowerCase());
 
   return { success: !error };
 }
 
 /**
- * Verify Telegram join
+ * Verify Telegram join (marks tasks_completed)
  */
 export async function verifyTelegram(walletAddress: string): Promise<{ success: boolean }> {
   const { error } = await supabase
     .from('airdrop_status')
-    .update({ telegram_verified: true })
+    .update({ tasks_completed: true })
     .eq('wallet_address', walletAddress.toLowerCase());
 
   return { success: !error };
@@ -97,14 +107,17 @@ export async function submitQuizScore(
     .from('airdrop_status')
     .upsert({ 
       wallet_address: walletAddress.toLowerCase(), 
-      quiz_score: score 
-    });
+      quiz_score: score,
+      tasks_completed: false,
+      signature_issued: false,
+      claimed: false,
+    }, { onConflict: 'wallet_address' });
 
   return { success: !error };
 }
 
 /**
- * Calculate and update total allocation based on completed tasks
+ * Calculate total allocation based on completed tasks
  */
 export async function calculateAllocation(walletAddress: string): Promise<number> {
   const status = await getAirdropStatus(walletAddress);
@@ -113,25 +126,14 @@ export async function calculateAllocation(walletAddress: string): Promise<number
   let allocation = 0;
 
   // Base allocation for social tasks (100M pool)
-  if (status.twitter_verified && status.telegram_verified) {
+  if (status.tasks_completed) {
     allocation += 100; // Base SENT for completing social tasks
   }
 
-  // Referral bonus (50M pool) - need 3+ referrals
-  if (status.referral_count >= 3) {
-    allocation += 50 * status.referral_count; // 50 SENT per referral
-  }
-
-  // Quiz bonus (10M pool) - Top 100 get extra
+  // Quiz bonus (10M pool)
   if (status.quiz_score > 0) {
     allocation += status.quiz_score; // Score = bonus SENT
   }
-
-  // Update allocation in database
-  await supabase
-    .from('airdrop_status')
-    .update({ total_allocation: allocation })
-    .eq('wallet_address', walletAddress.toLowerCase());
 
   return allocation;
 }
@@ -143,8 +145,8 @@ export async function isEligibleToClaim(walletAddress: string): Promise<boolean>
   const status = await getAirdropStatus(walletAddress);
   if (!status) return false;
 
-  // Must have Twitter AND Telegram verified
-  return status.twitter_verified && status.telegram_verified && !status.claimed;
+  // Must have tasks completed
+  return status.tasks_completed && !status.claimed;
 }
 
 /**
