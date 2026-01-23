@@ -1,19 +1,18 @@
 // Vercel Serverless Function: Verify worker airdrop eligibility
-// Uses THIRDWEB_SECRET_KEY (server-side only - never exposed to browser)
 
-import { createThirdwebClient } from "thirdweb";
 import { createClient } from "@supabase/supabase-js";
 
-// Initialize SECURE Thirdweb client (server-side only)
-const secureClient = createThirdwebClient({
-  secretKey: process.env.THIRDWEB_SECRET_KEY,
-});
-
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
-);
+// Initialize Supabase client lazily
+let supabase = null;
+function getSupabase() {
+  if (!supabase) {
+    supabase = createClient(
+      process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
+    );
+  }
+  return supabase;
+}
 
 export default async function handler(req, res) {
   // CORS headers
@@ -48,7 +47,7 @@ export default async function handler(req, res) {
 
   try {
     // Check if user has already claimed (Sybil protection)
-    const { data: existingClaim, error: checkError } = await supabase
+    const { data: existingClaim, error: checkError } = await getSupabase()
       .from("airdrop_status")
       .select("wallet_address, claimed, created_at")
       .eq("wallet_address", walletAddress.toLowerCase())
