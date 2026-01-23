@@ -1,36 +1,11 @@
-# Dependencies
+# Dependencies - main culprit for file count
 node_modules
 
-# Development files
-*.md
-!README.md
+# Git
 .git
+
+# GitHub workflows
 .github
-.gitignore
-.env*
-!.env.example
-
-# Build tools config
-vite.config.ts
-tsconfig*.json
-postcss.config.js
-tailwind.config.ts
-eslint.config.js
-components.json
-
-# Test files
-*.test.*
-*.spec.*
-__tests__
-coverage
-
-# Blockchain development
-blockchain
-hardhat.config.ts
-contracts
-
-# Scripts
-scripts
 
 # IDE
 .vscode
@@ -47,3 +22,17 @@ logs
 # Temporary
 *.tmp
 *.temp
+
+# Test files
+*.test.*
+*.spec.*
+__tests__
+coverage
+
+# Blockchain development (not needed for web build)
+blockchain
+contracts
+hardhat.config.ts
+
+# Scripts (deployment scripts not needed in build)
+scripts
