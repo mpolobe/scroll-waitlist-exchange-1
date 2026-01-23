@@ -117,10 +117,21 @@ export default async function handler(req, res) {
         });
       }
 
+      // Table doesn't exist - try to provide helpful error
+      if (error.code === "42P01" || error.message?.includes("does not exist")) {
+        console.error("Table airdrop_status does not exist:", error);
+        return res.status(500).json({ 
+          success: false, 
+          error: "Database table not configured. Please contact support.",
+          details: error.message
+        });
+      }
+
       console.error("Database error:", error);
       return res.status(500).json({ 
         success: false, 
-        error: "Failed to register wallet" 
+        error: "Failed to register wallet",
+        details: error.message
       });
     }
 
