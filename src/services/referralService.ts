@@ -3,17 +3,17 @@
  * - 50M SENT Referral Pool
  * - 100M SENT Social Tasks Pool
  * - 160M SENT Worker Pool
- * Tracks in Supabase airdrop_referrals table with Sybil protection
+ * Tracks in Supabase airdrop_status table with Sybil protection
  */
 
 import { supabase } from '@/lib/supabase';
 
 export interface AirdropReferral {
-  id: string;
+  wallet_address: string;
   created_at: string;
-  user_wallet: string;
-  referrer_wallet: string;
-  task_completed: boolean;
+  referrer_wallet: string | null;
+  twitter_verified: boolean;
+  telegram_verified: boolean;
   claimed: boolean;
   claimed_at: string | null;
   tx_hash: string | null;
@@ -27,7 +27,7 @@ export interface LeaderboardEntry {
 
 /**
  * Log a referral when user claims SENT tokens
- * Returns error if user already claimed (Sybil protection via unique user_wallet)
+ * Returns error if user already claimed (Sybil protection via unique wallet_address)
  */
 export async function logReferral(
   userWallet: string,
@@ -38,21 +38,67 @@ export async function logReferral(
     return { success: false, error: 'Cannot refer yourself' };
   }
 
-  const { error } = await supabase
-    .from('airdrop_referrals')
-    .insert([
-      {
-        user_wallet: userWallet.toLowerCase(),
-        referrer_wallet: referrerWallet ? referrerWallet.toLowerCase() : null,
-      },
-    ]);
+  const normalizedUser = userWallet.toLowerCase();
+  const normalizedReferrer = referrerWallet ? referrerWallet.toLowerCase() : null;
 
-  if (error) {
-    if (error.code === '23505') {
-      // Unique constraint violation on user_wallet
-      return { success: false, error: 'User already claimed referral bonus' };
+  // Check if user already exists
+  const { data: existing } = await supabase
+    .from('airdrop_status')
+    .select('wallet_address')
+    .eq('wallet_address', normalizedUser)
+    .single();
+
+  if (existing) {
+    // Update referrer if not already set
+    const { error } = await supabase
+      .from('airdrop_status')
+      .update({ referrer_wallet: normalizedReferrer })
+      .eq('wallet_address', normalizedUser)
+      .is('referrer_wallet', null);
+
+    if (error) {
+      return { success: false, error: error.message };
     }
-    return { success: false, error: error.message };
+  } else {
+    // Insert new record
+    const { error } = await supabase
+      .from('airdrop_status')
+      .insert([
+        {
+          wallet_address: normalizedUser,
+          referrer_wallet: normalizedReferrer,
+          twitter_verified: false,
+          telegram_verified: false,
+          quiz_score: 0,
+          referral_count: 0,
+          total_allocation: 0,
+          claimed: false,
+        },
+      ]);
+
+    if (error) {
+      if (error.code === '23505') {
+        // Unique constraint violation on wallet_address
+        return { success: false, error: 'User already claimed referral bonus' };
+      }
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Increment referrer's count if provided
+  if (normalizedReferrer) {
+    const { data: refData } = await supabase
+      .from('airdrop_status')
+      .select('referral_count')
+      .eq('wallet_address', normalizedReferrer)
+      .single();
+    
+    if (refData) {
+      await supabase
+        .from('airdrop_status')
+        .update({ referral_count: (refData.referral_count || 0) + 1 })
+        .eq('wallet_address', normalizedReferrer);
+    }
   }
 
   return { success: true };
@@ -66,23 +112,25 @@ export async function markAsClaimed(
   userWallet: string,
   txHash: string
 ): Promise<{ success: boolean; error?: string }> {
+  const normalizedWallet = userWallet.toLowerCase();
+  
   // First check if user exists
   const { data: existing } = await supabase
-    .from('airdrop_referrals')
-    .select('id')
-    .eq('user_wallet', userWallet.toLowerCase())
+    .from('airdrop_status')
+    .select('wallet_address')
+    .eq('wallet_address', normalizedWallet)
     .single();
 
   if (existing) {
     // Update existing record
     const { error } = await supabase
-      .from('airdrop_referrals')
+      .from('airdrop_status')
       .update({
         claimed: true,
         claimed_at: new Date().toISOString(),
         tx_hash: txHash,
       })
-      .eq('user_wallet', userWallet.toLowerCase());
+      .eq('wallet_address', normalizedWallet);
 
     if (error) {
       return { success: false, error: error.message };
@@ -90,11 +138,16 @@ export async function markAsClaimed(
   } else {
     // Insert new record with claimed status
     const { error } = await supabase
-      .from('airdrop_referrals')
+      .from('airdrop_status')
       .insert([
         {
-          user_wallet: userWallet.toLowerCase(),
+          wallet_address: normalizedWallet,
           referrer_wallet: getActiveReferrer()?.toLowerCase() || null,
+          twitter_verified: false,
+          telegram_verified: false,
+          quiz_score: 0,
+          referral_count: 0,
+          total_allocation: 0,
           claimed: true,
           claimed_at: new Date().toISOString(),
           tx_hash: txHash,
@@ -114,9 +167,9 @@ export async function markAsClaimed(
  */
 export async function hasClaimed(userWallet: string): Promise<boolean> {
   const { data, error } = await supabase
-    .from('airdrop_referrals')
+    .from('airdrop_status')
     .select('claimed')
-    .eq('user_wallet', userWallet.toLowerCase())
+    .eq('wallet_address', userWallet.toLowerCase())
     .single();
 
   if (error && error.code !== 'PGRST116') {
@@ -136,9 +189,9 @@ export async function getClaimStatus(userWallet: string): Promise<{
   txHash: string | null;
 }> {
   const { data, error } = await supabase
-    .from('airdrop_referrals')
+    .from('airdrop_status')
     .select('claimed, claimed_at, tx_hash')
-    .eq('user_wallet', userWallet.toLowerCase())
+    .eq('wallet_address', userWallet.toLowerCase())
     .single();
 
   if (error && error.code !== 'PGRST116') {
@@ -154,15 +207,15 @@ export async function getClaimStatus(userWallet: string): Promise<{
 }
 
 /**
- * Mark social task as completed for 100M SENT pool
+ * Mark social tasks as completed for 100M SENT pool
  */
 export async function markTaskCompleted(
   userWallet: string
 ): Promise<{ success: boolean; error?: string }> {
   const { error } = await supabase
-    .from('airdrop_referrals')
-    .update({ task_completed: true })
-    .eq('user_wallet', userWallet.toLowerCase());
+    .from('airdrop_status')
+    .update({ twitter_verified: true, telegram_verified: true })
+    .eq('wallet_address', userWallet.toLowerCase());
 
   if (error) {
     return { success: false, error: error.message };
@@ -179,7 +232,7 @@ export async function getLeaderboard(limit: number = 5): Promise<LeaderboardEntr
   // Query the pre-computed view for instant results
   const { data, error } = await supabase
     .from('referral_leaderboard')
-    .select('referrer_wallet, total_referrals')
+    .select('wallet_address, referral_count, qualified')
     .limit(limit);
 
   if (error) {
@@ -188,26 +241,29 @@ export async function getLeaderboard(limit: number = 5): Promise<LeaderboardEntr
   }
 
   // Get task completion counts separately
-  const wallets = (data || []).map(d => d.referrer_wallet);
+  const wallets = (data || []).map(d => d.wallet_address);
   
   if (wallets.length === 0) return [];
 
   const { data: taskData } = await supabase
-    .from('airdrop_referrals')
+    .from('airdrop_status')
     .select('referrer_wallet')
     .in('referrer_wallet', wallets)
-    .eq('task_completed', true);
+    .eq('twitter_verified', true)
+    .eq('telegram_verified', true);
 
   // Count tasks per referrer
   const taskCounts = (taskData || []).reduce((acc, row) => {
-    acc[row.referrer_wallet] = (acc[row.referrer_wallet] || 0) + 1;
+    if (row.referrer_wallet) {
+      acc[row.referrer_wallet] = (acc[row.referrer_wallet] || 0) + 1;
+    }
     return acc;
   }, {} as Record<string, number>);
 
   return (data || []).map(row => ({
-    referrer_wallet: row.referrer_wallet,
-    referral_count: row.total_referrals,
-    task_completed_count: taskCounts[row.referrer_wallet] || 0,
+    referrer_wallet: row.wallet_address,
+    referral_count: row.referral_count,
+    task_completed_count: taskCounts[row.wallet_address] || 0,
   }));
 }
 
@@ -215,17 +271,18 @@ export async function getLeaderboard(limit: number = 5): Promise<LeaderboardEntr
  * Get referral count for a specific wallet
  */
 export async function getReferralCount(walletAddress: string): Promise<number> {
-  const { count, error } = await supabase
-    .from('airdrop_referrals')
-    .select('*', { count: 'exact', head: true })
-    .eq('referrer_wallet', walletAddress.toLowerCase());
+  const { data, error } = await supabase
+    .from('airdrop_status')
+    .select('referral_count')
+    .eq('wallet_address', walletAddress.toLowerCase())
+    .single();
 
-  if (error) {
+  if (error && error.code !== 'PGRST116') {
     console.error('Failed to fetch referral count:', error.message);
     return 0;
   }
 
-  return count || 0;
+  return data?.referral_count || 0;
 }
 
 /**
@@ -233,10 +290,11 @@ export async function getReferralCount(walletAddress: string): Promise<number> {
  */
 export async function getTaskCompletedCount(walletAddress: string): Promise<number> {
   const { count, error } = await supabase
-    .from('airdrop_referrals')
+    .from('airdrop_status')
     .select('*', { count: 'exact', head: true })
     .eq('referrer_wallet', walletAddress.toLowerCase())
-    .eq('task_completed', true);
+    .eq('twitter_verified', true)
+    .eq('telegram_verified', true);
 
   if (error) {
     console.error('Failed to fetch task completed count:', error.message);
@@ -251,9 +309,9 @@ export async function getTaskCompletedCount(walletAddress: string): Promise<numb
  */
 export async function hasBeenReferred(userWallet: string): Promise<boolean> {
   const { data, error } = await supabase
-    .from('airdrop_referrals')
-    .select('id')
-    .eq('user_wallet', userWallet.toLowerCase())
+    .from('airdrop_status')
+    .select('wallet_address')
+    .eq('wallet_address', userWallet.toLowerCase())
     .single();
 
   if (error && error.code !== 'PGRST116') {

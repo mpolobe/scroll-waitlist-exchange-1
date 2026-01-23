@@ -49,9 +49,9 @@ export default async function handler(req, res) {
   try {
     // Check if user has already claimed (Sybil protection)
     const { data: existingClaim, error: checkError } = await supabase
-      .from("airdrop_referrals")
-      .select("id, created_at")
-      .eq("user_wallet", walletAddress.toLowerCase())
+      .from("airdrop_status")
+      .select("wallet_address, claimed, created_at")
+      .eq("wallet_address", walletAddress.toLowerCase())
       .single();
 
     if (checkError && checkError.code !== "PGRST116") {
@@ -62,7 +62,7 @@ export default async function handler(req, res) {
       });
     }
 
-    if (existingClaim) {
+    if (existingClaim && existingClaim.claimed) {
       return res.status(200).json({
         success: false,
         eligible: false,

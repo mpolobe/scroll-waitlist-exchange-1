@@ -56,41 +56,86 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Insert referral record
-    const { data, error } = await supabase
-      .from("airdrop_referrals")
-      .insert([
-        {
-          user_wallet: userWallet.toLowerCase(),
-          referrer_wallet: referrerWallet ? referrerWallet.toLowerCase() : null,
-        },
-      ])
-      .select()
+    const normalizedUser = userWallet.toLowerCase();
+    const normalizedReferrer = referrerWallet ? referrerWallet.toLowerCase() : null;
+
+    // Check if user already exists
+    const { data: existing } = await supabase
+      .from("airdrop_status")
+      .select("wallet_address")
+      .eq("wallet_address", normalizedUser)
       .single();
 
-    if (error) {
-      // Handle unique constraint violation (Sybil protection)
-      if (error.code === "23505") {
-        return res.status(409).json({
-          success: false,
-          error: "User has already claimed",
-          code: "ALREADY_CLAIMED",
+    if (existing) {
+      // Update referrer if not already set
+      const { error: updateError } = await supabase
+        .from("airdrop_status")
+        .update({ referrer_wallet: normalizedReferrer })
+        .eq("wallet_address", normalizedUser)
+        .is("referrer_wallet", null);
+
+      if (updateError) {
+        console.error("Update error:", updateError);
+      }
+    } else {
+      // Insert new record
+      const { error } = await supabase
+        .from("airdrop_status")
+        .insert([
+          {
+            wallet_address: normalizedUser,
+            referrer_wallet: normalizedReferrer,
+            twitter_verified: false,
+            telegram_verified: false,
+            quiz_score: 0,
+            referral_count: 0,
+            total_allocation: 0,
+            claimed: false,
+          },
+        ]);
+
+      if (error) {
+        // Handle unique constraint violation (Sybil protection)
+        if (error.code === "23505") {
+          return res.status(409).json({
+            success: false,
+            error: "User has already claimed",
+            code: "ALREADY_CLAIMED",
+          });
+        }
+
+        console.error("Database error:", error);
+        return res.status(500).json({ 
+          success: false, 
+          error: "Failed to log referral" 
         });
       }
+    }
 
-      console.error("Database error:", error);
-      return res.status(500).json({ 
-        success: false, 
-        error: "Failed to log referral" 
+    // Increment referrer's count if provided
+    if (normalizedReferrer) {
+      await supabase.rpc("increment_referral_count", { referrer: normalizedReferrer }).catch(async () => {
+        // Fallback: manual increment if RPC not available
+        const { data: refData } = await supabase
+          .from("airdrop_status")
+          .select("referral_count")
+          .eq("wallet_address", normalizedReferrer)
+          .single();
+        
+        if (refData) {
+          await supabase
+            .from("airdrop_status")
+            .update({ referral_count: (refData.referral_count || 0) + 1 })
+            .eq("wallet_address", normalizedReferrer);
+        }
       });
     }
 
     return res.status(200).json({
       success: true,
       message: "Referral logged successfully",
-      referralId: data.id,
       pools: {
-        referral: referrerWallet ? "50M SENT pool credited to referrer" : null,
+        referral: normalizedReferrer ? "50M SENT pool credited to referrer" : null,
         worker: "160M SENT pool - base allocation",
       },
     });

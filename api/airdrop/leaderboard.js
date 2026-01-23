@@ -40,15 +40,16 @@ export default async function handler(req, res) {
       });
     }
 
-    // Get total stats
+    // Get total stats from airdrop_status table
     const { count: totalClaims } = await supabase
-      .from("airdrop_referrals")
+      .from("airdrop_status")
       .select("*", { count: "exact", head: true });
 
     const { count: tasksCompleted } = await supabase
-      .from("airdrop_referrals")
+      .from("airdrop_status")
       .select("*", { count: "exact", head: true })
-      .eq("task_completed", true);
+      .eq("twitter_verified", true)
+      .eq("telegram_verified", true);
 
     return res.status(200).json({
       success: true,

@@ -70,12 +70,14 @@ export default async function handler(req, res) {
 
   try {
     const db = getSupabase();
+    const normalizedWallet = walletAddress.toLowerCase();
+    const normalizedReferrer = referrerWallet ? referrerWallet.toLowerCase() : null;
     
-    // Check if already registered (Sybil protection)
+    // Check if already registered in airdrop_status (primary table)
     const { data: existing } = await db
-      .from("airdrop_referrals")
-      .select("id, created_at")
-      .eq("user_wallet", walletAddress.toLowerCase())
+      .from("airdrop_status")
+      .select("wallet_address, created_at")
+      .eq("wallet_address", normalizedWallet)
       .single();
 
     if (existing) {
@@ -87,13 +89,19 @@ export default async function handler(req, res) {
       });
     }
 
-    // Register wallet for airdrop
+    // Register wallet in airdrop_status table
     const { data, error } = await db
-      .from("airdrop_referrals")
+      .from("airdrop_status")
       .insert([
         {
-          user_wallet: walletAddress.toLowerCase(),
-          referrer_wallet: referrerWallet ? referrerWallet.toLowerCase() : null,
+          wallet_address: normalizedWallet,
+          referrer_wallet: normalizedReferrer,
+          twitter_verified: false,
+          telegram_verified: false,
+          quiz_score: 0,
+          referral_count: 0,
+          total_allocation: 0,
+          claimed: false,
         },
       ])
       .select()
@@ -116,21 +124,44 @@ export default async function handler(req, res) {
       });
     }
 
+    // Increment referrer's count if provided
+    if (normalizedReferrer) {
+      await db
+        .from("airdrop_status")
+        .update({ referral_count: db.rpc ? undefined : 1 })
+        .eq("wallet_address", normalizedReferrer);
+      
+      // Use RPC function if available for atomic increment
+      await db.rpc("increment_referral_count", { referrer: normalizedReferrer }).catch(() => {
+        // Fallback: manual increment if RPC not available
+        db.from("airdrop_status")
+          .select("referral_count")
+          .eq("wallet_address", normalizedReferrer)
+          .single()
+          .then(({ data: refData }) => {
+            if (refData) {
+              db.from("airdrop_status")
+                .update({ referral_count: (refData.referral_count || 0) + 1 })
+                .eq("wallet_address", normalizedReferrer);
+            }
+          });
+      });
+    }
+
     // Get current registration count
     const { count } = await db
-      .from("airdrop_referrals")
+      .from("airdrop_status")
       .select("*", { count: "exact", head: true });
 
     return res.status(200).json({
       success: true,
       message: "Wallet registered for airdrop",
-      registrationId: data.id,
-      walletAddress: walletAddress.toLowerCase(),
+      walletAddress: normalizedWallet,
       queuePosition: count || 1,
       allocation: {
         amount: "100 SENT",
         pool: "160M Worker Pool",
-        referralCredit: referrerWallet ? "Referrer credited in 50M Pool" : null,
+        referralCredit: normalizedReferrer ? "Referrer credited in 50M Pool" : null,
       },
     });
 
