@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component, ErrorInfo, ReactNode } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SuiWalletProvider } from "@/contexts/SuiWalletContext";
@@ -6,6 +6,51 @@ import { SmartWalletProvider } from "@/contexts/SmartWalletContext";
 import { AppProvider } from "@/contexts/AppContext";
 import { ThirdwebWrapper } from "@/contexts/ThirdwebContext";
 import { Toaster } from "@/components/ui/toaster";
+
+// Error Boundary to catch and display runtime errors
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("App Error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: "20px", fontFamily: "system-ui, sans-serif", maxWidth: "600px", margin: "0 auto" }}>
+          <h1 style={{ color: "#dc2626" }}>Something went wrong</h1>
+          <p style={{ color: "#666" }}>An error occurred:</p>
+          <pre style={{ background: "#f3f4f6", padding: "12px", borderRadius: "8px", overflow: "auto", fontSize: "14px" }}>
+            {this.state.error?.message}
+          </pre>
+          <pre style={{ background: "#f3f4f6", padding: "12px", borderRadius: "8px", overflow: "auto", fontSize: "12px", color: "#666", marginTop: "8px" }}>
+            {this.state.error?.stack}
+          </pre>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ marginTop: "16px", padding: "8px 16px", background: "#3b82f6", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" }}
+          >
+            Reload App
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // Pages
 import Index from "@/pages/Index";
@@ -46,13 +91,14 @@ import AirdropAdminDashboard from "@/pages/admin/Dashboard";
 
 export default function App() {
   return (
-    <Router>
-      <ThirdwebWrapper>
-        <AuthProvider>
-          <SuiWalletProvider>
-            <SmartWalletProvider>
-              <AppProvider>
-                <Routes>
+    <ErrorBoundary>
+      <Router>
+        <ThirdwebWrapper>
+          <AuthProvider>
+            <SuiWalletProvider>
+              <SmartWalletProvider>
+                <AppProvider>
+                  <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
@@ -95,7 +141,8 @@ export default function App() {
             </SmartWalletProvider>
           </SuiWalletProvider>
         </AuthProvider>
-      </ThirdwebWrapper>
-    </Router>
+        </ThirdwebWrapper>
+      </Router>
+    </ErrorBoundary>
   );
 }
