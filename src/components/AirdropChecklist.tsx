@@ -1,10 +1,10 @@
 /**
  * Airdrop Portal Component
- * Shows task checklist - ClaimButton only active when eligibleAmount > 0
+ * Shows task checklist - Claim button only active when eligibleAmount > 0
  */
 
 import { useState, useEffect } from "react";
-import { ClaimButton, useActiveAccount, ConnectButton } from "thirdweb/react";
+import { useActiveAccount, ConnectButton } from "thirdweb/react";
 import { defineChain } from "thirdweb/chains";
 import { client } from "@/lib/thirdwebClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,9 @@ import {
   Users,
   Gift,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  AlertCircle,
+  Coins
 } from "lucide-react";
 import { 
   getAirdropStatus, 
@@ -28,6 +30,113 @@ import {
   markAsClaimed,
   registerWallet
 } from "@/services/airdropService";
+
+// Claim SENT Section Component - calls server-side claim endpoint
+function ClaimSentSection({ 
+  eligibleAmount, 
+  walletAddress, 
+  onClaimSuccess,
+  tasksCompleted
+}: { 
+  eligibleAmount: number; 
+  walletAddress?: string;
+  onClaimSuccess: () => void;
+  tasksCompleted: boolean;
+}) {
+  const [claiming, setClaiming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [txHash, setTxHash] = useState<string | null>(null);
+
+  const handleClaim = async () => {
+    if (!walletAddress || !tasksCompleted) return;
+
+    setClaiming(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/airdrop/claim-sent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workerAddress: walletAddress }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result.error || "Failed to claim tokens");
+        return;
+      }
+
+      setTxHash(result.txHash);
+      onClaimSuccess();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to claim tokens");
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  // Show success state
+  if (txHash) {
+    return (
+      <div className="space-y-3">
+        <Button disabled className="w-full py-4 text-lg bg-green-600 hover:bg-green-600">
+          <CheckCircle className="mr-2 h-5 w-5" />
+          {eligibleAmount} SENT Claimed!
+        </Button>
+        <p className="text-xs text-center text-muted-foreground">
+          <a 
+            href={`https://polygonscan.com/tx/${txHash}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-purple-600 hover:underline"
+          >
+            View transaction on Polygonscan
+          </a>
+        </p>
+      </div>
+    );
+  }
+
+  // Not eligible yet
+  if (!tasksCompleted || eligibleAmount <= 0) {
+    return (
+      <Button disabled className="w-full py-4 text-lg">
+        Complete Tasks to Unlock Claim
+      </Button>
+    );
+  }
+
+  // Ready to claim
+  return (
+    <div className="space-y-3">
+      <Button
+        onClick={handleClaim}
+        disabled={claiming}
+        className="w-full py-4 text-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+      >
+        {claiming ? (
+          <>
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            Claiming...
+          </>
+        ) : (
+          <>
+            <Coins className="mr-2 h-5 w-5" />
+            Claim {eligibleAmount.toLocaleString()} $SENT
+          </>
+        )}
+      </Button>
+
+      {error && (
+        <div className="flex items-center gap-2 text-sm text-red-500 bg-red-50 p-3 rounded-lg">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // Task Item Component
 function TaskItem({ 
@@ -305,37 +414,13 @@ export function AirdropChecklist() {
         </div>
       )}
 
-      {/* THE SMART CLAIM BUTTON - Only shows when eligibleAmount > 0 */}
-      {eligibleAmount > 0 ? (
-        <ClaimButton
-          contractAddress="0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf"
-          chain={defineChain(137)}
-          client={client}
-          claimParams={{
-            type: "ERC20",
-            quantity: eligibleAmount.toString(),
-            to: account?.address,
-          }}
-          onTransactionConfirmed={handleClaimSuccess}
-          style={{
-            width: "100%",
-            padding: "16px",
-            fontSize: "18px",
-            fontWeight: "bold",
-            background: "linear-gradient(to right, #9333ea, #3b82f6)",
-            color: "white",
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer"
-          }}
-        >
-          Claim {eligibleAmount.toLocaleString()} $SENT
-        </ClaimButton>
-      ) : (
-        <Button disabled className="w-full py-4 text-lg">
-          Complete Tasks to Unlock Claim
-        </Button>
-      )}
+      {/* THE CLAIM BUTTON - Only shows when eligibleAmount > 0 */}
+      <ClaimSentSection 
+        eligibleAmount={eligibleAmount}
+        walletAddress={account?.address}
+        onClaimSuccess={handleClaimSuccess}
+        tasksCompleted={tasks.twitter && tasks.telegram}
+      />
 
       {/* Progress indicator */}
       <p className="text-center text-sm text-muted-foreground mt-4">

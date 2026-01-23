@@ -1,9 +1,10 @@
 // Vercel Serverless Function: Claim SENT tokens
-// Hybrid "Pull" System - Worker clicks claim, server pushes tokens
+// Server-side push - Worker clicks claim, server sends tokens from treasury wallet
 // Verifies tasks in Supabase before sending
 
-import { createThirdwebClient, getContract } from "thirdweb";
-import { transfer, decimals } from "thirdweb/extensions/erc20";
+import { createThirdwebClient, getContract, sendTransaction } from "thirdweb";
+import { transfer } from "thirdweb/extensions/erc20";
+import { privateKeyToAccount } from "thirdweb/wallets";
 import { defineChain } from "thirdweb/chains";
 import { createClient } from "@supabase/supabase-js";
 
@@ -21,8 +22,8 @@ function getSupabase() {
   return supabase;
 }
 
-// SENT Contract on Polygon
-const SENT_CONTRACT = "0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf";
+// SENT Token Contract on Polygon (the ERC20 token, not the airdrop contract)
+const SENT_TOKEN_ADDRESS = "0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5";
 const POLYGON_CHAIN_ID = 137;
 
 // Check worker status in Supabase
@@ -34,7 +35,7 @@ async function checkWorkerStatus(walletAddress) {
     .single();
 
   if (error || !data) {
-    return { verified: false, reason: "Not registered" };
+    return { verified: false, reason: "Not registered for airdrop" };
   }
 
   if (data.claimed) {
@@ -56,8 +57,8 @@ async function checkWorkerStatus(walletAddress) {
   // Calculate allocation based on completed tasks
   let allocation = 100; // Base amount for social tasks
 
-  // Quiz bonus (5/5 = 100% score)
-  if (data.quiz_score >= 100) {
+  // Quiz bonus (80%+ score)
+  if (data.quiz_score >= 80) {
     allocation += 50;
   }
 
@@ -79,7 +80,8 @@ async function markAsClaimed(walletAddress, txHash, amount) {
     .from("airdrop_status")
     .update({ 
       claimed: true,
-      total_allocation: amount
+      total_allocation: amount,
+      claimed_at: new Date().toISOString()
     })
     .eq("wallet_address", walletAddress.toLowerCase());
 
@@ -102,6 +104,7 @@ export default async function handler(req, res) {
       success: true, 
       message: "claim-sent endpoint ready",
       hasThirdwebKey: !!process.env.THIRDWEB_SECRET_KEY,
+      hasAdminKey: !!process.env.ADMIN_PRIVATE_KEY,
       hasSupabaseKey: !!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY)
     });
   }
@@ -117,6 +120,15 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Valid wallet address required" });
   }
 
+  // Check for required environment variables
+  if (!process.env.THIRDWEB_SECRET_KEY) {
+    return res.status(500).json({ error: "Server configuration error: Missing Thirdweb key" });
+  }
+
+  if (!process.env.ADMIN_PRIVATE_KEY) {
+    return res.status(500).json({ error: "Server configuration error: Missing admin key" });
+  }
+
   try {
     // 1. CHECK SUPABASE - Verify worker completed tasks
     const status = await checkWorkerStatus(workerAddress);
@@ -128,28 +140,41 @@ export default async function handler(req, res) {
       });
     }
 
-    // 2. Initialize Secure Thirdweb Client (server-side only)
+    // 2. Initialize Thirdweb Client with secret key
     const client = createThirdwebClient({ 
       secretKey: process.env.THIRDWEB_SECRET_KEY 
     });
 
-    const contract = getContract({
+    // 3. Create admin account from private key (treasury wallet)
+    const adminAccount = privateKeyToAccount({
       client,
-      chain: defineChain(POLYGON_CHAIN_ID),
-      address: SENT_CONTRACT,
+      privateKey: process.env.ADMIN_PRIVATE_KEY
     });
 
-    // 3. EXECUTE THE TRANSFER (Server-side "push" that feels like "pull")
-    const transaction = await transfer({
-      contract,
+    // 4. Get the SENT token contract
+    const tokenContract = getContract({
+      client,
+      chain: defineChain(POLYGON_CHAIN_ID),
+      address: SENT_TOKEN_ADDRESS,
+    });
+
+    // 5. Prepare the transfer transaction
+    const transaction = transfer({
+      contract: tokenContract,
       to: workerAddress,
       amount: status.allocation.toString(),
     });
 
-    // 4. Mark as claimed in Supabase
-    await markAsClaimed(workerAddress, transaction.transactionHash, status.allocation);
+    // 6. Send the transaction from admin wallet
+    const result = await sendTransaction({
+      transaction,
+      account: adminAccount,
+    });
 
-    // 5. Increment referrer's count if applicable
+    // 7. Mark as claimed in Supabase
+    await markAsClaimed(workerAddress, result.transactionHash, status.allocation);
+
+    // 8. Increment referrer's count if applicable
     if (status.data?.referrer_wallet) {
       await getSupabase().rpc("increment_referral_count", { 
         referrer: status.data.referrer_wallet 
@@ -158,7 +183,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ 
       success: true, 
-      txHash: transaction.transactionHash,
+      txHash: result.transactionHash,
       amount: status.allocation,
       message: `${status.allocation} SENT sent to your wallet!`
     });
