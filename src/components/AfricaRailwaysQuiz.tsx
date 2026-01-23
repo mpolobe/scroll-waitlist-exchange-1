@@ -139,6 +139,16 @@ export function AfricaRailwaysQuiz({ walletAddress, onComplete }: AfricaRailways
     
     // Callback - 4/5 or better passes
     onComplete?.(finalScore >= 4, finalScore);
+    
+    // Auto-restart quiz after 3 seconds if failed
+    if (finalScore < 4) {
+      setTimeout(() => {
+        setCurrentQuestion(0);
+        setAnswers({});
+        setShowResults(false);
+        setScore(0);
+      }, 3000);
+    }
   };
 
   const handleRetry = () => {
@@ -186,13 +196,9 @@ export function AfricaRailwaysQuiz({ walletAddress, onComplete }: AfricaRailways
                     You need at least 4/5 correct to qualify for the Quiz Pool
                   </p>
                   <p className="text-sm text-red-600 mt-1">
-                    Study up and try again!
+                    Restarting quiz in 3 seconds...
                   </p>
                 </div>
-                <Button onClick={handleRetry} className="mt-4">
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Try Again
-                </Button>
               </>
             )}
 
