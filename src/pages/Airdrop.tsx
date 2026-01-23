@@ -242,7 +242,7 @@ export default function Airdrop() {
   // Verify Telegram
   const handleTelegramVerify = async () => {
     // Open Telegram join link
-    window.open("https://t.me/Africoin_Official", "_blank");
+    window.open("https://t.me/afrcsentinel", "_blank");
     
     // Mark as verified after delay (in production, use Telegram Bot API)
     setTimeout(async () => {

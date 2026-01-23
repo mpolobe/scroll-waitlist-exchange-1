@@ -152,7 +152,7 @@ export function AirdropChecklist() {
   };
 
   const handleTelegram = async () => {
-    window.open("https://t.me/Africoin_Official", "_blank");
+    window.open("https://t.me/afrcsentinel", "_blank");
     if (account?.address) {
       await verifyTelegram(account.address);
       setTasks(prev => ({ ...prev, telegram: true }));

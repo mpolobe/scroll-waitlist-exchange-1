@@ -55,7 +55,7 @@ export function AirdropTasks({ walletAddress, onAllTasksComplete }: AirdropTasks
       points: 20,
       icon: <Send className="h-5 w-5 text-blue-500" />,
       action: "Join",
-      link: "https://t.me/Africoin_Official",
+      link: "https://t.me/afrcsentinel",
       completed: false,
     },
     {
