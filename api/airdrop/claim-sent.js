@@ -7,11 +7,19 @@ import { transfer, decimals } from "thirdweb/extensions/erc20";
 import { defineChain } from "thirdweb/chains";
 import { createClient } from "@supabase/supabase-js";
 
-// Supabase client (project: llvprbmrnjvamjzavmhg)
-const supabase = createClient(
-  process.env.SUPABASE_URL || "https://llvprbmrnjvamjzavmhg.supabase.co",
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// Lazy initialize Supabase client
+let supabase = null;
+function getSupabase() {
+  if (!supabase) {
+    const url = process.env.SUPABASE_URL || "https://llvprbmrnjvamjzavmhg.supabase.co";
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+    if (!key) {
+      throw new Error("Supabase credentials not configured");
+    }
+    supabase = createClient(url, key);
+  }
+  return supabase;
+}
 
 // SENT Contract on Polygon
 const SENT_CONTRACT = "0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf";
@@ -19,7 +27,7 @@ const POLYGON_CHAIN_ID = 137;
 
 // Check worker status in Supabase
 async function checkWorkerStatus(walletAddress) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("airdrop_status")
     .select("*")
     .eq("wallet_address", walletAddress.toLowerCase())
@@ -67,7 +75,7 @@ async function checkWorkerStatus(walletAddress) {
 
 // Mark as claimed in Supabase
 async function markAsClaimed(walletAddress, txHash, amount) {
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from("airdrop_status")
     .update({ 
       claimed: true,
@@ -132,7 +140,7 @@ export default async function handler(req, res) {
 
     // 5. Increment referrer's count if applicable
     if (status.data?.referrer_wallet) {
-      await supabase.rpc("increment_referral_count", { 
+      await getSupabase().rpc("increment_referral_count", { 
         referrer: status.data.referrer_wallet 
       });
     }
