@@ -1,12 +1,42 @@
 /**
  * SENT Airdrop Claim Button
- * Worker clicks to pull 100 $SENT after passing quiz
+ * Worker clicks to pull SENT tokens after completing tasks
+ * Uses signature-based pull - user pays gas
  */
 
 import { TransactionButton, useActiveAccount } from "thirdweb/react";
 import { airdropERC20WithSignature } from "thirdweb/extensions/airdrop";
 import { airdropContract } from "@/lib/thirdwebClient";
 import { supabase } from "@/lib/supabase";
+
+// Helper to deserialize BigInt values from JSON strings
+function deserializeBigInts(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+  
+  if (Array.isArray(obj)) {
+    return obj.map(deserializeBigInts);
+  }
+  
+  if (typeof obj === 'object') {
+    const result: any = {};
+    for (const key in obj) {
+      const value = obj[key];
+      // Convert string numbers that look like BigInt back to BigInt
+      if (typeof value === 'string' && /^\d+$/.test(value) && value.length > 15) {
+        result[key] = BigInt(value);
+      } else if (key === 'expirationTimestamp' && typeof value === 'string') {
+        result[key] = BigInt(value);
+      } else if (key === 'amount' && typeof value === 'string') {
+        result[key] = BigInt(value);
+      } else {
+        result[key] = deserializeBigInts(value);
+      }
+    }
+    return result;
+  }
+  
+  return obj;
+}
 
 export default function ClaimButton() {
   const account = useActiveAccount();
@@ -33,7 +63,11 @@ export default function ClaimButton() {
           throw new Error(error.error || "Failed to get signature");
         }
         
-        const { req, signature } = await res.json();
+        const data = await res.json();
+        
+        // Deserialize BigInt values that were stringified for JSON transport
+        const req = deserializeBigInts(data.req);
+        const signature = data.signature;
         
         return airdropERC20WithSignature({
           contract: airdropContract,
@@ -51,7 +85,7 @@ export default function ClaimButton() {
           })
           .eq("wallet_address", account.address.toLowerCase());
         
-        alert("Successfully claimed 100 $SENT!");
+        alert("Successfully claimed $SENT!");
       }}
       onError={(err) => alert(err.message)}
     >

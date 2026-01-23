@@ -1,12 +1,7 @@
 /**
  * SENT Airdrop Claim Button (Full Tracking Version)
  * Tracks all claim data in Supabase for Sentinel records
- * 
- * Stores:
- * - wallet_address
- * - claim_tx_hash
- * - claimed_at timestamp
- * - amount claimed
+ * Uses signature-based pull - user pays gas
  */
  
 import { TransactionButton, useActiveAccount } from "thirdweb/react";
@@ -15,6 +10,34 @@ import { airdropContract } from "@/lib/thirdwebClient";
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { Gift, CheckCircle, AlertCircle } from "lucide-react";
+
+// Helper to deserialize BigInt values from JSON strings
+function deserializeBigInts(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+  
+  if (Array.isArray(obj)) {
+    return obj.map(deserializeBigInts);
+  }
+  
+  if (typeof obj === 'object') {
+    const result: any = {};
+    for (const key in obj) {
+      const value = obj[key];
+      if (typeof value === 'string' && /^\d+$/.test(value) && value.length > 15) {
+        result[key] = BigInt(value);
+      } else if (key === 'expirationTimestamp' && typeof value === 'string') {
+        result[key] = BigInt(value);
+      } else if (key === 'amount' && typeof value === 'string') {
+        result[key] = BigInt(value);
+      } else {
+        result[key] = deserializeBigInts(value);
+      }
+    }
+    return result;
+  }
+  
+  return obj;
+}
  
 interface ClaimButtonProps {
   onSuccess?: () => void;
@@ -41,7 +64,7 @@ export default function ClaimButtonTracked({ onSuccess, onError }: ClaimButtonPr
     return (
       <div className="w-full py-4 px-6 bg-green-100 text-green-700 rounded-lg font-medium text-center flex items-center justify-center gap-2">
         <CheckCircle className="h-5 w-5" />
-        100 $SENT Claimed Successfully!
+        $SENT Claimed Successfully!
       </div>
     );
   }
@@ -50,7 +73,6 @@ export default function ClaimButtonTracked({ onSuccess, onError }: ClaimButtonPr
     <div className="space-y-3">
       <TransactionButton
         transaction={async () => {
-          // A. Get signature from backend (sends wallet address)
           const res = await fetch("/api/airdrop/sign", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -59,12 +81,15 @@ export default function ClaimButtonTracked({ onSuccess, onError }: ClaimButtonPr
  
           if (!res.ok) {
             const errorData = await res.json();
-            throw new Error(errorData.error || "Not eligible - complete quiz first");
+            throw new Error(errorData.error || "Not eligible - complete tasks first");
           }
 
-          const { req, signature } = await res.json();
+          const data = await res.json();
+          
+          // Deserialize BigInt values
+          const req = deserializeBigInts(data.req);
+          const signature = data.signature;
  
-          // B. Call the Airdrop contract's pull function
           return airdropERC20WithSignature({
             contract: airdropContract,
             req,
@@ -72,20 +97,18 @@ export default function ClaimButtonTracked({ onSuccess, onError }: ClaimButtonPr
           });
         }}
         onTransactionConfirmed={async (result) => {
-          // C. Store claim record in Supabase for Sentinel tracking
           await supabase
             .from("airdrop_status")
             .update({ 
               claimed: true,
               claim_tx_hash: result.transactionHash,
-              claimed_at: new Date().toISOString(),
-              amount_claimed: 100
+              claimed_at: new Date().toISOString()
             })
             .eq("wallet_address", account.address?.toLowerCase());
  
           setClaimed(true);
           onSuccess?.();
-          alert("100 $SENT successfully pulled to your wallet!");
+          alert("$SENT successfully claimed to your wallet!");
         }}
         onError={(err) => {
           const message = err instanceof Error ? err.message : "Claim failed";

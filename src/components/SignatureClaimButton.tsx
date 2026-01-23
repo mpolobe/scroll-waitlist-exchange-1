@@ -1,15 +1,13 @@
 /**
  * Signature-Based Claim Button
- * Flow:
- * 1. Worker completes tasks (Twitter, Telegram, Quiz)
- * 2. Worker clicks "Verify" → Server checks Supabase → Generates signature
- * 3. Worker clicks "Claim" → Uses signature to pull tokens (pays own gas)
+ * Uses signature-based pull - user pays gas
+ * Verifies task completion before allowing claim
  */
 
 import { useState } from "react";
 import { useActiveAccount, TransactionButton } from "thirdweb/react";
-import { claimWithSignatureERC20 } from "thirdweb/extensions/airdrop";
-import { sentContract } from "@/lib/thirdwebClient";
+import { airdropERC20WithSignature } from "thirdweb/extensions/airdrop";
+import { airdropContract } from "@/lib/thirdwebClient";
 import { Button } from "@/components/ui/button";
 import { 
   Loader2, 
@@ -21,6 +19,34 @@ import {
   Send
 } from "lucide-react";
 import { markAsClaimed } from "@/services/airdropService";
+
+// Helper to deserialize BigInt values from JSON strings
+function deserializeBigInts(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+  
+  if (Array.isArray(obj)) {
+    return obj.map(deserializeBigInts);
+  }
+  
+  if (typeof obj === 'object') {
+    const result: any = {};
+    for (const key in obj) {
+      const value = obj[key];
+      if (typeof value === 'string' && /^\d+$/.test(value) && value.length > 15) {
+        result[key] = BigInt(value);
+      } else if (key === 'expirationTimestamp' && typeof value === 'string') {
+        result[key] = BigInt(value);
+      } else if (key === 'amount' && typeof value === 'string') {
+        result[key] = BigInt(value);
+      } else {
+        result[key] = deserializeBigInts(value);
+      }
+    }
+    return result;
+  }
+  
+  return obj;
+}
 
 interface SignatureClaimButtonProps {
   onSuccess?: (txHash: string) => void;
@@ -39,7 +65,6 @@ export function SignatureClaimButton({ onSuccess, onError }: SignatureClaimButto
   const [signature, setSignature] = useState<string | null>(null);
   const [payload, setPayload] = useState<any>(null);
   const [allocation, setAllocation] = useState(0);
-  const [breakdown, setBreakdown] = useState<ClaimBreakdown | null>(null);
   const [claimed, setClaimed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [missingTasks, setMissingTasks] = useState<{ twitter?: boolean; telegram?: boolean } | null>(null);
@@ -56,10 +81,10 @@ export function SignatureClaimButton({ onSuccess, onError }: SignatureClaimButto
     setMissingTasks(null);
 
     try {
-      const response = await fetch("/api/airdrop/generate-signature", {
+      const response = await fetch("/api/airdrop/sign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workerAddress: account.address }),
+        body: JSON.stringify({ address: account.address }),
       });
 
       const result = await response.json();
@@ -73,11 +98,10 @@ export function SignatureClaimButton({ onSuccess, onError }: SignatureClaimButto
         return;
       }
 
-      // Store signature and payload for claim
+      // Deserialize BigInt values and store for claim
+      setPayload(deserializeBigInts(result.req));
       setSignature(result.signature);
-      setPayload(result.payload);
-      setAllocation(result.allocation);
-      setBreakdown(result.breakdown);
+      setAllocation(result.allocation || 100);
 
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to get signature";
@@ -132,22 +156,13 @@ export function SignatureClaimButton({ onSuccess, onError }: SignatureClaimButto
             <span className="font-medium text-green-800">Verified!</span>
           </div>
           <p className="text-2xl font-bold text-green-700">{allocation} SENT</p>
-          
-          {/* Breakdown */}
-          {breakdown && (
-            <div className="mt-2 text-xs text-green-600 space-y-1">
-              <div>Social Tasks: {breakdown.socialTasks} SENT</div>
-              {breakdown.quizBonus > 0 && <div>Quiz Bonus: +{breakdown.quizBonus} SENT</div>}
-              {breakdown.referralBonus > 0 && <div>Referral Bonus: +{breakdown.referralBonus} SENT</div>}
-            </div>
-          )}
         </div>
 
         {/* Claim Button */}
         <TransactionButton
-          transaction={() => claimWithSignatureERC20({
-            contract: sentContract,
-            payload,
+          transaction={() => airdropERC20WithSignature({
+            contract: airdropContract,
+            req: payload,
             signature,
           })}
           onTransactionConfirmed={handleClaimSuccess}
