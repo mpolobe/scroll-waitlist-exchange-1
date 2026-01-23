@@ -3,11 +3,22 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-// Initialize Supabase
-const supabase = createClient(
-  process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
-);
+// Lazy initialize Supabase client
+let supabase = null;
+
+function getSupabase() {
+  if (!supabase) {
+    const url = process.env.SUPABASE_URL || "https://llvprbmrnjvamjzavmhg.supabase.co";
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    
+    if (!key) {
+      throw new Error("Supabase credentials not configured");
+    }
+    
+    supabase = createClient(url, key);
+  }
+  return supabase;
+}
 
 export default async function handler(req, res) {
   // CORS headers
@@ -58,8 +69,10 @@ export default async function handler(req, res) {
   }
 
   try {
+    const db = getSupabase();
+    
     // Check if already registered (Sybil protection)
-    const { data: existing } = await supabase
+    const { data: existing } = await db
       .from("airdrop_referrals")
       .select("id, created_at")
       .eq("user_wallet", walletAddress.toLowerCase())
@@ -75,7 +88,7 @@ export default async function handler(req, res) {
     }
 
     // Register wallet for airdrop
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("airdrop_referrals")
       .insert([
         {
@@ -104,7 +117,7 @@ export default async function handler(req, res) {
     }
 
     // Get current registration count
-    const { count } = await supabase
+    const { count } = await db
       .from("airdrop_referrals")
       .select("*", { count: "exact", head: true });
 
@@ -125,7 +138,7 @@ export default async function handler(req, res) {
     console.error("Registration error:", error);
     return res.status(500).json({ 
       success: false, 
-      error: "Internal server error" 
+      error: error.message || "Internal server error" 
     });
   }
 }
