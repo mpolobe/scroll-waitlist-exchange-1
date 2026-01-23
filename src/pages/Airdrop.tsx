@@ -5,7 +5,7 @@
  * Pools:
  * - 50M SENT: Referral Pool (3+ referrals)
  * - 100M SENT: Social Tasks Pool (Twitter + Telegram)
- * - 10M SENT: Quiz Pool (5/5 correct)
+ * - 10M SENT: Quiz Pool (4/5 correct)
  * - 150M SENT: Worker Pool (base allocation)
  * 
  * Airdrop Start: Friday, January 23rd, 2026 at 8:00 AM UTC
@@ -152,7 +152,7 @@ export default function Airdrop() {
           registered: true,
           twitterVerified: status.twitter_verified,
           telegramVerified: status.telegram_verified,
-          quizPassed: status.quiz_score >= 100,
+          quizPassed: status.quiz_score >= 80,
           referralCount: status.referral_count,
           totalAllocation: status.total_allocation,
           claimed: status.claimed

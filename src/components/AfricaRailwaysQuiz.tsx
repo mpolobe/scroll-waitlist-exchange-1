@@ -1,6 +1,6 @@
 /**
  * Africa Railways Quiz Component
- * 5/5 correct answers required to unlock 10M SENT Quiz Pool
+ * 4/5 correct answers required to unlock 10M SENT Quiz Pool
  */
 
 import { useState } from "react";
@@ -119,7 +119,7 @@ export function AfricaRailwaysQuiz({ walletAddress, onComplete }: AfricaRailways
     const percentage = (correct / QUIZ_QUESTIONS.length) * 100;
     setScore(finalScore);
     
-    // Submit to API - only 5/5 (100%) qualifies for Quiz Pool
+    // Submit to API - 4/5 (80%) qualifies for Quiz Pool
     try {
       const response = await fetch("/api/airdrop/submit-quiz", {
         method: "POST",
@@ -137,8 +137,8 @@ export function AfricaRailwaysQuiz({ walletAddress, onComplete }: AfricaRailways
     setShowResults(true);
     setSubmitting(false);
     
-    // Callback
-    onComplete?.(finalScore === 5, finalScore);
+    // Callback - 4/5 or better passes
+    onComplete?.(finalScore >= 4, finalScore);
   };
 
   const handleRetry = () => {
@@ -150,7 +150,7 @@ export function AfricaRailwaysQuiz({ walletAddress, onComplete }: AfricaRailways
 
   const question = QUIZ_QUESTIONS[currentQuestion];
   const allAnswered = Object.keys(answers).length === QUIZ_QUESTIONS.length;
-  const passed = score === 5;
+  const passed = score >= 4;
 
   // Results Screen
   if (showResults) {
@@ -164,7 +164,7 @@ export function AfricaRailwaysQuiz({ walletAddress, onComplete }: AfricaRailways
                   <Trophy className="h-10 w-10 text-yellow-500" />
                 </div>
                 <h2 className="text-2xl font-bold text-green-600">Quiz Passed!</h2>
-                <p className="text-lg">You scored {score}/5 (100%)</p>
+                <p className="text-lg">You scored {score}/5 ({(score / 5 * 100).toFixed(0)}%)</p>
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <p className="text-green-800 font-medium">
                     You're now eligible for the 10M SENT Quiz Pool!
@@ -183,7 +183,7 @@ export function AfricaRailwaysQuiz({ walletAddress, onComplete }: AfricaRailways
                 <p className="text-lg">You scored {score}/5</p>
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <p className="text-red-800 font-medium">
-                    You need 5/5 correct to qualify for the Quiz Pool
+                    You need at least 4/5 correct to qualify for the Quiz Pool
                   </p>
                   <p className="text-sm text-red-600 mt-1">
                     Study up and try again!
@@ -245,7 +245,7 @@ export function AfricaRailwaysQuiz({ walletAddress, onComplete }: AfricaRailways
           </span>
         </div>
         <CardDescription>
-          Score 5/5 to qualify for the 10M SENT Quiz Pool
+          Score at least 4/5 to qualify for the 10M SENT Quiz Pool
         </CardDescription>
         
         {/* Progress bar */}

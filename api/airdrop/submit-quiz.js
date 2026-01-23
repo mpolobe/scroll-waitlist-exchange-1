@@ -67,7 +67,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const passed = score >= 100; // 5/5 = 100%
+    const passed = score >= 80; // 4/5 = 80%
 
     return res.status(200).json({
       success: true,
