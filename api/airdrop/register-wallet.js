@@ -25,11 +25,42 @@ function getSupabase() {
 export default async function handler(req, res) {
   // CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") {
     return res.status(200).end();
+  }
+
+  // Health check endpoint
+  if (req.method === "GET") {
+    try {
+      const db = getSupabase();
+      const { count, error } = await db
+        .from("airdrop_status")
+        .select("*", { count: "exact", head: true });
+      
+      return res.status(200).json({
+        success: true,
+        message: "API is working",
+        airdrop_status_count: count,
+        airdrop_status_error: error?.message,
+        env: {
+          hasSupabaseUrl: !!process.env.SUPABASE_URL,
+          hasViteSupabaseUrl: !!process.env.VITE_SUPABASE_URL,
+          hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+          hasServiceKey2: !!process.env.SUPABASE_SERVICE_KEY,
+          hasAnonKey: !!process.env.SUPABASE_ANON_KEY,
+          hasViteAnonKey: !!process.env.VITE_SUPABASE_ANON_KEY,
+        }
+      });
+    } catch (e) {
+      return res.status(500).json({
+        success: false,
+        error: e.message,
+        name: e.name
+      });
+    }
   }
 
   if (req.method !== "POST") {
@@ -258,7 +289,9 @@ export default async function handler(req, res) {
     console.error("Registration error:", error);
     return res.status(500).json({ 
       success: false, 
-      error: error.message || "Internal server error" 
+      error: error.message || "Internal server error",
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+      name: error.name
     });
   }
 }
