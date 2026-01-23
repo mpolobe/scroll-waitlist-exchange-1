@@ -74,18 +74,55 @@ export default async function handler(req, res) {
     const normalizedReferrer = referrerWallet ? referrerWallet.toLowerCase() : null;
     
     // Check if already registered in airdrop_status (primary table)
-    const { data: existing } = await db
+    const { data: existingStatus, error: statusCheckError } = await db
       .from("airdrop_status")
       .select("wallet_address, created_at")
       .eq("wallet_address", normalizedWallet)
       .single();
 
-    if (existing) {
+    // If airdrop_status table exists and wallet is found
+    if (existingStatus) {
       return res.status(409).json({
         success: false,
         error: "Wallet already registered",
         code: "ALREADY_REGISTERED",
-        registeredAt: existing.created_at,
+        registeredAt: existingStatus.created_at,
+      });
+    }
+
+    // Also check legacy airdrop_referrals table
+    const { data: existingReferral } = await db
+      .from("airdrop_referrals")
+      .select("id, created_at")
+      .eq("user_wallet", normalizedWallet)
+      .single();
+
+    if (existingReferral) {
+      // Migrate to airdrop_status if not already there
+      const { error: migrateError } = await db
+        .from("airdrop_status")
+        .upsert([
+          {
+            wallet_address: normalizedWallet,
+            referrer_wallet: normalizedReferrer,
+            twitter_verified: false,
+            telegram_verified: false,
+            quiz_score: 0,
+            referral_count: 0,
+            total_allocation: 0,
+            claimed: false,
+          },
+        ], { onConflict: "wallet_address" });
+
+      if (migrateError) {
+        console.error("Migration error:", migrateError);
+      }
+
+      return res.status(409).json({
+        success: false,
+        error: "Wallet already registered",
+        code: "ALREADY_REGISTERED",
+        registeredAt: existingReferral.created_at,
       });
     }
 
@@ -117,13 +154,51 @@ export default async function handler(req, res) {
         });
       }
 
-      // Table doesn't exist - try to provide helpful error
+      // Table doesn't exist - fall back to airdrop_referrals
       if (error.code === "42P01" || error.message?.includes("does not exist")) {
-        console.error("Table airdrop_status does not exist:", error);
-        return res.status(500).json({ 
-          success: false, 
-          error: "Database table not configured. Please contact support.",
-          details: error.message
+        console.log("airdrop_status table not found, using airdrop_referrals");
+        
+        const { data: fallbackData, error: fallbackError } = await db
+          .from("airdrop_referrals")
+          .insert([
+            {
+              user_wallet: normalizedWallet,
+              referrer_wallet: normalizedReferrer,
+            },
+          ])
+          .select()
+          .single();
+
+        if (fallbackError) {
+          if (fallbackError.code === "23505") {
+            return res.status(409).json({
+              success: false,
+              error: "Wallet already registered",
+              code: "ALREADY_REGISTERED",
+            });
+          }
+          console.error("Fallback database error:", fallbackError);
+          return res.status(500).json({ 
+            success: false, 
+            error: "Failed to register wallet",
+            details: fallbackError.message
+          });
+        }
+
+        const { count } = await db
+          .from("airdrop_referrals")
+          .select("*", { count: "exact", head: true });
+
+        return res.status(200).json({
+          success: true,
+          message: "Wallet registered for airdrop",
+          walletAddress: normalizedWallet,
+          queuePosition: count || 1,
+          allocation: {
+            amount: "100 SENT",
+            pool: "160M Worker Pool",
+            referralCredit: normalizedReferrer ? "Referrer credited in 50M Pool" : null,
+          },
         });
       }
 
@@ -137,25 +212,21 @@ export default async function handler(req, res) {
 
     // Increment referrer's count if provided
     if (normalizedReferrer) {
-      await db
-        .from("airdrop_status")
-        .update({ referral_count: db.rpc ? undefined : 1 })
-        .eq("wallet_address", normalizedReferrer);
-      
       // Use RPC function if available for atomic increment
-      await db.rpc("increment_referral_count", { referrer: normalizedReferrer }).catch(() => {
+      await db.rpc("increment_referral_count", { referrer: normalizedReferrer }).catch(async () => {
         // Fallback: manual increment if RPC not available
-        db.from("airdrop_status")
+        const { data: refData } = await db
+          .from("airdrop_status")
           .select("referral_count")
           .eq("wallet_address", normalizedReferrer)
-          .single()
-          .then(({ data: refData }) => {
-            if (refData) {
-              db.from("airdrop_status")
-                .update({ referral_count: (refData.referral_count || 0) + 1 })
-                .eq("wallet_address", normalizedReferrer);
-            }
-          });
+          .single();
+        
+        if (refData) {
+          await db
+            .from("airdrop_status")
+            .update({ referral_count: (refData.referral_count || 0) + 1 })
+            .eq("wallet_address", normalizedReferrer);
+        }
       });
     }
 
