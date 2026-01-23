@@ -230,14 +230,32 @@ export default function Airdrop() {
     }
   };
 
+  // Helper to verify task via API
+  const verifyTaskViaAPI = async (task: "twitter" | "telegram") => {
+    try {
+      const response = await fetch("/api/airdrop/verify-task", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ walletAddress, task })
+      });
+      const result = await response.json();
+      return result.success;
+    } catch (err) {
+      console.error(`Failed to verify ${task}:`, err);
+      return false;
+    }
+  };
+
   // Verify Twitter - opens link and verifies
   const handleTwitterVerify = async () => {
     window.open("https://x.com/africoin_afc", "_blank");
     
     setTimeout(async () => {
-      await verifyTwitter(walletAddress);
-      setProgress(prev => ({ ...prev, twitterVerified: true }));
-      toast({ title: "Twitter Verified!", description: "+50 SENT unlocked" });
+      const success = await verifyTaskViaAPI("twitter");
+      if (success) {
+        setProgress(prev => ({ ...prev, twitterVerified: true }));
+        toast({ title: "Twitter Verified!", description: "+50 SENT unlocked" });
+      }
     }, 3000);
   };
 
@@ -248,9 +266,13 @@ export default function Airdrop() {
     );
     if (!confirmed) return;
     
-    await verifyTwitter(walletAddress);
-    setProgress(prev => ({ ...prev, twitterVerified: true }));
-    toast({ title: "Twitter Verified!", description: "+50 SENT unlocked" });
+    const success = await verifyTaskViaAPI("twitter");
+    if (success) {
+      setProgress(prev => ({ ...prev, twitterVerified: true }));
+      toast({ title: "Twitter Verified!", description: "+50 SENT unlocked" });
+    } else {
+      toast({ title: "Verification Failed", description: "Please try again", variant: "destructive" });
+    }
   };
 
   // Verify Telegram - opens link and verifies
@@ -258,9 +280,11 @@ export default function Airdrop() {
     window.open("https://t.me/afrcsentinel", "_blank");
     
     setTimeout(async () => {
-      await verifyTelegram(walletAddress);
-      setProgress(prev => ({ ...prev, telegramVerified: true }));
-      toast({ title: "Telegram Verified!", description: "+50 SENT unlocked" });
+      const success = await verifyTaskViaAPI("telegram");
+      if (success) {
+        setProgress(prev => ({ ...prev, telegramVerified: true }));
+        toast({ title: "Telegram Verified!", description: "+50 SENT unlocked" });
+      }
     }, 3000);
   };
 
@@ -271,9 +295,13 @@ export default function Airdrop() {
     );
     if (!confirmed) return;
     
-    await verifyTelegram(walletAddress);
-    setProgress(prev => ({ ...prev, telegramVerified: true }));
-    toast({ title: "Telegram Verified!", description: "+50 SENT unlocked" });
+    const success = await verifyTaskViaAPI("telegram");
+    if (success) {
+      setProgress(prev => ({ ...prev, telegramVerified: true }));
+      toast({ title: "Telegram Verified!", description: "+50 SENT unlocked" });
+    } else {
+      toast({ title: "Verification Failed", description: "Please try again", variant: "destructive" });
+    }
   };
 
   // Quiz completion handler
