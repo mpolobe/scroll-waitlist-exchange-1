@@ -144,7 +144,7 @@ export function AirdropChecklist() {
 
   // Task handlers
   const handleTwitter = async () => {
-    window.open("https://twitter.com/AfricaRailways", "_blank");
+    window.open("https://x.com/africoin_afc", "_blank");
     if (account?.address) {
       await verifyTwitter(account.address);
       setTasks(prev => ({ ...prev, twitter: true }));
@@ -152,7 +152,7 @@ export function AirdropChecklist() {
   };
 
   const handleTelegram = async () => {
-    window.open("https://t.me/AfricaRailways", "_blank");
+    window.open("https://t.me/Africoin_Official", "_blank");
     if (account?.address) {
       await verifyTelegram(account.address);
       setTasks(prev => ({ ...prev, telegram: true }));
