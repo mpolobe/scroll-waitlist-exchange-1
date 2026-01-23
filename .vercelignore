@@ -1,10 +1,7 @@
-# Dependencies - main culprit for file count
-node_modules
-
 # Git
 .git
 
-# GitHub workflows
+# GitHub workflows (not needed in deployment)
 .github
 
 # IDE
@@ -13,26 +10,6 @@ node_modules
 
 # OS files
 .DS_Store
-Thumbs.db
 
 # Logs
 *.log
-logs
-
-# Temporary
-*.tmp
-*.temp
-
-# Test files
-*.test.*
-*.spec.*
-__tests__
-coverage
-
-# Blockchain development (not needed for web build)
-blockchain
-contracts
-hardhat.config.ts
-
-# Scripts (deployment scripts not needed in build)
-scripts
