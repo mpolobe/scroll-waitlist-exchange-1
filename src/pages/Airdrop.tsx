@@ -142,8 +142,12 @@ export default function Airdrop() {
   const loadProgress = async (address: string) => {
     setLoading(true);
     try {
-      const status = await getAirdropStatus(address);
-      if (status) {
+      // Use API endpoint instead of direct Supabase call
+      const response = await fetch(`/api/airdrop/get-status?wallet=${address}`);
+      const result = await response.json();
+      
+      if (result.success && result.status) {
+        const status = result.status;
         setProgress({
           registered: true,
           twitterVerified: status.twitter_verified,
