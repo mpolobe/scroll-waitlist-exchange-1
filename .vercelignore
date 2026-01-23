@@ -1,9 +1,6 @@
 # Dependencies
 node_modules
 
-# Source files (only dist is needed for deployment)
-src
-
 # Development files
 *.md
 !README.md
