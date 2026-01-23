@@ -10,10 +10,11 @@ import { generateAirdropSignatureERC20 } from "thirdweb/extensions/airdrop";
 import { privateKeyToAccount } from "thirdweb/wallets";
 import { createClient } from "@supabase/supabase-js";
 
-// Helper to serialize BigInt values to strings for JSON
+// Helper to serialize BigInt values with "n" suffix for JSON
+// Client deserializes by matching /^\d+n$/ pattern
 function serializeBigInts(obj: any): any {
   if (typeof obj === 'bigint') {
-    return obj.toString();
+    return obj.toString() + 'n';
   }
   if (Array.isArray(obj)) {
     return obj.map(serializeBigInts);

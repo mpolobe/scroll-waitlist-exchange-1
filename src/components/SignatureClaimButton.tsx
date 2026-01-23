@@ -20,32 +20,26 @@ import {
 } from "lucide-react";
 import { markAsClaimed } from "@/services/airdropService";
 
-// Helper to deserialize BigInt values from JSON strings
-function deserializeBigInts(obj: any): any {
-  if (obj === null || obj === undefined) return obj;
+// Helper to deserialize BigInt values from "123n" format
+function deserializeSignature(data: any): any {
+  if (typeof data !== 'object' || data === null) return data;
   
-  if (Array.isArray(obj)) {
-    return obj.map(deserializeBigInts);
+  if (Array.isArray(data)) {
+    return data.map(deserializeSignature);
   }
   
-  if (typeof obj === 'object') {
-    const result: any = {};
-    for (const key in obj) {
-      const value = obj[key];
-      if (typeof value === 'string' && /^\d+$/.test(value) && value.length > 15) {
-        result[key] = BigInt(value);
-      } else if (key === 'expirationTimestamp' && typeof value === 'string') {
-        result[key] = BigInt(value);
-      } else if (key === 'amount' && typeof value === 'string') {
-        result[key] = BigInt(value);
-      } else {
-        result[key] = deserializeBigInts(value);
-      }
+  const res: any = {};
+  for (const key in data) {
+    const value = data[key];
+    if (typeof value === 'string' && /^\d+n$/.test(value)) {
+      res[key] = BigInt(value.replace('n', ''));
+    } else if (typeof value === 'object') {
+      res[key] = deserializeSignature(value);
+    } else {
+      res[key] = value;
     }
-    return result;
   }
-  
-  return obj;
+  return res;
 }
 
 interface SignatureClaimButtonProps {
@@ -99,8 +93,9 @@ export function SignatureClaimButton({ onSuccess, onError }: SignatureClaimButto
       }
 
       // Deserialize BigInt values and store for claim
-      setPayload(deserializeBigInts(result.req));
-      setSignature(result.signature);
+      const cleanPayload = deserializeSignature(result);
+      setPayload(cleanPayload.req);
+      setSignature(cleanPayload.signature);
       setAllocation(result.allocation || 100);
 
     } catch (err) {
