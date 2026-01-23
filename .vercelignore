@@ -1,0 +1,52 @@
+# Dependencies
+node_modules
+
+# Source files (only dist is needed for deployment)
+src
+
+# Development files
+*.md
+!README.md
+.git
+.github
+.gitignore
+.env*
+!.env.example
+
+# Build tools config
+vite.config.ts
+tsconfig*.json
+postcss.config.js
+tailwind.config.ts
+eslint.config.js
+components.json
+
+# Test files
+*.test.*
+*.spec.*
+__tests__
+coverage
+
+# Blockchain development
+blockchain
+hardhat.config.ts
+contracts
+
+# Scripts
+scripts
+
+# IDE
+.vscode
+.idea
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs
+
+# Temporary
+*.tmp
+*.temp
