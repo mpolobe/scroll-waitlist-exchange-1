@@ -229,7 +229,7 @@ export default function Airdrop() {
   // Verify Twitter
   const handleTwitterVerify = async () => {
     // Open Twitter follow link
-    window.open("https://twitter.com/intent/follow?screen_name=AfricaRailways", "_blank");
+    window.open("https://x.com/africoin_afc", "_blank");
     
     // Mark as verified after delay (in production, use Twitter API)
     setTimeout(async () => {
@@ -242,7 +242,7 @@ export default function Airdrop() {
   // Verify Telegram
   const handleTelegramVerify = async () => {
     // Open Telegram join link
-    window.open("https://t.me/AfricaRailways", "_blank");
+    window.open("https://t.me/Africoin_Official", "_blank");
     
     // Mark as verified after delay (in production, use Telegram Bot API)
     setTimeout(async () => {
