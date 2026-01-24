@@ -46,77 +46,77 @@ jobs:
           
           case "$MESSAGE_TYPE" in
             "ido_live")
-              MESSAGE="🚂 *\$SENT Token IDO is LIVE on PinkSale!*
+              MESSAGE='🚂 *$SENT Token IDO is LIVE on PinkSale!*
 
-🌍 Building Africa's railway safety infrastructure
-✅ Audited Contract
-✅ Locked Liquidity  
-✅ Real Utility - 2,000+ track workers
+          🌍 Building Africa'"'"'s railway safety infrastructure
+          ✅ Audited Contract
+          ✅ Locked Liquidity  
+          ✅ Real Utility - 2,000+ track workers
 
-🔗 Join now: [PinkSale Launchpad](https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08)
+          🔗 Join now: [PinkSale Launchpad](https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08)
 
-#SENT #PinkSale #Polygon #Crypto"
+          #SENT #PinkSale #Polygon #Crypto'
               ;;
             "countdown")
-              MESSAGE="⏰ *SENT IDO Countdown!*
+              MESSAGE='⏰ *SENT IDO Countdown!*
 
-🚀 Don't miss the opportunity!
-📅 IDO is live NOW on PinkSale
+          🚀 Don'"'"'t miss the opportunity!
+          📅 IDO is live NOW on PinkSale
 
-🔗 Participate: [PinkSale](https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08)
+          🔗 Participate: [PinkSale](https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08)
 
-#SENT #IDO #Crypto"
+          #SENT #IDO #Crypto'
               ;;
             "ecosystem")
-              MESSAGE="🌍 *Africa Railways Ecosystem*
+              MESSAGE='🌍 *Africa Railways Ecosystem*
 
-🔹 *\$AFC* - Payment token on Sui
-🔹 *\$SENT* - Governance token on Polygon  
-🔹 Real utility with railway integration
+          🔹 *$AFC* - Payment token on Sui
+          🔹 *$SENT* - Governance token on Polygon  
+          🔹 Real utility with railway integration
 
-🌐 Website: [africarailways.com](https://africarailways.com)
-📊 Reviews: [Project Reviews](https://africarailways.com/reviews)
+          🌐 Website: [africarailways.com](https://africarailways.com)
+          📊 Reviews: [Project Reviews](https://africarailways.com/reviews)
 
-#AfricaRailways #Crypto #DeFi #RWA"
+          #AfricaRailways #Crypto #DeFi #RWA'
               ;;
             "why_sent")
-              MESSAGE="💡 *Why \$SENT is a gem:*
+              MESSAGE='💡 *Why $SENT is a gem:*
 
-1️⃣ Real utility - 2,000+ railway workers
-2️⃣ Proof-of-Safety consensus
-3️⃣ Audited & verified on PinkSale
-4️⃣ Low market cap opportunity
-5️⃣ Strong roadmap through 2026
+          1️⃣ Real utility - 2,000+ railway workers
+          2️⃣ Proof-of-Safety consensus
+          3️⃣ Audited & verified on PinkSale
+          4️⃣ Low market cap opportunity
+          5️⃣ Strong roadmap through 2026
 
-📖 DYOR: [Read Full Review](https://africarailways.com/reviews/sent-token-sentinel-network)
+          📖 DYOR: [Read Full Review](https://africarailways.com/reviews/sent-token-sentinel-network)
 
-#SENT #CryptoGems"
+          #SENT #CryptoGems'
               ;;
             "afc_token")
-              MESSAGE="🚀 *Africoin (\$AFC) - Live on Sui Mainnet!*
+              MESSAGE='🚀 *Africoin ($AFC) - Live on Sui Mainnet!*
 
-💰 Pan-African payment token
-⚡ Fast & cheap transactions
-🎫 Railway ticket purchases
-🏪 Merchant payments
+          💰 Pan-African payment token
+          ⚡ Fast & cheap transactions
+          🎫 Railway ticket purchases
+          🏪 Merchant payments
 
-🔗 Buy AFC: [MovePump](https://movepump.com/token/0xc68c4cfb63d702227db09c28837e75abd23bbb3adc192e3bc45fecca4dd5b7e8::afc::AFC)
+          🔗 Buy AFC: [MovePump](https://movepump.com/token/0xc68c4cfb63d702227db09c28837e75abd23bbb3adc192e3bc45fecca4dd5b7e8::afc::AFC)
 
-#AFC #Sui #Crypto #Africa"
+          #AFC #Sui #Crypto #Africa'
               ;;
             "custom")
               MESSAGE="${{ github.event.inputs.custom_message }}"
               ;;
             *)
               # Default: daily_reminder
-              MESSAGE="⏰ *Daily Reminder: SENT IDO is live!*
+              MESSAGE='⏰ *Daily Reminder: SENT IDO is live!*
 
-🛡️ Sentinel Network - Railway Safety Token
-📈 Join early for best allocation
+          🛡️ Sentinel Network - Railway Safety Token
+          📈 Join early for best allocation
 
-👉 [Participate Now](https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08)
+          👉 [Participate Now](https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08)
 
-#SENT #PinkSale #Polygon"
+          #SENT #PinkSale #Polygon'
               ;;
           esac
           
