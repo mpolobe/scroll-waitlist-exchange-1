@@ -146,9 +146,14 @@ export default async function handler(req, res) {
     });
 
     // 3. Create admin account from private key (treasury wallet)
+    // Ensure private key has 0x prefix
+    const privateKey = process.env.ADMIN_PRIVATE_KEY.startsWith('0x') 
+      ? process.env.ADMIN_PRIVATE_KEY 
+      : `0x${process.env.ADMIN_PRIVATE_KEY}`;
+    
     const adminAccount = privateKeyToAccount({
       client,
-      privateKey: process.env.ADMIN_PRIVATE_KEY
+      privateKey
     });
 
     // 4. Get the SENT token contract
