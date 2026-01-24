@@ -10,9 +10,14 @@ const FAMOUS_AI_TOKEN = process.env.FAMOUS_AI_TOKEN || 'fd6b6ddc-e56a-441f-9b24-
 // You'll need the anon key from Famous-AI at minimum
 const FAMOUS_AI_ANON_KEY = process.env.FAMOUS_AI_ANON_KEY;
 
-// Destination: Vercel Supabase
-const DEST_URL = 'https://llvprbmrnjvamjzavmhg.supabase.co';
-const DEST_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsdnByYm1ybmp2YW1qemF2bWhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTc0NDU1MiwiZXhwIjoyMDgxMzIwNTUyfQ.yfdj690DOhgtlLXENe8nd5y22IFq5N1gtNZ2vnpHcKI';
+// Destination: Vercel Supabase - credentials from environment
+const DEST_URL = process.env.SUPABASE_URL || 'https://llvprbmrnjvamjzavmhg.supabase.co';
+const DEST_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+
+if (!DEST_KEY) {
+  console.error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable');
+  process.exit(1);
+}
 
 if (!FAMOUS_AI_ANON_KEY) {
   console.error('❌ Error: FAMOUS_AI_ANON_KEY not set');

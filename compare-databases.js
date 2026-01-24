@@ -6,9 +6,14 @@ const { createClient } = require('@supabase/supabase-js');
 const FAMOUS_URL = 'https://xlbdtzmkncxycaddevnn.databasepad.com';
 const FAMOUS_KEY = process.env.FAMOUS_AI_SUPABASE_KEY;
 
-// Vercel Supabase
-const VERCEL_URL = 'https://llvprbmrnjvamjzavmhg.supabase.co';
-const VERCEL_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsdnByYm1ybmp2YW1qemF2bWhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTc0NDU1MiwiZXhwIjoyMDgxMzIwNTUyfQ.yfdj690DOhgtlLXENe8nd5y22IFq5N1gtNZ2vnpHcKI';
+// Vercel Supabase - credentials from environment
+const VERCEL_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const VERCEL_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+
+if (!VERCEL_URL || !VERCEL_KEY) {
+  console.error('Missing required environment variables: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
+  process.exit(1);
+}
 
 const vercelDB = createClient(VERCEL_URL, VERCEL_KEY);
 const famousDB = FAMOUS_KEY ? createClient(FAMOUS_URL, FAMOUS_KEY) : null;

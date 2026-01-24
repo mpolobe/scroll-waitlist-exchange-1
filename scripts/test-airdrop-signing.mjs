@@ -8,11 +8,19 @@ import { polygon } from "thirdweb/chains";
 import { generateAirdropSignatureERC20 } from "thirdweb/extensions/airdrop";
 import { privateKeyToAccount } from "thirdweb/wallets";
 
-// Configuration from environment
-const THIRDWEB_SECRET_KEY = process.env.THIRDWEB_SECRET_KEY || 'cHGBHt9Tx2HjojftKIgd7cLob0fPRkyxEB5o2h1CZwmT66xFuYDWj9mXOuxVoGSK5awBqnBkHFsFM3S5Dyec9g';
-const ADMIN_PRIVATE_KEY = process.env.ADMIN_PRIVATE_KEY || 'REMOVED_COMPROMISED_KEY';
-const SUPABASE_URL = 'https://llvprbmrnjvamjzavmhg.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsdnByYm1ybmp2YW1qemF2bWhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTc0NDU1MiwiZXhwIjoyMDgxMzIwNTUyfQ.yfdj690DOhgtlLXENe8nd5y22IFq5N1gtNZ2vnpHcKI';
+// Configuration from environment - ALL KEYS MUST BE SET VIA ENVIRONMENT VARIABLES
+const THIRDWEB_SECRET_KEY = process.env.THIRDWEB_SECRET_KEY;
+const ADMIN_PRIVATE_KEY = process.env.ADMIN_PRIVATE_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://llvprbmrnjvamjzavmhg.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
+
+if (!THIRDWEB_SECRET_KEY || !ADMIN_PRIVATE_KEY || !SUPABASE_KEY) {
+  console.error('Missing required environment variables:');
+  console.error('- THIRDWEB_SECRET_KEY:', THIRDWEB_SECRET_KEY ? '✓' : '✗');
+  console.error('- ADMIN_PRIVATE_KEY:', ADMIN_PRIVATE_KEY ? '✓' : '✗');
+  console.error('- SUPABASE_SERVICE_KEY:', SUPABASE_KEY ? '✓' : '✗');
+  process.exit(1);
+}
 
 const TEST_WALLET = '0x1234567890abcdef1234567890abcdef12345678';
 const AIRDROP_CONTRACT = '0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf';
