@@ -141,22 +141,36 @@ export default async function handler(req, res) {
     }
 
     // 2. Initialize Thirdweb Client with secret key
+    console.log("Initializing Thirdweb client...");
     const client = createThirdwebClient({ 
       secretKey: process.env.THIRDWEB_SECRET_KEY 
     });
 
     // 3. Create admin account from private key (treasury wallet)
     // Ensure private key has 0x prefix
+    console.log("Creating admin account...");
     const privateKey = process.env.ADMIN_PRIVATE_KEY.startsWith('0x') 
       ? process.env.ADMIN_PRIVATE_KEY 
       : `0x${process.env.ADMIN_PRIVATE_KEY}`;
+    console.log("Private key length:", privateKey.length);
     
-    const adminAccount = privateKeyToAccount({
-      client,
-      privateKey
-    });
+    let adminAccount;
+    try {
+      adminAccount = privateKeyToAccount({
+        client,
+        privateKey
+      });
+      console.log("Admin account created:", adminAccount.address);
+    } catch (accountError) {
+      console.error("Failed to create admin account:", accountError);
+      return res.status(500).json({ 
+        error: "Failed to initialize admin wallet",
+        details: accountError.message 
+      });
+    }
 
     // 4. Get the SENT token contract
+    console.log("Getting token contract...");
     const tokenContract = getContract({
       client,
       chain: defineChain(POLYGON_CHAIN_ID),
@@ -164,6 +178,7 @@ export default async function handler(req, res) {
     });
 
     // 5. Prepare the transfer transaction
+    console.log("Preparing transfer of", status.allocation, "SENT to", workerAddress);
     const transaction = transfer({
       contract: tokenContract,
       to: workerAddress,
@@ -171,10 +186,12 @@ export default async function handler(req, res) {
     });
 
     // 6. Send the transaction from admin wallet
+    console.log("Sending transaction...");
     const result = await sendTransaction({
       transaction,
       account: adminAccount,
     });
+    console.log("Transaction sent:", result.transactionHash);
 
     // 7. Mark as claimed in Supabase
     await markAsClaimed(workerAddress, result.transactionHash, status.allocation);
