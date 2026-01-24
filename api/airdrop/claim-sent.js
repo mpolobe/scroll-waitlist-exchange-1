@@ -206,10 +206,12 @@ export default async function handler(req, res) {
     });
 
     // 5. Prepare the transfer transaction
-    console.log("Preparing transfer of", status.allocation, "SENT to", workerAddress);
+    // Use lowercase address to avoid checksum issues
+    const recipientAddress = workerAddress.toLowerCase();
+    console.log("Preparing transfer of", status.allocation, "SENT to", recipientAddress);
     const transaction = transfer({
       contract: tokenContract,
-      to: workerAddress,
+      to: recipientAddress,
       amount: status.allocation.toString(),
     });
 
