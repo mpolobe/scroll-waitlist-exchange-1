@@ -176,3 +176,4 @@ For support, email admin@africarailways.com or open an issue in the repository.
 - UI components from [shadcn/ui](https://ui.shadcn.com/)
 - Blockchain infrastructure by [Alchemy](https://www.alchemy.com/)
 - Backend powered by [Supabase](https://supabase.com/)
+# Force redeploy Sat Jan 24 06:59:49 UTC 2026
