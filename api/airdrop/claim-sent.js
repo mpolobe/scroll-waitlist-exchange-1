@@ -98,15 +98,43 @@ export default async function handler(req, res) {
 
   if (req.method === "OPTIONS") return res.status(200).end();
   
-  // Health check
+  // Health check - also test thirdweb connection
   if (req.method === "GET") {
-    return res.status(200).json({ 
+    const result = { 
       success: true, 
       message: "claim-sent endpoint ready",
       hasThirdwebKey: !!process.env.THIRDWEB_SECRET_KEY,
       hasAdminKey: !!process.env.ADMIN_PRIVATE_KEY,
-      hasSupabaseKey: !!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY)
-    });
+      hasSupabaseKey: !!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY),
+      thirdwebKeyLength: process.env.THIRDWEB_SECRET_KEY?.length,
+      adminKeyLength: process.env.ADMIN_PRIVATE_KEY?.length
+    };
+    
+    // Test thirdweb initialization if query param ?test=true
+    if (req.query.test === "true") {
+      try {
+        const client = createThirdwebClient({ 
+          secretKey: process.env.THIRDWEB_SECRET_KEY 
+        });
+        result.thirdwebClient = "initialized";
+        
+        const privateKey = process.env.ADMIN_PRIVATE_KEY.startsWith('0x') 
+          ? process.env.ADMIN_PRIVATE_KEY 
+          : `0x${process.env.ADMIN_PRIVATE_KEY}`;
+        
+        const adminAccount = privateKeyToAccount({
+          client,
+          privateKey
+        });
+        result.adminAddress = adminAccount.address;
+        result.thirdwebTest = "success";
+      } catch (e) {
+        result.thirdwebTest = "failed";
+        result.thirdwebError = e.message;
+      }
+    }
+    
+    return res.status(200).json(result);
   }
   
   if (req.method !== "POST") {
