@@ -55,7 +55,7 @@ export const SENT_TOKEN: TokenConfig = {
   description: 'Governance token for the Sentinel safety network',
   network: 'polygon',
   chainId: '0x89', // Polygon Mainnet
-  contractAddress: '0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5',
+  contractAddress: '0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46',
   decimals: 18,
   icon: '🛡️',
   color: '#10B981',
@@ -74,7 +74,7 @@ export const SENT_IDO_CONFIG = {
   softCapUsd: 36_900, // Approximate USD value
   maxBuyPol: 10_000, // 10,000 POL maximum per wallet
   // Pool addresses
-  tokenAddress: '0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5',
+  tokenAddress: '0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46',
   poolAddress: '0xf366e3aaCC54C99E50c90B7C57625776f88D8d08',
   // Listing details
   launchpad: 'PinkSale',

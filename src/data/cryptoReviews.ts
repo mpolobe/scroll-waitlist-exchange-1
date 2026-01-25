@@ -152,7 +152,7 @@ With real utility and a growing user base, SENT represents a unique opportunity 
       website: 'https://africarailways.com',
       twitter: 'https://x.com/africoin_afc',
       telegram: 'https://t.me/Africoin_Official',
-      contract: '0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5',
+      contract: '0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46',
       launchpad: 'https://www.pinksale.finance/launchpad/polygon/0xf366e3aaCC54C99E50c90B7C57625776f88D8d08'
     },
     pros: [

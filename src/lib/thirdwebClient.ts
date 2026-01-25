@@ -27,7 +27,7 @@ export const client = createThirdwebClient({
 export { polygon };
 
 // Contract Addresses on Polygon Mainnet
-export const SENT_CONTRACT_ADDRESS = "0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5";
+export const SENT_CONTRACT_ADDRESS = "0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46";
 export const AIRDROP_CONTRACT_ADDRESS = "0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf";
 
 // Pre-instantiated contract objects for direct import

@@ -33,7 +33,7 @@ const IDOProgressBanner = () => {
   };
 
   const contracts = {
-    token: '0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5',
+    token: '0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46',
     presale: '0xf366e3aaCC54C99E50c90B7C57625776f88D8d08'
   };
 
@@ -119,7 +119,7 @@ export const TrustBadges = () => {
   };
 
   const contracts = {
-    token: '0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5',
+    token: '0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46',
     presale: '0xf366e3aaCC54C99E50c90B7C57625776f88D8d08'
   };
 
@@ -139,7 +139,7 @@ export const TrustBadges = () => {
               </div>
             </div>
             <a 
-              href="https://polygonscan.com/token/0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5"
+              href="https://polygonscan.com/token/0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46"
               target="_blank"
               rel="noopener noreferrer"
               className="text-green-400 text-sm hover:underline flex items-center gap-1"

@@ -133,7 +133,7 @@ export default async function handler(req: any, res: any) {
     });
 
     // SENT token address on Polygon
-    const SENT_TOKEN = "0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5";
+    const SENT_TOKEN = "0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46";
     
     // Amount with 18 decimals
     const amountInWei = BigInt(allocation) * BigInt("1000000000000000000");

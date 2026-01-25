@@ -81,7 +81,7 @@ $SENT rewards 2,000+ track maintenance workers ("Sentinels") who use a mobile ap
 
 Real utility. Real infrastructure. Real Africa.
 
-Token: 0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5
+Token: 0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46
 Presale: 0xf366e3aaCC54C99E50c90B7C57625776f88D8d08
 
 #SENT #AfricaRailways`

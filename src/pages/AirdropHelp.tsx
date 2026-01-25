@@ -19,7 +19,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 
-const SENT_CONTRACT = "0xF379f21Af5967F26c358568Bb60408DB8B4F7fE5";
+const SENT_CONTRACT = "0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46";
 const POLYGON_SCAN_URL = `https://polygonscan.com/token/${SENT_CONTRACT}`;
 
 interface FAQItem {
