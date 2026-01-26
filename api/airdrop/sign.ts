@@ -44,7 +44,7 @@ export default async function handler(req: any, res: any) {
       status: "ok",
       hasSecretKey: !!process.env.THIRDWEB_SECRET_KEY,
       hasAdminKey: !!process.env.ADMIN_PRIVATE_KEY,
-      hasSupabaseKey: !!process.env.SUPABASE_SERVICE_KEY
+      hasSupabaseKey: !!(process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)
     });
   }
 
@@ -69,8 +69,9 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({ error: "Server configuration error" });
   }
 
-  if (!process.env.SUPABASE_SERVICE_KEY) {
-    console.error("Missing SUPABASE_SERVICE_KEY");
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseKey) {
+    console.error("Missing SUPABASE_SERVICE_KEY or SUPABASE_SERVICE_ROLE_KEY");
     return res.status(500).json({ error: "Server configuration error" });
   }
 
@@ -79,7 +80,7 @@ export default async function handler(req: any, res: any) {
 
     const supabase = createClient(
       process.env.SUPABASE_URL || "https://llvprbmrnjvamjzavmhg.supabase.co",
-      process.env.SUPABASE_SERVICE_KEY
+      supabaseKey
     );
 
     // 1. Verify worker status in Supabase
@@ -164,9 +165,10 @@ export default async function handler(req: any, res: any) {
     
     // Rollback claimed status on error
     try {
+      const rollbackKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
       const supabase = createClient(
         process.env.SUPABASE_URL || "https://llvprbmrnjvamjzavmhg.supabase.co",
-        process.env.SUPABASE_SERVICE_KEY!
+        rollbackKey!
       );
       await supabase
         .from("airdrop_status")
