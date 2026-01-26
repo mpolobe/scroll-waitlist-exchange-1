@@ -12,10 +12,17 @@
  *   SUPABASE_SERVICE_ROLE_KEY - Service role key (NOT anon key)
  */
 
-const ADMIN_EMAIL = 'admin@africarailways.com';
-const ADMIN_PASSWORD = 'Globaltelecom1!';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@africarailways.com';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD; // Required - set via environment variable
 const ADMIN_FULL_NAME = 'Super Administrator';
 const ADMIN_COUNTRY = 'Zambia';
+
+if (!ADMIN_PASSWORD) {
+  console.error('❌ ADMIN_PASSWORD environment variable is required');
+  console.log('\nUsage:');
+  console.log('  ADMIN_PASSWORD=your_secure_password SUPABASE_SERVICE_ROLE_KEY=... node scripts/setup-admin.js');
+  process.exit(1);
+}
 
 async function setupAdmin() {
   // Try to load from .env file
