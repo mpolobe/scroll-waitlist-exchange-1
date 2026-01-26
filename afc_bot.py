@@ -181,7 +181,7 @@ Join: t.me/africarailways
 
 ⏰ Ends: {end_time}
 
-🐦 Twitter: twitter.com/africarailways
+🐦 Twitter: x.com/africoin_afc
 
 #FlashAirdrop #SENT #Crypto
 """,
@@ -232,7 +232,7 @@ def get_airdrop_keyboard() -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton("🌐 Website", url="https://scroll-waitlist-exchange-1.vercel.app"),
-            InlineKeyboardButton("🐦 Twitter", url="https://twitter.com/africarailways")
+            InlineKeyboardButton("🐦 Twitter", url="https://x.com/africoin_afc")
         ],
         [
             InlineKeyboardButton("💬 Community", url="https://t.me/africarailways")
@@ -366,7 +366,7 @@ async def links(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("🚀 Buy AFC", url="https://movepump.com/token/0xc68c4cfb63d702227db09c28837e75abd23bbb3adc192e3bc45fecca4dd5b7e8::afc::AFC")
         ],
         [
-            InlineKeyboardButton("🐦 Twitter", url="https://twitter.com/africarailways"),
+            InlineKeyboardButton("🐦 Twitter", url="https://x.com/africoin_afc"),
             InlineKeyboardButton("📱 Telegram", url="https://t.me/africarailways")
         ],
     ]
