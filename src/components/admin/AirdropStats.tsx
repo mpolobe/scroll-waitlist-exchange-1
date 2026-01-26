@@ -301,12 +301,12 @@ export function AirdropStats() {
             <div>
               <p className="text-gray-500">Airdrop Contract</p>
               <a 
-                href="https://polygonscan.com/address/0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf"
+                href="https://polygonscan.com/address/0x71F7edd5bE9E509E68ef70216C59Df37484e0E23"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-mono text-blue-600 hover:underline"
               >
-                0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf
+                0x71F7edd5bE9E509E68ef70216C59Df37484e0E23
               </a>
             </div>
           </div>

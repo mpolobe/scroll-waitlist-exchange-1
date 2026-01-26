@@ -129,7 +129,7 @@ export default async function handler(req: any, res: any) {
     const airdropContract = getContract({
       client,
       chain: polygon,
-      address: "0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf"
+      address: "0x71F7edd5bE9E509E68ef70216C59Df37484e0E23"
     });
 
     // SENT token address on Polygon

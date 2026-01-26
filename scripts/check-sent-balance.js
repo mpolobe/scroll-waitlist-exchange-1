@@ -5,7 +5,7 @@
  * Run: node scripts/check-sent-balance.js
  */
 
-const SENT_CONTRACT = "0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf";
+const SENT_CONTRACT = "0x71F7edd5bE9E509E68ef70216C59Df37484e0E23";
 const TREASURY_WALLET = "0xfcfa02a852551618f544fbce52908a0f941abef9";
 const POLYGON_RPC = "https://polygon-mainnet.g.alchemy.com/v2/demo";
 

@@ -47,7 +47,7 @@ Set these in Vercel Dashboard → Settings → Environment Variables:
 ### 1. Smart Contract Setup ✓
 
 - [x] SENT Token deployed: `0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46`
-- [x] Airdrop Contract deployed: `0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf`
+- [x] Airdrop Contract deployed: `0x71F7edd5bE9E509E68ef70216C59Df37484e0E23`
 - [ ] Admin wallet (`0xfcfa02a852551618f544fbce52908a0f941abef9`) has approved Airdrop contract
 - [ ] Airdrop contract has sufficient SENT tokens (200,000+ for 2,000 workers)
 
@@ -168,7 +168,7 @@ node scripts/test-airdrop-flow.js
 | Contract | Address | Network |
 |----------|---------|---------|
 | SENT Token | `0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46` | Polygon Mainnet |
-| Airdrop Contract | `0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf` | Polygon Mainnet |
+| Airdrop Contract | `0x71F7edd5bE9E509E68ef70216C59Df37484e0E23` | Polygon Mainnet |
 | Admin Wallet | `0xfcfa02a852551618f544fbce52908a0f941abef9` | Polygon Mainnet |
 
 ## Support

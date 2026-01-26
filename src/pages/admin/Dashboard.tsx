@@ -192,7 +192,7 @@ export default function AdminDashboard() {
             SENT Token ↗
           </a>
           <a 
-            href="https://polygonscan.com/address/0x7175F1b0A27ebD20Cb9CA00f915C6670b4596bcf" 
+            href="https://polygonscan.com/address/0x71F7edd5bE9E509E68ef70216C59Df37484e0E23" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-blue-400 transition-colors"
