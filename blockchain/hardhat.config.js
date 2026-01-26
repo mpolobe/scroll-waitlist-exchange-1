@@ -1,8 +1,9 @@
-require("@nomicfoundation/hardhat-toolbox");
-require("dotenv").config({ path: "../.env" });
+import "@nomicfoundation/hardhat-toolbox";
+import dotenv from "dotenv";
+dotenv.config({ path: "../.env" });
 
 /** @type import('hardhat/config').HardhatUserConfig */
-module.exports = {
+export default {
   solidity: {
     version: "0.8.20",
     settings: {
@@ -28,12 +29,18 @@ module.exports = {
       url: process.env.POLYGON_RPC_URL || "https://rpc-amoy.polygon.technology",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
+    polygon: {
+      url: process.env.POLYGON_RPC || "https://polygon-bor-rpc.publicnode.com",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      chainId: 137,
+    },
   },
   etherscan: {
     apiKey: {
       scrollSepolia: process.env.SCROLLSCAN_API_KEY || "",
       scroll: process.env.SCROLLSCAN_API_KEY || "",
       polygonAmoy: process.env.POLYGONSCAN_API_KEY || "",
+      polygon: process.env.POLYGONSCAN_API_KEY || "",
     },
     customChains: [
       {

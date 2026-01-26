@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Smartphone, ExternalLink, Shield, TrendingUp, Users } from 'lucide-react';
+import { Smartphone, ExternalLink, Shield, TrendingUp, Users, Gift } from 'lucide-react';
 
 const MarketingHero = () => {
   const navigate = useNavigate();
@@ -48,6 +48,19 @@ const MarketingHero = () => {
           </div>
         </div>
         
+        {/* Airdrop Banner */}
+        <div 
+          onClick={() => navigate('/airdrop')}
+          className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500/30 to-emerald-500/30 border border-green-400/50 rounded-full px-5 py-2 mb-4 backdrop-blur-sm cursor-pointer hover:from-green-500/40 hover:to-emerald-500/40 transition"
+        >
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+          </span>
+          <Gift className="w-4 h-4 text-green-300" />
+          <span className="text-green-100 font-semibold text-sm">SENT AIRDROP LIVE - CLAIM NOW</span>
+        </div>
+
         {/* IDO Banner */}
         <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500/30 to-pink-500/30 border border-orange-400/50 rounded-full px-5 py-2 mb-8 backdrop-blur-sm">
           <span className="relative flex h-3 w-3">
@@ -86,18 +99,19 @@ const MarketingHero = () => {
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
           <button 
+            onClick={() => navigate('/airdrop')}
+            className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-green-600 hover:to-emerald-600 transition shadow-xl flex items-center justify-center gap-2"
+          >
+            <Gift className="w-5 h-5" />
+            Claim SENT Airdrop
+          </button>
+
+          <button 
             onClick={handleJoinIDO}
             className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-orange-600 hover:to-pink-600 transition shadow-xl flex items-center justify-center gap-2"
           >
             Join $SENT IDO on PinkSale
             <ExternalLink className="w-5 h-5" />
-          </button>
-
-          <button 
-            onClick={() => navigate('/reviews')}
-            className="bg-white text-slate-900 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition shadow-xl"
-          >
-            Read Token Reviews
           </button>
 
           <button 
