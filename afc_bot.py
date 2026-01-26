@@ -161,7 +161,7 @@ Register: [Airdrop Page](https://scroll-waitlist-exchange-1.vercel.app/airdrop)
 📅 {next_date}
 🎯 Stay tuned for details!
 
-Join: t.me/africarailways
+Join: t.me/afrcsentinel
 
 #AfricaRailways #Airdrop #Crypto
 """,
@@ -235,7 +235,7 @@ def get_airdrop_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton("🐦 Twitter", url="https://x.com/africoin_afc")
         ],
         [
-            InlineKeyboardButton("💬 Community", url="https://t.me/africarailways")
+            InlineKeyboardButton("💬 Community", url="https://t.me/afrcsentinel")
         ]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -367,7 +367,7 @@ async def links(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
         [
             InlineKeyboardButton("🐦 Twitter", url="https://x.com/africoin_afc"),
-            InlineKeyboardButton("📱 Telegram", url="https://t.me/africarailways")
+            InlineKeyboardButton("📱 Telegram", url="https://t.me/afrcsentinel")
         ],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -427,7 +427,7 @@ async def promo_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def promoter_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Information about becoming a promoter."""
     keyboard = [
-        [InlineKeyboardButton("📱 Join Telegram", url="https://t.me/africarailways")],
+        [InlineKeyboardButton("📱 Join Telegram", url="https://t.me/afrcsentinel")],
         [InlineKeyboardButton("🌐 Website", url="https://scroll-waitlist-exchange-1.vercel.app")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
