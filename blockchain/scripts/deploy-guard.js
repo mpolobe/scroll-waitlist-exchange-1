@@ -9,7 +9,7 @@ const hre = require("hardhat");
  *   PRIVATE_KEY=... npx hardhat run scripts/deploy-guard.js --network polygon
  */
 async function main() {
-  const SENT_TOKEN = "0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46";
+  const SENT_TOKEN = "0x65f6cEdBB6e023e7A91df61c26364FAc0fA2dd64";
 
   console.log("Deploying SafeAirdropGuard...");
   console.log("SENT Token:", SENT_TOKEN);

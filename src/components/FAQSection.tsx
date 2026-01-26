@@ -19,7 +19,7 @@ const FAQSection = () => {
     },
     {
       question: 'Is the smart contract audited?',
-      answer: 'Yes, the SENT token contract has been audited and verified on PinkSale. The contract address is 0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46 on Polygon. You can verify this on PolygonScan.'
+      answer: 'Yes, the SENT token contract has been audited and verified on PinkSale. The contract address is 0x65f6cEdBB6e023e7A91df61c26364FAc0fA2dd64 on Polygon. You can verify this on PolygonScan.'
     },
     {
       question: 'How do I participate in the IDO?',

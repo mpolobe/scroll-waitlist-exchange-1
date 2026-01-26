@@ -184,7 +184,7 @@ export default function AdminDashboard() {
       <div className="mt-8 p-4 bg-gray-900/50 border border-gray-800 rounded-xl">
         <div className="flex flex-wrap gap-6 text-sm">
           <a 
-            href="https://polygonscan.com/token/0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46" 
+            href="https://polygonscan.com/token/0x65f6cEdBB6e023e7A91df61c26364FAc0fA2dd64" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-blue-400 transition-colors"

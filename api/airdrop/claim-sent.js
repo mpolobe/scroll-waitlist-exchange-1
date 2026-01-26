@@ -23,7 +23,7 @@ function getSupabase() {
 }
 
 // SENT Token Contract on Polygon (the ERC20 token, not the airdrop contract)
-const SENT_TOKEN_ADDRESS = "0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46";
+const SENT_TOKEN_ADDRESS = "0x65f6cEdBB6e023e7A91df61c26364FAc0fA2dd64";
 const POLYGON_CHAIN_ID = 137;
 
 // Check worker status in Supabase

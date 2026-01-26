@@ -290,12 +290,12 @@ export function AirdropStats() {
             <div>
               <p className="text-gray-500">SENT Token Contract</p>
               <a 
-                href="https://polygonscan.com/token/0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46"
+                href="https://polygonscan.com/token/0x65f6cEdBB6e023e7A91df61c26364FAc0fA2dd64"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-mono text-blue-600 hover:underline"
               >
-                0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46
+                0x65f6cEdBB6e023e7A91df61c26364FAc0fA2dd64
               </a>
             </div>
             <div>
