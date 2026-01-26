@@ -12,10 +12,11 @@
     "verify": "hardhat run scripts/verify.js"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@openzeppelin/contracts": "^5.0.0",
     "dotenv": "^16.0.0",
-    "hardhat": "^2.22.0"
+    "hardhat": "^2.22.0",
+    "solc": "^0.8.20"
   }
 }
