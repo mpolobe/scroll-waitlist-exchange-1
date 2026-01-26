@@ -1,0 +1,18 @@
+{
+  "migrationDate": "2026-01-26T21:51:06.773Z",
+  "oldToken": "0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46",
+  "newToken": "0x65f6cEdBB6e023e7A91df61c26364FAc0fA2dd64",
+  "adminWallet": "0x2dEEaF33C55bc6855E3bf52b8C47fced8bDDc7F1",
+  "totalMigrated": 1,
+  "totalFailed": 0,
+  "results": [
+    {
+      "address": "0x87ba671df7955bf7156facfeceb9ebb85d047433",
+      "amount": "1000000000000000000",
+      "amountFormatted": "1.0000",
+      "txHash": "0xce12191a06eb60ec6456b37a3fa4ded23b1b0d2d49e128a4014695447a82e036",
+      "blockNumber": 82172145,
+      "status": "success"
+    }
+  ]
+}

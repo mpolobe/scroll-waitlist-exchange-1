@@ -1,0 +1,19 @@
+{
+  "oldToken": "0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46",
+  "snapshotDate": "2026-01-26T21:50:20.096Z",
+  "totalHolders": 2,
+  "totalSupplyHeld": "10000000000000000000000000000",
+  "totalSupplyHeldFormatted": "10000000000.0000",
+  "holders": [
+    {
+      "address": "0x8969ed336bb2ba8b81fd4bdfd26edf156e467f8d",
+      "balance": "9999999999000000000000000000",
+      "balanceFormatted": "9999999999.0000"
+    },
+    {
+      "address": "0x87ba671df7955bf7156facfeceb9ebb85d047433",
+      "balance": "1000000000000000000",
+      "balanceFormatted": "1.0000"
+    }
+  ]
+}
