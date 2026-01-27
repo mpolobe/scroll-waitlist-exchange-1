@@ -21,7 +21,7 @@ import { ethers } from 'ethers';
 
 // Contract addresses on Polygon Mainnet
 const SAFE_ADDRESS = "0x8969Ed336BB2BA8b81FD4BdFd26EDf156E467f8d";
-const SENT_TOKEN = "0x75CaEb2c62D8E29DAE0cdFde6775B898Dee43f46";
+const SENT_TOKEN = "0x65f6cEdBB6e023e7A91df61c26364FAc0fA2dd64";
 const AIRDROP_CONTRACT = "0x71F7edd5bE9E509E68ef70216C59Df37484e0E23";
 
 // RPC endpoints (fallback chain)
