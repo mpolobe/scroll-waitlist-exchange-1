@@ -2,6 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
+import { CreditCard, Smartphone } from 'lucide-react';
 
 interface PaymentMethodSelectorProps {
   selectedMethod: string;
@@ -16,11 +17,35 @@ export function PaymentMethodSelector({
   phoneNumber,
   onPhoneNumberChange
 }: PaymentMethodSelectorProps) {
+  const isMobileMethod = ['mpesa', 'mtn', 'airtel'].includes(selectedMethod);
+
   return (
     <div className="space-y-4">
       <Label className="text-lg font-semibold">Select Payment Method</Label>
       <RadioGroup value={selectedMethod} onValueChange={onMethodChange}>
-        <Card className="p-4 cursor-pointer hover:border-orange-500 transition-colors">
+        {/* Card Payment - Stripe */}
+        <Card className={`p-4 cursor-pointer transition-colors ${selectedMethod === 'stripe' ? 'border-orange-500 bg-orange-50' : 'hover:border-orange-500'}`}>
+          <div className="flex items-center space-x-3">
+            <RadioGroupItem value="stripe" id="stripe" />
+            <Label htmlFor="stripe" className="flex-1 cursor-pointer">
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-blue-600" />
+                <div className="font-semibold">Credit/Debit Card</div>
+              </div>
+              <div className="text-sm text-gray-500">Visa, Mastercard, American Express</div>
+            </Label>
+          </div>
+        </Card>
+
+        {/* Mobile Money Section */}
+        <div className="pt-2">
+          <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+            <Smartphone className="w-4 h-4" />
+            <span>Mobile Money</span>
+          </div>
+        </div>
+
+        <Card className={`p-4 cursor-pointer transition-colors ${selectedMethod === 'mpesa' ? 'border-orange-500 bg-orange-50' : 'hover:border-orange-500'}`}>
           <div className="flex items-center space-x-3">
             <RadioGroupItem value="mpesa" id="mpesa" />
             <Label htmlFor="mpesa" className="flex-1 cursor-pointer">
@@ -30,7 +55,7 @@ export function PaymentMethodSelector({
           </div>
         </Card>
 
-        <Card className="p-4 cursor-pointer hover:border-orange-500 transition-colors">
+        <Card className={`p-4 cursor-pointer transition-colors ${selectedMethod === 'mtn' ? 'border-orange-500 bg-orange-50' : 'hover:border-orange-500'}`}>
           <div className="flex items-center space-x-3">
             <RadioGroupItem value="mtn" id="mtn" />
             <Label htmlFor="mtn" className="flex-1 cursor-pointer">
@@ -40,7 +65,7 @@ export function PaymentMethodSelector({
           </div>
         </Card>
 
-        <Card className="p-4 cursor-pointer hover:border-orange-500 transition-colors">
+        <Card className={`p-4 cursor-pointer transition-colors ${selectedMethod === 'airtel' ? 'border-orange-500 bg-orange-50' : 'hover:border-orange-500'}`}>
           <div className="flex items-center space-x-3">
             <RadioGroupItem value="airtel" id="airtel" />
             <Label htmlFor="airtel" className="flex-1 cursor-pointer">
@@ -51,7 +76,7 @@ export function PaymentMethodSelector({
         </Card>
       </RadioGroup>
 
-      {selectedMethod && (
+      {isMobileMethod && (
         <div className="space-y-2">
           <Label htmlFor="phone">Phone Number</Label>
           <Input

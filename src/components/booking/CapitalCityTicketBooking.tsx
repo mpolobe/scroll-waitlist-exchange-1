@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { 
   Train, MapPin, CalendarIcon, Users, CreditCard, 
   Loader2, CheckCircle, Ticket, Image, ArrowRight,
-  Clock, Navigation
+  Clock, Navigation, Lock
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,113 @@ import { capitalStations, type CapitalStation } from '@/data/capitalStations';
 import { createBooking, getTicketPrice, type Ticket as TicketType, type NFTSouvenir } from '@/services/ticketService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+
+// Stripe payment component for tickets
+function StripeTicketPaymentForm({ 
+  amount, 
+  onSuccess, 
+  onError,
+  isLoading: externalLoading 
+}: { 
+  amount: number; 
+  onSuccess: () => void; 
+  onError: (error: string) => void;
+  isLoading: boolean;
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/stripe/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: Math.round(amount * 100),
+          currency: 'usd',
+          metadata: { type: 'ticket_purchase' }
+        }),
+      });
+
+      const { clientSecret, error: apiError } = await response.json();
+      if (apiError) throw new Error(apiError);
+
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) throw new Error('Card element not found');
+
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: { card: cardElement },
+      });
+
+      if (error) throw new Error(error.message);
+      if (paymentIntent?.status === 'succeeded') {
+        onSuccess();
+      }
+    } catch (err: any) {
+      onError(err.message || 'Payment failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cardElementOptions = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#1f2937',
+        '::placeholder': { color: '#9ca3af' },
+      },
+      invalid: { color: '#ef4444' },
+    },
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="p-4 border rounded-lg bg-white">
+        <CardElement options={cardElementOptions} />
+      </div>
+      <div className="flex items-center gap-2 text-sm text-gray-500">
+        <Lock className="w-4 h-4" />
+        <span>Secured by Stripe</span>
+      </div>
+      <Button
+        type="submit"
+        disabled={!stripe || loading || externalLoading}
+        className="w-full bg-gradient-to-r from-orange-500 to-amber-500"
+      >
+        {loading || externalLoading ? (
+          <><Loader2 className="mr-2 w-4 h-4 animate-spin" /> Processing...</>
+        ) : (
+          <><CreditCard className="mr-2 w-4 h-4" /> Pay ${amount.toFixed(2)} USD</>
+        )}
+      </Button>
+    </form>
+  );
+}
+
+function StripeTicketPayment(props: { amount: number; onSuccess: () => void; onError: (error: string) => void; isLoading: boolean }) {
+  if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
+    return (
+      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <p className="text-yellow-800 text-sm">Card payments are currently unavailable.</p>
+      </div>
+    );
+  }
+  return (
+    <Elements stripe={stripePromise}>
+      <StripeTicketPaymentForm {...props} />
+    </Elements>
+  );
+}
 
 type BookingStep = 'route' | 'details' | 'payment' | 'confirmation';
 type TicketClass = 'economy' | 'business' | 'first';
@@ -403,8 +510,56 @@ export function CapitalCityTicketBooking() {
               <Separator />
               <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
-                <span className="text-orange-600">{price} AFRC</span>
+                <span className="text-orange-600">${price} USD / {price} AFRC</span>
               </div>
+            </div>
+
+            {/* Payment Method Selection */}
+            <div className="space-y-3">
+              <Label className="text-lg font-semibold">Select Payment Method</Label>
+              <Tabs defaultValue="card" className="w-full">
+                <TabsList className="grid grid-cols-2 w-full">
+                  <TabsTrigger value="card" className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" />
+                    Card
+                  </TabsTrigger>
+                  <TabsTrigger value="afrc" className="flex items-center gap-2">
+                    <Train className="w-4 h-4" />
+                    AFRC Token
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="card" className="mt-4">
+                  <StripeTicketPayment 
+                    amount={price}
+                    onSuccess={handlePayment}
+                    onError={(error) => toast.error(error)}
+                    isLoading={isLoading}
+                  />
+                </TabsContent>
+                <TabsContent value="afrc" className="mt-4">
+                  <div className="space-y-4">
+                    <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                      <p className="text-sm text-orange-800">
+                        Pay with AFRC tokens from your connected wallet. 1 AFRC = 1 USD.
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={handlePayment} 
+                      disabled={isLoading}
+                      className="w-full bg-gradient-to-r from-orange-500 to-amber-500"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 w-4 h-4 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>Pay {price} AFRC</>
+                      )}
+                    </Button>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
 
             {/* NFT Info */}
@@ -419,25 +574,9 @@ export function CapitalCityTicketBooking() {
               </p>
             </div>
 
-            <div className="flex gap-4">
-              <Button variant="outline" onClick={() => setStep('details')} className="flex-1">
-                Back
-              </Button>
-              <Button 
-                onClick={handlePayment} 
-                disabled={isLoading}
-                className="flex-1 bg-gradient-to-r from-orange-500 to-amber-500"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 w-4 h-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>Pay {price} AFRC</>
-                )}
-              </Button>
-            </div>
+            <Button variant="outline" onClick={() => setStep('details')} className="w-full">
+              Back
+            </Button>
           </CardContent>
         </Card>
       )}
