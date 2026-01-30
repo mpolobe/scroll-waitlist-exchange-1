@@ -132,7 +132,7 @@ type BookingStep = 'route' | 'details' | 'payment' | 'confirmation';
 type TicketClass = 'economy' | 'business' | 'first';
 
 export function CapitalCityTicketBooking() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [step, setStep] = useState<BookingStep>('route');
   const [isLoading, setIsLoading] = useState(false);
   
@@ -146,9 +146,21 @@ export function CapitalCityTicketBooking() {
   const [passengers, setPassengers] = useState(1);
   const [isReturnTrip, setIsReturnTrip] = useState(false);
   
-  // Passenger info
+  // Passenger info - prefill from profile if available
   const [passengerName, setPassengerName] = useState('');
   const [passengerPhone, setPassengerPhone] = useState('');
+  
+  // Prefill passenger info from user profile
+  useEffect(() => {
+    if (profile) {
+      if (profile.full_name && !passengerName) {
+        setPassengerName(profile.full_name);
+      }
+      if (profile.phone && !passengerPhone) {
+        setPassengerPhone(profile.phone);
+      }
+    }
+  }, [profile]);
   
   // Booking result
   const [ticket, setTicket] = useState<TicketType | null>(null);
